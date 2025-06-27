@@ -1,0 +1,12 @@
+{
+  "name": "Speakers Platform",
+  "description": "Витрина выступлений спикеров",
+  "short_name": "Speakers",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ]
+}
