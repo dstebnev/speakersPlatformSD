@@ -73,14 +73,14 @@ export const AdminForm: React.FC = () => {
       const updated = await updateSpeaker(editingSpeaker, {
         name: speakerForm.name,
         description: speakerForm.description,
-        photoUrl,
+        photoUrl: photoUrl || '/default_icon.png',
       });
       setSpeakers((prev) => prev.map((s) => (s.id === editingSpeaker ? updated : s)));
     } else {
       const created = await createSpeaker({
         name: speakerForm.name,
         description: speakerForm.description,
-        photoUrl: photoUrl || '',
+        photoUrl: photoUrl || '/default_icon.png',
       });
       setSpeakers((prev) => [...prev, created]);
     }
@@ -148,7 +148,11 @@ export const AdminForm: React.FC = () => {
         <ul className="space-y-2">
           {speakers.map((s) => (
             <li key={s.id} className="flex items-center gap-2">
-              <img src={s.photoUrl} alt={s.name} className="w-10 h-10 rounded-full object-cover" />
+              <img
+                src={s.photoUrl || '/default_icon.png'}
+                alt={s.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
               <span className="flex-1">{s.name}</span>
               <button
                 onClick={() => startEditSpeaker(s)}

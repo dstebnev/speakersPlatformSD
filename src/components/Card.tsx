@@ -24,12 +24,14 @@ export const Card: React.FC<Props> = ({ talk }) => {
 
   const color = directionColors[talk.direction];
 
+  const photoUrl = talk.speaker.photoUrl || '/default_icon.png';
+
   return (
     <div
       {...handlers}
       className={`p-4 rounded-xl shadow-md ${color} flex flex-col gap-2 min-w-[250px]`}
     >
-      <img src={talk.speaker.photoUrl} alt={talk.speaker.name} className="w-full h-40 object-cover rounded-md" />
+      <img src={photoUrl} alt={talk.speaker.name} className="w-full h-40 object-cover rounded-md" />
       <h2 className="text-xl font-bold">{talk.speaker.name}</h2>
       <h3 className="text-lg font-semibold">{talk.title}</h3>
       <p className="text-sm">{talk.description}</p>

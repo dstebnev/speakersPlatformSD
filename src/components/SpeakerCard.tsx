@@ -53,7 +53,7 @@ export const SpeakerCard: React.FC<SpeakerCardProps> = ({
       </span>
       <div className="relative flex flex-col items-center gap-2">
         <img
-          src={speaker.photoUrl}
+          src={speaker.photoUrl || '/default_icon.png'}
           alt={speaker.name}
           className="w-24 h-24 rounded-full border-4 border-white shadow-lg -mt-12 object-cover"
         />
