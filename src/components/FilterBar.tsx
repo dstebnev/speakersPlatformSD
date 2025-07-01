@@ -10,6 +10,7 @@ interface Props {
 const directions = ['all', 'frontend', 'backend', 'QA', 'mobile', 'product', 'data', 'manager'];
 const statuses = ['all', 'past', 'upcoming'];
 
+
 export const FilterBar: React.FC<Props> = ({ direction, status, setDirection, setStatus }) => {
   return (
     <div className="flex gap-2 p-2 overflow-x-auto">
