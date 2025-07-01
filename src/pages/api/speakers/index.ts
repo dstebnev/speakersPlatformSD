@@ -10,7 +10,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'POST') {
     const body = req.body as Omit<Speaker, 'id'>;
-    const newSpeaker: Speaker = { id: randomUUID(), ...body };
+    const photoUrl = body.photoUrl || '/default_icon.png';
+    const newSpeaker: Speaker = { id: randomUUID(), ...body, photoUrl };
     addSpeaker(newSpeaker);
     return res.status(200).json(newSpeaker);
   }
