@@ -7,7 +7,10 @@ export type Db = {
   talks: Talk[];
 };
 
-const dbPath = path.join(process.cwd(), 'db.json');
+// Файл базы данных можно переопределить переменной окружения DB_PATH
+const dbPath = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.join(process.cwd(), 'db.json');
 
 function readDb(): Db {
   if (!fs.existsSync(dbPath)) {
