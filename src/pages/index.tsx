@@ -9,28 +9,28 @@ interface TalkWithSpeaker extends Talk {
   speaker: Speaker;
 }
 
-const testSpeakers: Speaker[] = [
-  {
-    id: '1',
-    name: 'Иван Иванов',
-    photoUrl: 'https://via.placeholder.com/150',
-    description: 'Frontend разработчик',
-  },
-];
+// const testSpeakers: Speaker[] = [
+//   {
+//     id: '1',
+//     name: 'Иван Иванов',
+//     photoUrl: 'https://via.placeholder.com/150',
+//     description: 'Frontend разработчик',
+//   },
+// ];
 
-const testTalks: Talk[] = [
-  {
-    id: 't1',
-    speakerId: '1',
-    title: 'Реактивный фронтенд',
-    description: 'Всё о React',
-    eventName: 'Frontend Conf',
-    direction: 'frontend',
-    status: 'upcoming',
-    date: '2024-08-10',
-    registrationLink: 'https://example.com',
-  },
-];
+// const testTalks: Talk[] = [
+//   {
+//     id: 't1',
+//     speakerId: '1',
+//     title: 'Реактивный фронтенд',
+//     description: 'Всё о React',
+//     eventName: 'Frontend Conf',
+//     direction: 'frontend',
+//     status: 'upcoming',
+//     date: '2024-08-10',
+//     registrationLink: 'https://example.com',
+//   },
+// ];
 
 const HomePage: React.FC = () => {
   const [direction, setDirection] = useState('all');
@@ -39,12 +39,15 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     expand();
-    // Здесь будет загрузка данных с сервера
-    const combined = testTalks.map((talk) => ({
-      ...talk,
-      speaker: testSpeakers.find((s) => s.id === talk.speakerId)!,
-    }));
-    setTalks(combined);
+    const load = async () => {
+      const [sp, ta] = await Promise.all([fetchSpeakers(), fetchTalks()]);
+      const combined = ta.map((talk) => ({
+        ...talk,
+        speaker: sp.find((s) => s.id === talk.speakerId)!,
+      }));
+      setTalks(combined);
+    };
+    load();
   }, []);
 
   const filtered = talks.filter((t) => {
