@@ -76,10 +76,25 @@ export const deleteTalk = async (id: string) => {
   if (error) throw error;
 };
 
+const PHOTOS_BUCKET = 'photos';
+
+const ensureSpeakersBucket = async () => {
+  const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+  if (listError) throw listError;
+  const exists = buckets?.some((b) => b.name === PHOTOS_BUCKET);
+  if (!exists) {
+    const { error: createError } = await supabase.storage.createBucket(PHOTOS_BUCKET, {
+      public: true,
+    });
+    if (createError) throw createError;
+  }
+};
+
 export const uploadPhoto = async (file: File) => {
+  await ensureSpeakersBucket();
   const filePath = `speakers/${Date.now()}_${file.name}`;
-  const { error } = await supabase.storage.from('photos').upload(filePath, file);
+  const { error } = await supabase.storage.from(PHOTOS_BUCKET).upload(filePath, file);
   if (error) throw error;
-  const { data } = supabase.storage.from('photos').getPublicUrl(filePath);
+  const { data } = supabase.storage.from(PHOTOS_BUCKET).getPublicUrl(filePath);
   return data.publicUrl;
 };
