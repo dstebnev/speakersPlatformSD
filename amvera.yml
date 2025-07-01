@@ -9,8 +9,10 @@ build:
     '.next': .next
     'public': public
     'node_modules': node_modules
-    'package.json': package.json
-    'tsconfig.json': tsconfig.json
+    'package.json': ./package.json
+    'tsconfig.json': ./tsconfig.json
+    'next-env.d.ts': ./next-env.d.ts
+    'src': ./src
   command: npm install && npm run build
 
 run:
