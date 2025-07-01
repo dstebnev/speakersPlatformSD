@@ -17,3 +17,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   res.status(405).end();
 }
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4mb',
+    },
+  },
+};
