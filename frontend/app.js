@@ -1,6 +1,31 @@
-import { useSwipeable } from 'https://unpkg.com/react-swipeable@7/dist/react-swipeable.esm.js';
 const e = React.createElement;
 const { useState, useEffect } = React;
+
+// Minimal swipe detection to avoid external dependencies
+function useSwipeable(opts = {}) {
+  let startX = null;
+  let startY = null;
+
+  const onTouchStart = e => {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    startX = t.clientX;
+    startY = t.clientY;
+  };
+
+  const onTouchEnd = e => {
+    const t = e.changedTouches && e.changedTouches[0];
+    if (startX === null || !t) return;
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      opts.onSwiped && opts.onSwiped({ dir: dx > 0 ? 'Right' : 'Left', deltaX: dx });
+    }
+    startX = startY = null;
+  };
+
+  return { onTouchStart, onTouchEnd };
+}
 
 const TEST_SPEAKERS = [
   {
