@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, send_from_directory
 import os
 import json
 from uuid import uuid4
@@ -89,9 +89,19 @@ def talk_by_id(id):
     write_db(data)
     return jsonify(talks[idx])
 
-@app.route("/")
+@app.route('/')
 def index():
-    return "API is running!"
+    return send_from_directory('frontend', 'index.html')
+
+
+@app.route('/admin')
+def admin_page():
+    return send_from_directory('frontend', 'admin.html')
+
+
+@app.route('/<path:path>')
+def static_proxy(path):
+    return send_from_directory('frontend', path)
 
 
 if __name__ == '__main__':
