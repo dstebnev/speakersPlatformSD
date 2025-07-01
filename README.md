@@ -1,23 +1,12 @@
-# speakersPlatformSD
+# Flask Version of speakersPlatformSD
 
-Телеграм Mini App для витрины выступлений спикеров.
+This folder contains a minimal Flask application that exposes the same REST API
+as the original Next.js version. Data is stored in `db.json` by default or the
+path specified in the `DB_PATH` environment variable.
 
-## Запуск локально
+## Running locally
 
 ```bash
-npm install
-npm run dev
+pip install -r requirements.txt
+python app.py
 ```
-
-Приложение хранит данные в локальном файле `db.json`. Создайте `.env` на основе `.env.example` для указания имён администраторов.
-
-При создании или редактировании спикера, если фото не загружено, будет использовано изображение `/default_icon.png` из папки `public`.
-
-## Развёртывание на Amvera
-
-1. Создайте файл `.env` на основе `.env.example`.
-2. Платформа использует `amvera.yml`. По умолчанию при сборке выполняются `npm install && npm run build`, а при запуске — `npm start`.
-3. Amvera передаёт переменную `PORT`. Скрипт `npm start` запускает `next start -p $PORT`, поэтому приложение должно слушать этот порт.
-4. Укажите переменную `ADMIN_USERNAMES` и при необходимости `DB_PATH` (например `/data/db.json`).
-5. Папка `/data` монтируется как постоянное хранилище. Размещайте `db.json` в этом каталоге, чтобы данные сохранялись между запусками.
-6. Для корректной работы в Telegram укажите ссылку на `telegram-webapp-manifest.json` при настройке веб‑приложения.

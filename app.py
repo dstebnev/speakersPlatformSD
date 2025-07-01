@@ -89,6 +89,10 @@ def talk_by_id(id):
     write_db(data)
     return jsonify(talks[idx])
 
+@app.route("/")
+def index():
+    return "API is running!"
+
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
