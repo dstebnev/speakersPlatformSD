@@ -3,10 +3,17 @@ meta:
   toolchain:
     name: npm
     version: 18
+
 build:
   artifacts:
-    '*': /
+    '.next': .next
+    'public': public
+    'node_modules': node_modules
+    'package.json': package.json
+    'tsconfig.json': tsconfig.json
   command: npm install && npm run build
+
 run:
+  containerPort: 3000
   persistenceMount: /data
-  containerPort: 80
+  command: npm run start
