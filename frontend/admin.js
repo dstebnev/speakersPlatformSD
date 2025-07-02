@@ -157,9 +157,9 @@ function AdminApp() {
     setTalks(talks.filter(t => t.id !== id));
   };
 
-  if (!authorized) {
-    return e('div', null, 'Доступ запрещен для ', username || 'guest');
-  }
+  // if (!authorized) {
+  //   return e('div', null, 'Доступ запрещен для ', username || 'guest');
+  // }
 
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
