@@ -124,18 +124,22 @@ def upload():
     if ext not in allowed_ext or file.mimetype not in allowed_mimes:
         return abort(400)
 
-    # Convert to JPEG and compress under 2MB
-    img = Image.open(file.stream).convert('RGB')
-    quality = 85
+    # Convert to PNG and compress under 2MB
+    img = Image.open(file.stream)
+    if img.mode not in ('RGB', 'RGBA'):
+        img = img.convert('RGBA')
+
     buf = BytesIO()
-    img.save(buf, format='JPEG', quality=quality, optimize=True)
-    while buf.tell() > 2 * 1024 * 1024 and quality > 20:
-        quality -= 5
+    img.save(buf, format='PNG', optimize=True, compress_level=9)
+    colors = 256
+    while buf.tell() > 2 * 1024 * 1024 and colors > 32:
+        colors //= 2
+        quantized = img.convert('P', palette=Image.ADAPTIVE, colors=colors)
         buf.seek(0)
         buf.truncate(0)
-        img.save(buf, format='JPEG', quality=quality, optimize=True)
+        quantized.save(buf, format='PNG', optimize=True, compress_level=9)
 
-    filename = f"{uuid4().hex}.jpg"
+    filename = f"{uuid4().hex}.png"
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     with open(os.path.join(UPLOAD_FOLDER, filename), 'wb') as f:
         f.write(buf.getvalue())
