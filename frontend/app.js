@@ -129,6 +129,7 @@ function App() {
   );
 }
 
-Telegram?.WebApp?.expand();
+// Expand the Telegram WebApp if running inside Telegram
+window.Telegram?.WebApp?.expand();
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
