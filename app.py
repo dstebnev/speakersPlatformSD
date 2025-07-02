@@ -127,6 +127,11 @@ def admin_page():
     return send_from_directory('frontend', 'admin.html')
 
 
+@app.route('/profile')
+def profile_page():
+    return send_from_directory('frontend', 'profile.html')
+
+
 @app.route('/<path:path>')
 def static_proxy(path):
     return send_from_directory('frontend', path)
