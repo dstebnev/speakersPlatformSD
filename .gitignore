@@ -4,3 +4,4 @@ out
 .env
 
 db.json
+frontend/photos/*

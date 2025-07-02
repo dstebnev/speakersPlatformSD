@@ -93,12 +93,16 @@ function App() {
   const [talks, setTalks] = useState([]);
 
   useEffect(() => {
-    // For demo use test data
-    const merged = TEST_TALKS.map(t => ({
-      ...t,
-      speaker: TEST_SPEAKERS.find(s => s.id === t.speakerId),
-    }));
-    setTalks(merged);
+    Promise.all([
+      fetch('/api/speakers').then(r => r.json()),
+      fetch('/api/talks').then(r => r.json()),
+    ]).then(([speakers, talks]) => {
+      const merged = talks.map(t => ({
+        ...t,
+        speaker: speakers.find(s => s.id === t.speakerId),
+      }));
+      setTalks(merged);
+    });
   }, []);
 
   let filtered = talks;
