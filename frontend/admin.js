@@ -45,21 +45,42 @@ function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const [description, setDescription] = useState(initial.description || '');
   const [eventName, setEventName] = useState(initial.eventName || '');
   const [direction, setDirection] = useState(initial.direction || 'frontend');
-  const [status, setStatus] = useState(initial.status || 'upcoming');
   const [date, setDate] = useState(initial.date || '');
   const [registrationLink, setRegistrationLink] = useState(initial.registrationLink || '');
   const [recordingLink, setRecordingLink] = useState(initial.recordingLink || '');
 
-  return e('form', { onSubmit: ev => { ev.preventDefault(); onSubmit({ ...initial, title, speakerId, description, eventName, direction, status, date, registrationLink, recordingLink }); } },
+  const status = date && new Date(date) < new Date().setHours(0,0,0,0) ? 'past' : 'upcoming';
+
+  const handleSubmit = ev => {
+    ev.preventDefault();
+    if (!speakerId || !title.trim() || !eventName.trim() || !direction || !date) {
+      alert('Заполните обязательные поля');
+      return;
+    }
+    onSubmit({
+      ...initial,
+      title,
+      speakerId,
+      description,
+      eventName,
+      direction,
+      status,
+      date,
+      registrationLink,
+      recordingLink,
+    });
+  };
+
+  return e('form', { onSubmit: handleSubmit },
     e('div', null,
       e('label', null, 'Спикер'),
-      e('select', { value: speakerId, onChange: ev => setSpeakerId(ev.target.value) },
+      e('select', { value: speakerId, onChange: ev => setSpeakerId(ev.target.value), required: true },
         speakers.map(s => e('option', { key: s.id, value: s.id }, s.name))
       )
     ),
     e('div', null,
       e('label', null, 'Название'),
-      e('input', { value: title, onChange: ev => setTitle(ev.target.value) })
+      e('input', { value: title, onChange: ev => setTitle(ev.target.value), required: true })
     ),
     e('div', null,
       e('label', null, 'Описание'),
@@ -67,24 +88,17 @@ function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     ),
     e('div', null,
       e('label', null, 'Мероприятие'),
-      e('input', { value: eventName, onChange: ev => setEventName(ev.target.value) })
+      e('input', { value: eventName, onChange: ev => setEventName(ev.target.value), required: true })
     ),
     e('div', null,
       e('label', null, 'Направление'),
-      e('select', { value: direction, onChange: ev => setDirection(ev.target.value) },
+      e('select', { value: direction, onChange: ev => setDirection(ev.target.value), required: true },
         DIRECTIONS.map(d => e('option', { key: d, value: d }, d))
       )
     ),
     e('div', null,
-      e('label', null, 'Статус'),
-      e('select', { value: status, onChange: ev => setStatus(ev.target.value) },
-        e('option', { value: 'upcoming' }, 'upcoming'),
-        e('option', { value: 'past' }, 'past')
-      )
-    ),
-    e('div', null,
       e('label', null, 'Дата'),
-      e('input', { type: 'date', value: date, onChange: ev => setDate(ev.target.value) })
+      e('input', { type: 'date', value: date, onChange: ev => setDate(ev.target.value), required: true })
     ),
     status === 'upcoming' && e('div', null,
       e('label', null, 'Ссылка регистрации'),
