@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, abort, send_from_directory
 import os
 import json
 from uuid import uuid4
+import datetime
 
 app = Flask(__name__)
 
@@ -25,6 +26,14 @@ def read_db():
 def write_db(data):
     with open(DB_PATH, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def calc_status(date_str: str) -> str:
+    try:
+        d = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    except Exception:
+        return 'upcoming'
+    return 'past' if d < datetime.date.today() else 'upcoming'
 
 
 @app.route('/api/speakers', methods=['GET', 'POST'])
@@ -66,10 +75,12 @@ def speaker_by_id(id):
 def talks():
     data = read_db()
     if request.method == 'GET':
-        return jsonify(data['talks'])
+        talks = [ { **t, 'status': calc_status(t.get('date', '')) } for t in data['talks'] ]
+        return jsonify(talks)
 
     body = request.get_json() or {}
     new_talk = {'id': str(uuid4()), **body}
+    new_talk['status'] = calc_status(new_talk.get('date', ''))
     data['talks'].append(new_talk)
     write_db(data)
     return jsonify(new_talk)
@@ -90,6 +101,7 @@ def talk_by_id(id):
 
     body = request.get_json() or {}
     talks[idx].update(body)
+    talks[idx]['status'] = calc_status(talks[idx].get('date', ''))
     write_db(data)
     return jsonify(talks[idx])
 
