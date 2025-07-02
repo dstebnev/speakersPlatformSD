@@ -1,3 +1,5 @@
+import { DIRECTIONS } from './directions.js';
+
 const e = React.createElement;
 const { useState, useEffect } = React;
 
@@ -69,7 +71,9 @@ function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     ),
     e('div', null,
       e('label', null, 'Направление'),
-      e('input', { value: direction, onChange: ev => setDirection(ev.target.value) })
+      e('select', { value: direction, onChange: ev => setDirection(ev.target.value) },
+        DIRECTIONS.map(d => e('option', { key: d, value: d }, d))
+      )
     ),
     e('div', null,
       e('label', null, 'Статус'),
@@ -82,11 +86,11 @@ function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       e('label', null, 'Дата'),
       e('input', { type: 'date', value: date, onChange: ev => setDate(ev.target.value) })
     ),
-    e('div', null,
+    status === 'upcoming' && e('div', null,
       e('label', null, 'Ссылка регистрации'),
       e('input', { value: registrationLink, onChange: ev => setRegistrationLink(ev.target.value) })
     ),
-    e('div', null,
+    status === 'past' && e('div', null,
       e('label', null, 'Ссылка записи'),
       e('input', { value: recordingLink, onChange: ev => setRecordingLink(ev.target.value) })
     ),

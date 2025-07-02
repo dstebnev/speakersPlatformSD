@@ -1,3 +1,5 @@
+import { DIRECTIONS } from './directions.js';
+
 const e = React.createElement;
 const { useState, useEffect } = React;
 
@@ -119,7 +121,7 @@ function App() {
       { className: 'filters' },
       e('select', { value: direction, onChange: e => setDirection(e.target.value) },
         e('option', { value: 'all' }, 'Все направления'),
-        ['frontend','backend','QA','mobile','product','data','manager'].map(d =>
+        DIRECTIONS.map(d =>
           e('option', { key: d, value: d }, d)
         )
       ),
