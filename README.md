@@ -2,7 +2,7 @@
 
 This project contains a tiny Flask backend and a static front‑end written in React. It showcases speakers and their talks inside a Telegram WebApp.
 
-Data is stored in `db.json` by default (path can be changed with the `DB_PATH` environment variable).
+Data is stored in `/data/db.json` by default (the location can be changed via the `DB_PATH` environment variable).
 
 ## Running locally
 
