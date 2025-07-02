@@ -5,6 +5,10 @@ from uuid import uuid4
 
 app = Flask(__name__)
 
+# Where uploaded photos will be stored
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'frontend', 'photos')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db.json'))
 
 
@@ -88,6 +92,18 @@ def talk_by_id(id):
     talks[idx].update(body)
     write_db(data)
     return jsonify(talks[idx])
+
+
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        return abort(400)
+    ext = os.path.splitext(file.filename)[1]
+    filename = f"{uuid4().hex}{ext}"
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    file.save(os.path.join(UPLOAD_FOLDER, filename))
+    return jsonify({'url': f'/photos/{filename}'})
 
 @app.route('/')
 def index():
