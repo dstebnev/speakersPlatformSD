@@ -41,3 +41,18 @@ button {
   background: #03a9f4;
   color: white;
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+form input,
+form textarea,
+form select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
