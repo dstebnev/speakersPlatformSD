@@ -4,5 +4,5 @@ out
 .env
 
 db.json
-frontend/photos/*
+data/
 amvera.yml

@@ -7,10 +7,10 @@ import datetime
 app = Flask(__name__)
 
 # Where uploaded photos will be stored
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'frontend', 'photos')
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/data/photos')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db.json'))
+DB_PATH = os.getenv('DB_PATH', '/data/db.json')
 
 
 def read_db():
@@ -116,6 +116,11 @@ def upload():
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     file.save(os.path.join(UPLOAD_FOLDER, filename))
     return jsonify({'url': f'/photos/{filename}'})
+
+
+@app.route('/photos/<path:filename>')
+def serve_photo(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 @app.route('/')
 def index():
