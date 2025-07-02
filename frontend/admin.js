@@ -9,13 +9,16 @@ function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
   const [description, setDescription] = useState(initial.description || '');
   const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '');
+  const [uploading, setUploading] = useState(false);
 
   const uploadFile = async f => {
+    setUploading(true);
     const fd = new FormData();
     fd.append('file', f);
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
     const data = await res.json();
     setPhotoUrl(data.url);
+    setUploading(false);
   };
 
   return e('form', { onSubmit: ev => { ev.preventDefault(); onSubmit({ ...initial, name, description, photoUrl }); } },
@@ -32,9 +35,10 @@ function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
       e('input', { value: photoUrl, onChange: ev => setPhotoUrl(ev.target.value) })
     ),
     e('div', null,
+      uploading ? e('div', null, 'Загрузка фото...') :
       e('input', { type: 'file', onChange: ev => ev.target.files[0] && uploadFile(ev.target.files[0]) })
     ),
-    e('button', { type: 'submit' }, 'Сохранить'),
+    e('button', { type: 'submit', disabled: uploading || !photoUrl }, 'Сохранить'),
     e('button', { type: 'button', onClick: onCancel }, 'Отмена')
   );
 }

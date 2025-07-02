@@ -3,6 +3,8 @@ import os
 import json
 from uuid import uuid4
 import datetime
+from io import BytesIO
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -111,10 +113,33 @@ def upload():
     file = request.files.get('file')
     if not file or file.filename == '':
         return abort(400)
-    ext = os.path.splitext(file.filename)[1]
-    filename = f"{uuid4().hex}{ext}"
+
+    # Validate extension and MIME type
+    allowed_ext = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+    allowed_mimes = {
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp'
+    }
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext or file.mimetype not in allowed_mimes:
+        return abort(400)
+
+    # Convert to JPEG and compress under 2MB
+    img = Image.open(file.stream).convert('RGB')
+    quality = 85
+    buf = BytesIO()
+    img.save(buf, format='JPEG', quality=quality, optimize=True)
+    while buf.tell() > 2 * 1024 * 1024 and quality > 20:
+        quality -= 5
+        buf.seek(0)
+        buf.truncate(0)
+        img.save(buf, format='JPEG', quality=quality, optimize=True)
+
+    filename = f"{uuid4().hex}.jpg"
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    file.save(os.path.join(UPLOAD_FOLDER, filename))
+    with open(os.path.join(UPLOAD_FOLDER, filename), 'wb') as f:
+        f.write(buf.getvalue())
+
     return jsonify({'url': f'/photos/{filename}'})
 
 
