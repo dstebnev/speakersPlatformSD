@@ -158,7 +158,7 @@ function AdminApp() {
   };
 
   if (!authorized) {
-    return e('div', null, 'Access denied for ', username || 'guest');
+    return e('div', null, 'Доступ запрещен для ', username || 'guest');
   }
 
   const speakerSection = editingSpeaker ?
