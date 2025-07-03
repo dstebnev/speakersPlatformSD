@@ -58,7 +58,7 @@ function Card({ talk, speaker }) {
   );
 }
 
-function BottomSheet({ talk, speaker, visible, onClose }) {
+function BottomSheet({ talk, speaker }) {
   if (!talk) return null;
 
   const accent = ACCENTS[talk.direction] || '#03a9f4';
@@ -68,12 +68,10 @@ function BottomSheet({ talk, speaker, visible, onClose }) {
       ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
       : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
 
-  const className = `bottom-sheet${visible ? ' open' : ''}`;
-
   return e(
     'div',
-    { className, style: { borderLeft: `8px solid ${accent}` } },
-    e('div', { className: 'handle', onClick: onClose }),
+    { className: 'bottom-sheet', style: { borderLeft: `8px solid ${accent}` } },
+    e('div', { className: 'handle' }),
     e('h3', null, talk.title),
     e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
     e('div', null, talk.description),
@@ -89,7 +87,6 @@ function App() {
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -123,27 +120,19 @@ function App() {
 
   useEffect(() => {
     setActiveIndex(0);
-    setSheetOpen(false);
   }, [filtered.length]);
 
   useEffect(() => {
     const item = filtered[activeIndex];
-    sheetRoot.render(
-      e(BottomSheet, {
-        talk: item,
-        speaker: item?.speaker,
-        visible: sheetOpen,
-        onClose: () => setSheetOpen(false),
-      })
-    );
-  }, [activeIndex, filtered, sheetOpen]);
+    sheetRoot.render(e(BottomSheet, { talk: item, speaker: item?.speaker }));
+  }, [activeIndex, filtered]);
 
   useEffect(() => {
     if (window.Swiper && swiperRef.current) {
       if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
       swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
         centeredSlides: true,
-        slidesPerView: 'auto',
+        slidesPerView: 3,
         spaceBetween: 20,
         loop: false,
         effect: 'coverflow',
@@ -156,7 +145,6 @@ function App() {
         },
         on: {
           slideChange() {
-            setSheetOpen(false);
             setActiveIndex(this.realIndex);
           },
         },
@@ -192,9 +180,7 @@ function App() {
             {
               className: 'swiper-slide',
               key: t.id,
-              onClick: () => {
-                if (idx === activeIndex) setSheetOpen(!sheetOpen);
-              },
+              onClick: () => {},
             },
             e(Card, { talk: t, speaker: t.speaker })
           )
