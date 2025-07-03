@@ -14,6 +14,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DB_PATH = os.getenv('DB_PATH', '/data/db.json')
 
+# Comma separated list of Telegram usernames allowed in the admin section
+ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '')
+                   .split(',') if u.strip()]
+
 
 def read_db():
     if not os.path.exists(DB_PATH):
@@ -141,6 +145,12 @@ def upload():
         f.write(buf.getvalue())
 
     return jsonify({'url': f'/photos/{filename}'})
+
+
+@app.route('/api/admin-users')
+def admin_users():
+    """Return the list of usernames allowed to access the admin interface."""
+    return jsonify(ADMIN_USERNAMES)
 
 
 @app.route('/photos/<path:filename>')

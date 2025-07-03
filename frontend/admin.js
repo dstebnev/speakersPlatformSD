@@ -3,7 +3,6 @@ import { DIRECTIONS } from './directions.js';
 const e = React.createElement;
 const { useState, useEffect } = React;
 
-const ALLOWED_USERS = ['admin'];
 
 function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
@@ -130,11 +129,17 @@ function AdminApp() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
     const user = tg?.initDataUnsafe?.user;
-    if (user) {
-      setUsername(user.username);
-      setAuthorized(ALLOWED_USERS.includes(user.username));
-    }
     tg?.expand();
+
+    fetch('/api/admin-users')
+      .then(r => r.json())
+      .then(list => {
+        if (user) {
+          setUsername(user.username);
+          setAuthorized(list.includes(user.username));
+        }
+      });
+
     fetch('/api/speakers').then(r => r.json()).then(setSpeakers);
     fetch('/api/talks').then(r => r.json()).then(setTalks);
   }, []);
@@ -175,9 +180,9 @@ function AdminApp() {
     setTalks(talks.filter(t => t.id !== id));
   };
 
-  // if (!authorized) {
-  //   return e('div', null, 'Доступ запрещен для ', username || 'guest');
-  // }
+  if (!authorized) {
+    return e('div', null, 'Доступ запрещен для ', username || 'guest');
+  }
 
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
