@@ -21,7 +21,7 @@ function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
     setUploading(false);
   };
 
-  return e('form', { onSubmit: ev => { ev.preventDefault(); onSubmit({ ...initial, name, description, photoUrl }); } },
+  return e('form', { className: 'admin-form', onSubmit: ev => { ev.preventDefault(); onSubmit({ ...initial, name, description, photoUrl }); } },
     e('div', null,
       e('label', null, 'Имя'),
       e('input', { value: name, onChange: ev => setName(ev.target.value) })
@@ -75,7 +75,7 @@ function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     });
   };
 
-  return e('form', { onSubmit: handleSubmit },
+  return e('form', { className: 'admin-form', onSubmit: handleSubmit },
     e('div', null,
       e('label', null, 'Спикер'),
       e('select', { value: speakerId, onChange: ev => setSpeakerId(ev.target.value), required: true },
@@ -181,7 +181,7 @@ function AdminApp() {
 
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
-    e('div', null,
+    e('div', { className: 'admin-list' },
       e('button', { onClick: () => setEditingSpeaker({}) }, 'Добавить спикера'),
       speakers.map(s => e('div', { key: s.id },
         e('span', null, s.name),
@@ -194,7 +194,7 @@ function AdminApp() {
 
   const talkSection = editingTalk ?
     e(TalkForm, { initial: editingTalk, speakers, onSubmit: saveTalk, onCancel: () => setEditingTalk(null) }) :
-    e('div', null,
+    e('div', { className: 'admin-list' },
       e('button', { onClick: () => setEditingTalk({}) }, 'Добавить выступление'),
       talks.map(t => e('div', { key: t.id },
         e('span', null, t.title),
@@ -206,7 +206,7 @@ function AdminApp() {
     );
 
   return e('div', null,
-    e('div', null,
+    e('div', { className: 'admin-tabs' },
       e('button', { onClick: () => setTab('speakers') }, 'Спикеры'),
       e('button', { onClick: () => setTab('talks') }, 'Выступления')
     ),
