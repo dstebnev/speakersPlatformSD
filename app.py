@@ -45,7 +45,7 @@ def speakers():
         return jsonify(data['speakers'])
 
     body = request.get_json() or {}
-    body.setdefault('photoUrl', '/default_icon.png')
+    body.setdefault('photoUrl', '/default_icon.svg')
     new_speaker = {'id': str(uuid4()), **body}
     data['speakers'].append(new_speaker)
     write_db(data)
@@ -67,7 +67,7 @@ def speaker_by_id(id):
 
     body = request.get_json() or {}
     if 'photoUrl' not in body:
-        body['photoUrl'] = '/default_icon.png'
+        body['photoUrl'] = '/default_icon.svg'
     speakers[idx].update(body)
     write_db(data)
     return jsonify(speakers[idx])

@@ -1,0 +1,58 @@
+/* Styles specific to the admin interface */
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-page header {
+  background: #03a9f4;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 10px;
+  padding-bottom: 70px; /* space for bottom nav */
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-tabs button {
+  flex: 1;
+}
+
+.admin-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.admin-form label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  width: 100%;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+

@@ -1,33 +1,20 @@
 import { DIRECTIONS } from './directions.js';
 
+const ACCENTS = {
+  frontend: '#4caf50',
+  backend: '#795548',
+  QA: '#9c27b0',
+  mobile: '#ff9800',
+  product: '#f44336',
+  data: '#2196f3',
+  manager: '#607d8b',
+};
+
 const e = React.createElement;
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
-// Minimal swipe detection to avoid external dependencies
-function useSwipeable(opts = {}) {
-  let startX = null;
-  let startY = null;
+const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
 
-  const onTouchStart = e => {
-    const t = e.touches && e.touches[0];
-    if (!t) return;
-    startX = t.clientX;
-    startY = t.clientY;
-  };
-
-  const onTouchEnd = e => {
-    const t = e.changedTouches && e.changedTouches[0];
-    if (startX === null || !t) return;
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      opts.onSwiped && opts.onSwiped({ dir: dx > 0 ? 'Right' : 'Left', deltaX: dx });
-    }
-    startX = startY = null;
-  };
-
-  return { onTouchStart, onTouchEnd };
-}
 
 const TEST_SPEAKERS = [
   {
@@ -64,28 +51,32 @@ const TEST_TALKS = [
 ];
 
 function Card({ talk, speaker }) {
-  const handlers = useSwipeable({ onSwiped: () => {} });
-  const accent = {
-    frontend: '#4caf50',
-    backend: '#795548',
-    QA: '#9c27b0',
-    mobile: '#ff9800',
-    product: '#f44336',
-    data: '#2196f3',
-    manager: '#607d8b',
-  }[talk.direction] || '#03a9f4';
+  return e(
+    'div',
+    { className: 'card' },
+    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name })
+  );
+}
+
+function BottomSheet({ talk, speaker }) {
+  if (!talk) return null;
+
+  const accent = ACCENTS[talk.direction] || '#03a9f4';
+
+  const link =
+    talk.status === 'past'
+      ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
+      : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
 
   return e(
     'div',
-    { className: 'card', style: { borderLeft: `8px solid ${accent}` }, ...handlers },
-    e('img', { src: speaker.photoUrl, alt: speaker.name }),
-    e('div', { className: 'card-title' }, talk.title),
-    e('div', null, speaker.name),
+    { className: 'bottom-sheet', style: { borderLeft: `8px solid ${accent}` } },
+    e('div', { className: 'handle' }),
+    e('h3', null, talk.title),
+    e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
     e('div', null, talk.description),
     e('div', null, talk.eventName),
-    talk.status === 'past'
-      ? e('div', null, 'Прошло — ', e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись'))
-      : e('div', null, talk.date, ' — ', e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация'))
+    link
   );
 }
 
@@ -93,32 +84,82 @@ function App() {
   const [direction, setDirection] = useState('all');
   const [status, setStatus] = useState('all');
   const [talks, setTalks] = useState([]);
+  const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/speakers').then(r => r.json()),
-      fetch('/api/talks').then(r => r.json()),
-    ]).then(([speakers, talks]) => {
-      const merged = talks.map(t => ({
-        ...t,
-        speaker: speakers.find(s => s.id === t.speakerId),
-      }));
-      setTalks(merged);
-    });
+    const load = async () => {
+      try {
+        const [speakersRes, talksRes] = await Promise.all([
+          fetch('/api/speakers'),
+          fetch('/api/talks'),
+        ]);
+        if (!speakersRes.ok || !talksRes.ok) throw new Error('Fetch error');
+        const [speakers, talks] = await Promise.all([
+          speakersRes.json(),
+          talksRes.json(),
+        ]);
+        const merged = talks.map(t => ({
+          ...t,
+          speaker: speakers.find(s => s.id === t.speakerId),
+        }));
+        setTalks(merged);
+      } catch (err) {
+        setError('Не удалось загрузить данные');
+      }
+    };
+    load();
   }, []);
 
   let filtered = talks;
   if (direction !== 'all') filtered = filtered.filter(t => t.direction === direction);
   if (status !== 'all') filtered = filtered.filter(t => t.status === status);
-
   filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [filtered.length]);
+
+  useEffect(() => {
+    const item = filtered[activeIndex];
+    sheetRoot.render(e(BottomSheet, { talk: item, speaker: item?.speaker }));
+  }, [activeIndex, filtered]);
+
+  useEffect(() => {
+    if (window.Swiper && swiperRef.current) {
+      if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
+      swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
+        centeredSlides: true,
+        slidesPerView: 3,
+        spaceBetween: 20,
+        loop: false,
+        effect: 'coverflow',
+        coverflowEffect: {
+          rotate: 0,
+          stretch: 0,
+          depth: 100,
+          modifier: 2.5,
+          slideShadows: false,
+        },
+        on: {
+          slideChange() {
+            setActiveIndex(this.realIndex);
+          },
+        },
+      });
+    }
+  }, [filtered.length]);
 
   return e(
     'div',
     null,
+    error && e('div', { className: 'error' }, error),
+    e('button', { className: 'filter-btn', onClick: () => setShowFilters(!showFilters) }, 'Фильтры'),
     e(
       'div',
-      { className: 'filters' },
+      { className: `filters${showFilters ? ' show' : ''}` },
       e('select', { value: direction, onChange: e => setDirection(e.target.value) },
         e('option', { value: 'all' }, 'Все направления'),
         DIRECTIONS.map(d =>
@@ -131,7 +172,21 @@ function App() {
         e('option', { value: 'upcoming' }, 'Будущие')
       )
     ),
-    filtered.map(t => e(Card, { key: t.id, talk: t, speaker: t.speaker }))
+    e('div', { className: 'swiper-container', ref: swiperRef },
+      e('div', { className: 'swiper-wrapper' },
+        filtered.map((t, idx) =>
+          e(
+            'div',
+            {
+              className: 'swiper-slide',
+              key: t.id,
+              onClick: () => {},
+            },
+            e(Card, { talk: t, speaker: t.speaker })
+          )
+        )
+      )
+    )
   );
 }
 

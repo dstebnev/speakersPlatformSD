@@ -1,37 +1,69 @@
 body {
-  font-family: sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background: #f0f0f0;
+  background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #fff;
 }
 
 #root {
   padding: 10px;
-  padding-bottom: 70px; /* space for bottom nav */
+  padding-bottom: 150px; /* space for bottom nav and bottom sheet */
 }
 
 .card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0;
+  margin-bottom: 10px;
+  transition: transform 0.3s, opacity 0.3s;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInScale 0.5s forwards;
 }
 
 .card img {
   max-width: 100%;
   border-radius: 12px;
+  object-fit: cover;
 }
 
 .card-title {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   margin: 10px 0;
+  font-weight: 600;
 }
 
 .filters {
   margin-bottom: 20px;
-  display: flex;
+  display: none;
+  flex-direction: column;
   gap: 10px;
+  margin-top: 10px;
+}
+.filters.show {
+  display: flex;
+}
+
+.swiper-container {
+  width: 100%;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.swiper-slide {
+  transition: transform 0.3s;
+}
+
+.swiper-slide-prev,
+.swiper-slide-next {
+  transform: scale(0.85);
+}
+
+.swiper-slide-active {
+  transform: scale(1.1);
+  z-index: 2;
 }
 
 button {
@@ -39,8 +71,21 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: #03a9f4;
-  color: white;
+  background: #00e5ff;
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(0,229,255,0.7);
+}
+
+.filter-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: #00ffff;
+  color: #000;
+  border-radius: 12px;
+  padding: 8px 12px;
 }
 
 form {
@@ -58,6 +103,28 @@ form select {
   border: 1px solid #ccc;
 }
 
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #111;
+  color: #fff;
+  padding: 20px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.bottom-sheet .handle {
+  width: 40px;
+  height: 4px;
+  background: #555;
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -65,17 +132,34 @@ form select {
   right: 0;
   display: flex;
   justify-content: space-around;
-  background: #fff;
-  border-top: 1px solid #ccc;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.3);
   padding: 10px 0;
 }
 
 .bottom-nav a {
   text-decoration: none;
   font-size: 24px;
-  color: #666;
+  color: #fff;
 }
 
 .bottom-nav a.active {
-  color: #03a9f4;
+  color: #00e5ff;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

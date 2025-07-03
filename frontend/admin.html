@@ -4,14 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin</title>
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <!-- Telegram WebApp JS -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
-  <div id="admin-root"></div>
+<body class="admin-page">
+  <header>
+    <h1>Панель администратора</h1>
+  </header>
+  <main id="admin-root" class="admin-content"></main>
   <nav class="bottom-nav">
     <a href="/" title="Выступления">🎤</a>
     <a href="/admin" class="active" title="Админка">⚙️</a>
