@@ -3,6 +3,8 @@ import { DIRECTIONS } from './directions.js';
 const e = React.createElement;
 const { useState, useEffect, useRef } = React;
 
+const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
+
 
 const TEST_SPEAKERS = [
   {
@@ -52,14 +54,28 @@ function Card({ talk, speaker }) {
   return e(
     'div',
     { className: 'card', style: { borderLeft: `8px solid ${accent}` } },
-    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name }),
-    e('div', { className: 'card-title' }, talk.title),
-    e('div', null, speaker.name),
-    e('div', null, talk.description),
-    e('div', null, talk.eventName),
+    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name })
+  );
+}
+
+function BottomSheet({ talk, speaker }) {
+  if (!talk) {
+    return e('div', { className: 'bottom-sheet' }, 'Нет данных');
+  }
+
+  const link =
     talk.status === 'past'
-      ? e('div', null, 'Прошло — ', e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись'))
-      : e('div', null, talk.date, ' — ', e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация'))
+      ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
+      : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
+
+  return e(
+    'div',
+    { className: 'bottom-sheet' },
+    e('h3', null, talk.title),
+    e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
+    e('div', null, talk.description),
+    e('div', null, talk.date),
+    link
   );
 }
 
@@ -69,6 +85,7 @@ function App() {
   const [talks, setTalks] = useState([]);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -101,6 +118,15 @@ function App() {
   filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   useEffect(() => {
+    setActiveIndex(0);
+  }, [filtered.length]);
+
+  useEffect(() => {
+    const item = filtered[activeIndex];
+    sheetRoot.render(e(BottomSheet, { talk: item, speaker: item?.speaker }));
+  }, [activeIndex, filtered]);
+
+  useEffect(() => {
     if (window.Swiper && swiperRef.current) {
       if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
       swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
@@ -109,7 +135,12 @@ function App() {
         spaceBetween: 20,
         effect: 'coverflow',
         coverflowEffect: { rotate: 0, stretch: 0, depth: 100, modifier: 1, slideShadows: false },
-        breakpoints: { 600: { slidesPerView: 3 } }
+        breakpoints: { 600: { slidesPerView: 3 } },
+        on: {
+          slideChange() {
+            setActiveIndex(this.realIndex);
+          }
+        }
       });
     }
   }, [filtered.length]);
