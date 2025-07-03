@@ -1,5 +1,15 @@
 import { DIRECTIONS } from './directions.js';
 
+const ACCENTS = {
+  frontend: '#4caf50',
+  backend: '#795548',
+  QA: '#9c27b0',
+  mobile: '#ff9800',
+  product: '#f44336',
+  data: '#2196f3',
+  manager: '#607d8b',
+};
+
 const e = React.createElement;
 const { useState, useEffect, useRef } = React;
 
@@ -41,19 +51,9 @@ const TEST_TALKS = [
 ];
 
 function Card({ talk, speaker }) {
-  const accent = {
-    frontend: '#4caf50',
-    backend: '#795548',
-    QA: '#9c27b0',
-    mobile: '#ff9800',
-    product: '#f44336',
-    data: '#2196f3',
-    manager: '#607d8b',
-  }[talk.direction] || '#03a9f4';
-
   return e(
     'div',
-    { className: 'card', style: { borderLeft: `8px solid ${accent}` } },
+    { className: 'card' },
     e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name })
   );
 }
@@ -63,6 +63,8 @@ function BottomSheet({ talk, speaker }) {
     return e('div', { className: 'bottom-sheet' }, 'Нет данных');
   }
 
+  const accent = ACCENTS[talk.direction] || '#03a9f4';
+
   const link =
     talk.status === 'past'
       ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
@@ -70,7 +72,7 @@ function BottomSheet({ talk, speaker }) {
 
   return e(
     'div',
-    { className: 'bottom-sheet' },
+    { className: 'bottom-sheet', style: { borderLeft: `8px solid ${accent}` } },
     e('h3', null, talk.title),
     e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
     e('div', null, talk.description),
