@@ -126,53 +126,92 @@ function AdminApp() {
   const [editingSpeaker, setEditingSpeaker] = useState(null);
   const [editingTalk, setEditingTalk] = useState(null);
   const [tab, setTab] = useState('speakers');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    const user = tg?.initDataUnsafe?.user;
-    if (user) {
-      setUsername(user.username);
-      setAuthorized(ALLOWED_USERS.includes(user.username));
-    }
-    tg?.expand();
-    fetch('/api/speakers').then(r => r.json()).then(setSpeakers);
-    fetch('/api/talks').then(r => r.json()).then(setTalks);
+    const load = async () => {
+      const tg = window.Telegram?.WebApp;
+      const user = tg?.initDataUnsafe?.user;
+      if (user) {
+        setUsername(user.username);
+        setAuthorized(ALLOWED_USERS.includes(user.username));
+      }
+      tg?.expand();
+      try {
+        const [speakersRes, talksRes] = await Promise.all([
+          fetch('/api/speakers'),
+          fetch('/api/talks'),
+        ]);
+        if (!speakersRes.ok || !talksRes.ok) throw new Error('Fetch error');
+        const [speakersData, talksData] = await Promise.all([
+          speakersRes.json(),
+          talksRes.json(),
+        ]);
+        setSpeakers(speakersData);
+        setTalks(talksData);
+      } catch (err) {
+        setError('Не удалось загрузить данные');
+      }
+    };
+    load();
   }, []);
 
   const saveSpeaker = async data => {
-    if (data.id) {
-      const res = await fetch('/api/speakers/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      const updated = await res.json();
-      setSpeakers(speakers.map(s => s.id === updated.id ? updated : s));
-    } else {
-      const res = await fetch('/api/speakers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      const created = await res.json();
-      setSpeakers([...speakers, created]);
+    try {
+      if (data.id) {
+        const res = await fetch('/api/speakers/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Fetch error');
+        const updated = await res.json();
+        setSpeakers(speakers.map(s => s.id === updated.id ? updated : s));
+      } else {
+        const res = await fetch('/api/speakers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Fetch error');
+        const created = await res.json();
+        setSpeakers([...speakers, created]);
+      }
+      setEditingSpeaker(null);
+    } catch (err) {
+      setError('Не удалось сохранить спикера');
     }
-    setEditingSpeaker(null);
   };
 
   const deleteSpeaker = async id => {
-    await fetch('/api/speakers/' + id, { method: 'DELETE' });
-    setSpeakers(speakers.filter(s => s.id !== id));
+    try {
+      const res = await fetch('/api/speakers/' + id, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Fetch error');
+      setSpeakers(speakers.filter(s => s.id !== id));
+    } catch (err) {
+      setError('Не удалось удалить спикера');
+    }
   };
 
   const saveTalk = async data => {
-    if (data.id) {
-      const res = await fetch('/api/talks/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      const updated = await res.json();
-      setTalks(talks.map(t => t.id === updated.id ? updated : t));
-    } else {
-      const res = await fetch('/api/talks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      const created = await res.json();
-      setTalks([...talks, created]);
+    try {
+      if (data.id) {
+        const res = await fetch('/api/talks/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Fetch error');
+        const updated = await res.json();
+        setTalks(talks.map(t => t.id === updated.id ? updated : t));
+      } else {
+        const res = await fetch('/api/talks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Fetch error');
+        const created = await res.json();
+        setTalks([...talks, created]);
+      }
+      setEditingTalk(null);
+    } catch (err) {
+      setError('Не удалось сохранить выступление');
     }
-    setEditingTalk(null);
   };
 
   const deleteTalk = async id => {
-    await fetch('/api/talks/' + id, { method: 'DELETE' });
-    setTalks(talks.filter(t => t.id !== id));
+    try {
+      const res = await fetch('/api/talks/' + id, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Fetch error');
+      setTalks(talks.filter(t => t.id !== id));
+    } catch (err) {
+      setError('Не удалось удалить выступление');
+    }
   };
 
   // if (!authorized) {
@@ -206,6 +245,7 @@ function AdminApp() {
     );
 
   return e('div', null,
+    error && e('div', { className: 'error' }, error),
     e('div', { className: 'admin-tabs' },
       e('button', { onClick: () => setTab('speakers') }, 'Спикеры'),
       e('button', { onClick: () => setTab('talks') }, 'Выступления')
