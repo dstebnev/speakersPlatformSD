@@ -93,18 +93,30 @@ function App() {
   const [direction, setDirection] = useState('all');
   const [status, setStatus] = useState('all');
   const [talks, setTalks] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/speakers').then(r => r.json()),
-      fetch('/api/talks').then(r => r.json()),
-    ]).then(([speakers, talks]) => {
-      const merged = talks.map(t => ({
-        ...t,
-        speaker: speakers.find(s => s.id === t.speakerId),
-      }));
-      setTalks(merged);
-    });
+    const load = async () => {
+      try {
+        const [speakersRes, talksRes] = await Promise.all([
+          fetch('/api/speakers'),
+          fetch('/api/talks'),
+        ]);
+        if (!speakersRes.ok || !talksRes.ok) throw new Error('Fetch error');
+        const [speakers, talks] = await Promise.all([
+          speakersRes.json(),
+          talksRes.json(),
+        ]);
+        const merged = talks.map(t => ({
+          ...t,
+          speaker: speakers.find(s => s.id === t.speakerId),
+        }));
+        setTalks(merged);
+      } catch (err) {
+        setError('Не удалось загрузить данные');
+      }
+    };
+    load();
   }, []);
 
   let filtered = talks;
@@ -116,6 +128,7 @@ function App() {
   return e(
     'div',
     null,
+    error && e('div', { className: 'error' }, error),
     e(
       'div',
       { className: 'filters' },
