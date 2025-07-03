@@ -1,33 +1,8 @@
 import { DIRECTIONS } from './directions.js';
 
 const e = React.createElement;
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
-// Minimal swipe detection to avoid external dependencies
-function useSwipeable(opts = {}) {
-  let startX = null;
-  let startY = null;
-
-  const onTouchStart = e => {
-    const t = e.touches && e.touches[0];
-    if (!t) return;
-    startX = t.clientX;
-    startY = t.clientY;
-  };
-
-  const onTouchEnd = e => {
-    const t = e.changedTouches && e.changedTouches[0];
-    if (startX === null || !t) return;
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      opts.onSwiped && opts.onSwiped({ dir: dx > 0 ? 'Right' : 'Left', deltaX: dx });
-    }
-    startX = startY = null;
-  };
-
-  return { onTouchStart, onTouchEnd };
-}
 
 const TEST_SPEAKERS = [
   {
@@ -64,7 +39,6 @@ const TEST_TALKS = [
 ];
 
 function Card({ talk, speaker }) {
-  const handlers = useSwipeable({ onSwiped: () => {} });
   const accent = {
     frontend: '#4caf50',
     backend: '#795548',
@@ -77,8 +51,8 @@ function Card({ talk, speaker }) {
 
   return e(
     'div',
-    { className: 'card', style: { borderLeft: `8px solid ${accent}` }, ...handlers },
-    e('img', { src: speaker.photoUrl, alt: speaker.name }),
+    { className: 'card', style: { borderLeft: `8px solid ${accent}` } },
+    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name }),
     e('div', { className: 'card-title' }, talk.title),
     e('div', null, speaker.name),
     e('div', null, talk.description),
@@ -94,6 +68,8 @@ function App() {
   const [status, setStatus] = useState('all');
   const [talks, setTalks] = useState([]);
   const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
@@ -122,16 +98,30 @@ function App() {
   let filtered = talks;
   if (direction !== 'all') filtered = filtered.filter(t => t.direction === direction);
   if (status !== 'all') filtered = filtered.filter(t => t.status === status);
-
   filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  useEffect(() => {
+    if (window.Swiper && swiperRef.current) {
+      if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
+      swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
+        slidesPerView: 1.2,
+        centeredSlides: true,
+        spaceBetween: 20,
+        effect: 'coverflow',
+        coverflowEffect: { rotate: 0, stretch: 0, depth: 100, modifier: 1, slideShadows: false },
+        breakpoints: { 600: { slidesPerView: 3 } }
+      });
+    }
+  }, [filtered.length]);
 
   return e(
     'div',
     null,
     error && e('div', { className: 'error' }, error),
+    e('button', { onClick: () => setShowFilters(!showFilters) }, 'Фильтры'),
     e(
       'div',
-      { className: 'filters' },
+      { className: `filters${showFilters ? ' show' : ''}` },
       e('select', { value: direction, onChange: e => setDirection(e.target.value) },
         e('option', { value: 'all' }, 'Все направления'),
         DIRECTIONS.map(d =>
@@ -144,7 +134,15 @@ function App() {
         e('option', { value: 'upcoming' }, 'Будущие')
       )
     ),
-    filtered.map(t => e(Card, { key: t.id, talk: t, speaker: t.speaker }))
+    e('div', { className: 'swiper-container', ref: swiperRef },
+      e('div', { className: 'swiper-wrapper' },
+        filtered.map(t =>
+          e('div', { className: 'swiper-slide', key: t.id },
+            e(Card, { talk: t, speaker: t.speaker })
+          )
+        )
+      )
+    )
   );
 }
 
