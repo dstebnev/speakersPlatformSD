@@ -70,7 +70,7 @@ function BottomSheet({ talk, speaker }) {
 
   return e(
     'div',
-    { className: 'bottom-sheet', style: { borderLeft: `8px solid ${accent}` } },
+    { className: 'bottom-sheet', style: { borderTop: `8px solid ${accent}` } },
     e('div', { className: 'handle' }),
     e('h3', null, talk.title),
     e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
