@@ -1,10 +1,13 @@
-from flask import Flask, jsonify, request, abort, send_from_directory
+from flask import Flask, jsonify, request, abort, send_from_directory, Response
 import os
 import json
+from dotenv import load_dotenv
 from uuid import uuid4
 import datetime
 from io import BytesIO
 from PIL import Image
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -13,6 +16,9 @@ UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/data/photos')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DB_PATH = os.getenv('DB_PATH', '/data/db.json')
+
+MODE = os.getenv('MODE', 'prod').lower()
+ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '').split(',') if u.strip()]
 
 
 def read_db():
@@ -150,6 +156,16 @@ def upload():
 @app.route('/photos/<path:filename>')
 def serve_photo(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+@app.route('/config.js')
+def config_js():
+    admins = ADMIN_USERNAMES
+    js = (
+        "window.APP_CONFIG = "
+        + json.dumps({"mode": MODE, "admins": admins}, ensure_ascii=False)
+    )
+    return Response(js, mimetype='application/javascript')
 
 @app.route('/')
 def index():

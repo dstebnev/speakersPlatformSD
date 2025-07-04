@@ -3,7 +3,8 @@ import { DIRECTIONS } from './directions.js';
 const e = React.createElement;
 const { useState, useEffect } = React;
 
-const ALLOWED_USERS = ['admin'];
+const APP_CFG = window.APP_CONFIG || { mode: 'prod', admins: [] };
+const ALLOWED_USERS = APP_CFG.admins;
 
 function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
@@ -134,7 +135,11 @@ function AdminApp() {
       const user = tg?.initDataUnsafe?.user;
       if (user) {
         setUsername(user.username);
-        setAuthorized(ALLOWED_USERS.includes(user.username));
+        if (APP_CFG.mode === 'debug') {
+          setAuthorized(true);
+        } else {
+          setAuthorized(ALLOWED_USERS.includes(user.username));
+        }
       }
       tg?.expand();
       try {
@@ -214,9 +219,9 @@ function AdminApp() {
     }
   };
 
-  // if (!authorized) {
-  //   return e('div', null, 'Доступ запрещен для ', username || 'guest');
-  // }
+  if (APP_CFG.mode === 'prod' && !authorized) {
+    return e('div', null, 'Доступ запрещён для ', username || 'guest');
+  }
 
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
