@@ -104,8 +104,6 @@ function TalkList({ items }) {
         e(
           'div',
           null,
-          e('span', { className: 'list-date' }, formatDate(t.date)),
-          ' | ',
           e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
           ' — ',
           e('span', { className: 'list-title' }, t.title)
@@ -113,6 +111,8 @@ function TalkList({ items }) {
         e(
           'div',
           null,
+          e('span', { className: 'list-date' }, formatDate(t.date)),
+          ' | ',
           e('span', { className: 'list-event' }, t.eventName),
           ' | ',
           e('span', { className: 'list-link' }, link)
