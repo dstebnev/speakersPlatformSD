@@ -1,6 +1,8 @@
 :root {
-  --speaker-top: 40px;
-  --speaker-height: 55vh;
+  /* Lift speaker images higher on the screen */
+  --speaker-top: 20px;
+  /* Slightly reduce the height so prev/next speakers remain visible */
+  --speaker-height: 50vh;
 }
 
 body {
@@ -67,7 +69,8 @@ body {
 
 .swiper-slide-prev,
 .swiper-slide-next {
-  transform: translateY(20px) scale(0.85);
+  /* keep neighbour slides visible above the sheet */
+  transform: translateY(0) scale(0.85);
   opacity: 0.7;
   z-index: 1;
 }
