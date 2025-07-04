@@ -80,12 +80,39 @@ function BottomSheet({ talk, speaker }) {
   );
 }
 
+function TalkList({ items }) {
+  return e(
+    'ul',
+    { className: 'talk-list' },
+    items.map(t => {
+      const link =
+        t.status === 'past'
+          ? e('a', { href: t.recordingLink, target: '_blank' }, 'Запись')
+          : e('a', { href: t.registrationLink, target: '_blank' }, 'Регистрация');
+      return e(
+        'li',
+        { key: t.id },
+        e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
+        ' / ',
+        e('span', { className: 'list-title' }, t.title),
+        ' / ',
+        e('span', { className: 'list-event' }, t.eventName),
+        ' / ',
+        e('span', { className: 'list-date' }, t.date),
+        ' / ',
+        e('span', { className: 'list-link' }, link)
+      );
+    })
+  );
+}
+
 function App() {
   const [direction, setDirection] = useState('all');
   const [status, setStatus] = useState('all');
   const [talks, setTalks] = useState([]);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef(null);
 
@@ -123,11 +150,22 @@ function App() {
   }, [filtered.length]);
 
   useEffect(() => {
+    if (viewMode !== 'cards') {
+      sheetRoot.render(null);
+      return;
+    }
     const item = filtered[activeIndex];
     sheetRoot.render(e(BottomSheet, { talk: item, speaker: item?.speaker }));
-  }, [activeIndex, filtered]);
+  }, [activeIndex, filtered, viewMode]);
 
   useEffect(() => {
+    if (viewMode !== 'cards') {
+      if (swiperRef.current?.swiper) {
+        swiperRef.current.swiper.destroy();
+        swiperRef.current.swiper = null;
+      }
+      return;
+    }
     if (window.Swiper && swiperRef.current) {
       if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
       swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
@@ -150,13 +188,28 @@ function App() {
         },
       });
     }
-  }, [filtered.length]);
+  }, [filtered.length, viewMode]);
 
   return e(
     'div',
     null,
     error && e('div', { className: 'error' }, error),
     e('button', { className: 'filter-btn', onClick: () => setShowFilters(!showFilters) }, 'Фильтры'),
+    e(
+      'div',
+      { className: 'view-switch' },
+      e('span', null, 'Список'),
+      e(
+        'label',
+        { className: 'switch' },
+        e('input', {
+          type: 'checkbox',
+          checked: viewMode === 'list',
+          onChange: () => setViewMode(viewMode === 'cards' ? 'list' : 'cards'),
+        }),
+        e('span', { className: 'slider' })
+      )
+    ),
     e(
       'div',
       { className: `filters${showFilters ? ' show' : ''}` },
@@ -172,21 +225,27 @@ function App() {
         e('option', { value: 'upcoming' }, 'Будущие')
       )
     ),
-    e('div', { className: 'swiper-container', ref: swiperRef },
-      e('div', { className: 'swiper-wrapper' },
-        filtered.map((t, idx) =>
+    viewMode === 'cards'
+      ? e(
+          'div',
+          { className: 'swiper-container', ref: swiperRef },
           e(
             'div',
-            {
-              className: 'swiper-slide',
-              key: t.id,
-              onClick: () => {},
-            },
-            e(Card, { talk: t, speaker: t.speaker })
+            { className: 'swiper-wrapper' },
+            filtered.map((t, idx) =>
+              e(
+                'div',
+                {
+                  className: 'swiper-slide',
+                  key: t.id,
+                  onClick: () => {},
+                },
+                e(Card, { talk: t, speaker: t.speaker })
+              )
+            )
           )
         )
-      )
-    )
+      : e(TalkList, { items: filtered })
   );
 }
 
