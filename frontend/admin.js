@@ -135,11 +135,11 @@ function AdminApp() {
       const user = tg?.initDataUnsafe?.user;
       if (user) {
         setUsername(user.username);
-        if (APP_CFG.mode === 'debug') {
-          setAuthorized(true);
-        } else {
-          setAuthorized(ALLOWED_USERS.includes(user.username));
-        }
+      }
+      if (APP_CFG.mode === 'debug') {
+        setAuthorized(true);
+      } else if (user) {
+        setAuthorized(ALLOWED_USERS.includes(user.username));
       }
       tg?.expand();
       try {
