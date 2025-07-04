@@ -53,16 +53,18 @@ body {
 }
 
 .swiper-slide {
-  transition: transform 0.3s;
+  transition: transform 0.3s, filter 0.3s;
 }
 
 .swiper-slide-prev,
 .swiper-slide-next {
-  transform: scale(0.85);
+  transform: translateY(20px) scale(0.85);
+  filter: brightness(0.7);
+  z-index: 1;
 }
 
 .swiper-slide-active {
-  transform: scale(1.1);
+  transform: translateY(-20px) scale(1.2);
   z-index: 2;
 }
 
@@ -105,7 +107,7 @@ form select {
 
 .bottom-sheet {
   position: fixed;
-  bottom: 0;
+  bottom: 60px;
   left: 0;
   right: 0;
   background: #111;
@@ -123,6 +125,24 @@ form select {
   background: #555;
   border-radius: 2px;
   margin: 0 auto 12px;
+}
+
+.bottom-sheet h3 {
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bottom-sheet .sheet-speaker,
+.bottom-sheet .sheet-event {
+  margin-top: 4px;
+}
+
+.bottom-sheet a {
+  color: #1ec4ff;
+  text-decoration: underline;
+  display: inline-block;
+  margin-top: 8px;
 }
 
 .bottom-nav {
