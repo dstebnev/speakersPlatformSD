@@ -281,6 +281,10 @@ form select {
   border-radius: 8px;
 }
 
+.talk-list li div:first-child {
+  margin-bottom: 4px;
+}
+
 .talk-list a {
   color: #3ea6ff;
   text-decoration: underline;
