@@ -75,7 +75,7 @@ function BottomSheet({ talk, speaker }) {
     e('h3', null, talk.title),
     e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
     e('div', null, talk.description),
-    e('div', null, talk.eventName),
+    e('div', { className: 'sheet-event' }, talk.eventName),
     link
   );
 }
@@ -132,15 +132,15 @@ function App() {
       if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
       swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
         centeredSlides: true,
-        slidesPerView: 3,
+        slidesPerView: 'auto',
         spaceBetween: 20,
         loop: false,
         effect: 'coverflow',
         coverflowEffect: {
           rotate: 0,
           stretch: 0,
-          depth: 100,
-          modifier: 2.5,
+          depth: 120,
+          modifier: 2,
           slideShadows: false,
         },
         on: {
