@@ -81,6 +81,15 @@ function BottomSheet({ talk, speaker }) {
 }
 
 function TalkList({ items }) {
+  const formatDate = d => {
+    const date = new Date(d);
+    if (isNaN(date)) return d;
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yy = String(date.getFullYear()).slice(-2);
+    return `${dd}/${mm}/${yy}`;
+  };
+
   return e(
     'ul',
     { className: 'talk-list' },
@@ -92,15 +101,22 @@ function TalkList({ items }) {
       return e(
         'li',
         { key: t.id },
-        e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
-        ' / ',
-        e('span', { className: 'list-title' }, t.title),
-        ' / ',
-        e('span', { className: 'list-event' }, t.eventName),
-        ' / ',
-        e('span', { className: 'list-date' }, t.date),
-        ' / ',
-        e('span', { className: 'list-link' }, link)
+        e(
+          'div',
+          null,
+          e('span', { className: 'list-date' }, formatDate(t.date)),
+          ' | ',
+          e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
+          ' — ',
+          e('span', { className: 'list-title' }, t.title)
+        ),
+        e(
+          'div',
+          null,
+          e('span', { className: 'list-event' }, t.eventName),
+          ' | ',
+          e('span', { className: 'list-link' }, link)
+        )
       );
     })
   );
