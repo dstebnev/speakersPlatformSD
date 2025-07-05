@@ -7,7 +7,7 @@ import datetime
 from io import BytesIO
 from PIL import Image
 
-load_dotenv()
+load_dotenv(override=True)
 
 app = Flask(__name__)
 
