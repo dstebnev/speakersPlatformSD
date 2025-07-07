@@ -55,6 +55,8 @@ function renderCharts(speakers, talks) {
       }]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: true,
       plugins: { legend: { display: false } }
     }
   });
@@ -68,6 +70,10 @@ function renderCharts(speakers, talks) {
         data: activeSpeakers,
         backgroundColor: DIRECTIONS.map(d => ACCENTS[d] || '#ccc')
       }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true
     }
   });
 }
