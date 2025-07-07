@@ -360,8 +360,20 @@ form select {
   padding-bottom: calc(20px + var(--bottom-nav-height) + env(safe-area-inset-bottom));
 }
 
+.chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart-title {
+  margin: 0;
+  text-align: center;
+}
+
 .stats-wrapper canvas {
   background: rgba(0,0,0,0.4);
   border-radius: 8px;
   padding: 10px;
+  width: 100%;
 }
