@@ -24,6 +24,9 @@
       const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
       const tg = window.Telegram?.WebApp;
       const user = tg?.initDataUnsafe?.user;
+      if (user && user.username) {
+        document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
+      }
       const isAdmin = user && cfg.admins.includes(user.username);
       if (cfg.mode === 'prod' && !isAdmin) {
         document.getElementById('admin-link')?.remove();
