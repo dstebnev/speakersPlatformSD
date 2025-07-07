@@ -14,6 +14,11 @@ export function BottomSheet({ talk, speaker }) {
     return () => nav && nav.classList.remove('disabled');
   }, []);
 
+  React.useEffect(() => {
+    document.body.classList.toggle('sheet-expanded', expanded);
+    return () => document.body.classList.remove('sheet-expanded');
+  }, [expanded]);
+
   const handleStart = ev => {
     const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
     startYRef.current = y;
