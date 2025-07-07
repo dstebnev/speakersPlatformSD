@@ -16,6 +16,11 @@ body {
   color: #fff;
 }
 
+#profile-root {
+  padding: 10px;
+  padding-bottom: 70px; /* reserve space for bottom navigation */
+}
+
 #root {
   padding: 10px;
   padding-bottom: 150px; /* space for bottom nav and bottom sheet */
