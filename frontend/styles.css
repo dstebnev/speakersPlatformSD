@@ -265,21 +265,6 @@ form select {
   display: inline-block;
   margin-top: 8px;
 }
-
-.bottom-sheet .sheet-select {
-  margin-top: 16px;
-  width: 100%;
-  padding: 10px;
-  font-weight: 600;
-  background: #00e5ff;
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
-  position: sticky;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-}
-
 .bottom-nav {
   position: fixed;
   bottom: 0;
