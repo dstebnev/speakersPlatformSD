@@ -142,7 +142,8 @@ body.sheet-expanded .swiper-slide-next {
   left: 50%;
   transform: translateX(-50%);
   height: var(--speaker-height);
-  z-index: 2;
+  /* keep the active speaker photo above the bottom sheet */
+  z-index: 25;
 }
 
 .swiper-slide-prev .card img,
@@ -151,7 +152,8 @@ body.sheet-expanded .swiper-slide-next {
   /* Slightly lower the neighbouring speakers */
   top: calc(var(--speaker-top) + 20px);
   height: calc(var(--speaker-height) * 0.55);
-  z-index: 1;
+  /* neighbour speakers should still stay above the sheet */
+  z-index: 15;
   margin-top: 25%;
   transform: translateX(-50%);
   opacity: 0.8;
