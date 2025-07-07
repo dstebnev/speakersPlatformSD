@@ -196,6 +196,15 @@ form select {
     100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
   );
   min-height: 40vh;
+  transition: top 0.3s ease, bottom 0.3s ease, border-radius 0.3s ease;
+}
+
+.bottom-sheet.expanded {
+  top: 0;
+  bottom: 0;
+  max-height: none;
+  height: calc(100vh - env(safe-area-inset-bottom));
+  border-radius: 0;
 }
 
 .bottom-sheet .sheet-content {
@@ -209,6 +218,11 @@ form select {
     var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom)
   );
   flex: 1;
+}
+
+.bottom-sheet.expanded .sheet-content {
+  max-height: none;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .bottom-sheet .handle {
