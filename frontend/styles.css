@@ -153,9 +153,16 @@ body.sheet-expanded .swiper-slide-next {
   height: calc(var(--speaker-height) * 0.55);
   z-index: 1;
   margin-top: 25%;
-  left: 50%;
   transform: translateX(-50%);
   opacity: 0.8;
+}
+
+.swiper-slide-next .card img {
+  left: 14%;
+}
+
+.swiper-slide-prev .card img {
+  left: 93%;
 }
 
 button {
