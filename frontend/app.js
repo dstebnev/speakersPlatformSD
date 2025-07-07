@@ -72,11 +72,15 @@ function BottomSheet({ talk, speaker }) {
     'div',
     { className: 'bottom-sheet', style: { borderTop: `8px solid ${accent}` } },
     e('div', { className: 'handle' }),
-    e('h3', null, talk.title),
-    e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
-    e('div', null, talk.description),
-    e('div', { className: 'sheet-event' }, talk.eventName),
-    link
+    e(
+      'div',
+      { className: 'sheet-content' },
+      e('h3', null, talk.title),
+      e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
+      e('div', null, talk.description),
+      e('div', { className: 'sheet-event' }, talk.eventName),
+      link
+    )
   );
 }
 
