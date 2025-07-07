@@ -38,7 +38,7 @@
         document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
       }
       const isAdmin = user && cfg.admins.includes(user.username);
-      if (cfg.mode === 'prod' && !isAdmin) {
+      if (cfg.mode !== 'debug' && !isAdmin) {
         document.getElementById('admin-link')?.remove();
         document.getElementById('stats-link')?.remove();
       }

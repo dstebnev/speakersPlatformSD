@@ -219,7 +219,7 @@ function AdminApp() {
     }
   };
 
-  if (APP_CFG.mode === 'prod' && !authorized) {
+  if (APP_CFG.mode !== 'debug' && !authorized) {
     return e('div', null, 'Доступ запрещён для ', username || 'guest');
   }
 
