@@ -290,6 +290,17 @@ form select {
   text-decoration: underline;
 }
 
+.swipe-hint {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #fff;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
 @keyframes fadeInScale {
   from {
     opacity: 0;
