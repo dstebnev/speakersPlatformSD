@@ -5,6 +5,34 @@ export function BottomSheet({ talk, speaker }) {
   if (!talk) return null;
 
   const accent = ACCENTS[talk.direction] || '#03a9f4';
+  const [expanded, setExpanded] = React.useState(false);
+  const startYRef = React.useRef(0);
+
+  const handleStart = ev => {
+    const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+    startYRef.current = y;
+    document.addEventListener('pointermove', handleMove);
+    document.addEventListener('pointerup', handleEnd);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
+  };
+
+  const handleMove = ev => {
+    const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+    const diff = startYRef.current - y;
+    if (diff > 50) {
+      setExpanded(true);
+    } else if (diff < -50) {
+      setExpanded(false);
+    }
+  };
+
+  const handleEnd = () => {
+    document.removeEventListener('pointermove', handleMove);
+    document.removeEventListener('pointerup', handleEnd);
+    document.removeEventListener('touchmove', handleMove);
+    document.removeEventListener('touchend', handleEnd);
+  };
 
   const link =
     talk.status === 'past'
@@ -13,8 +41,11 @@ export function BottomSheet({ talk, speaker }) {
 
   return e(
     'div',
-    { className: 'bottom-sheet', style: { borderTop: `8px solid ${accent}` } },
-    e('div', { className: 'handle' }),
+    {
+      className: `bottom-sheet${expanded ? ' expanded' : ''}`,
+      style: { borderTop: `8px solid ${accent}` },
+    },
+    e('div', { className: 'handle', onPointerDown: handleStart, onTouchStart: handleStart }),
     e(
       'div',
       { className: 'sheet-content' },
