@@ -182,6 +182,11 @@ def profile_page():
     return send_from_directory('frontend', 'profile.html')
 
 
+@app.route('/stats')
+def stats_page():
+    return send_from_directory('frontend', 'stats.html')
+
+
 @app.route('/<path:path>')
 def static_proxy(path):
     return send_from_directory('frontend', path)

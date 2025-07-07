@@ -349,3 +349,19 @@ form select {
     transform: scale(1);
   }
 }
+
+/* Statistics page */
+.stats-wrapper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* leave space for bottom nav */
+  padding-bottom: calc(20px + var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+.stats-wrapper canvas {
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 10px;
+}
