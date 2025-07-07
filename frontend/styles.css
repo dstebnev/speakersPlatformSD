@@ -5,27 +5,35 @@
   --speaker-height: 50vh;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
+html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
   background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
   background-attachment: fixed;
-  min-height: 100vh;
-  /* allow scrolling so content isn't hidden behind the fixed nav */
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   color: #fff;
 }
 
 #profile-root {
   padding: 10px;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   /* reserve space for bottom navigation and safe areas */
   padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
 #root {
   padding: 10px;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   /* space for bottom nav, bottom sheet and safe areas */
   padding-bottom: calc(150px + env(safe-area-inset-bottom));
 }
