@@ -135,11 +135,11 @@ function AdminApp() {
       const user = tg?.initDataUnsafe?.user;
       if (user) {
         setUsername(user.username);
-        if (APP_CFG.mode === 'debug') {
-          setAuthorized(true);
-        } else {
-          setAuthorized(ALLOWED_USERS.includes(user.username));
-        }
+      }
+      if (APP_CFG.mode === 'debug') {
+        setAuthorized(true);
+      } else if (user) {
+        setAuthorized(ALLOWED_USERS.includes(user.username));
       }
       tg?.expand();
       try {
@@ -227,12 +227,12 @@ function AdminApp() {
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
     e('div', { className: 'admin-list' },
       e('button', { onClick: () => setEditingSpeaker({}) }, 'Добавить спикера'),
-      speakers.map(s => e('div', { key: s.id },
-        e('span', null, s.name),
-        ' ',
-        e('button', { onClick: () => setEditingSpeaker(s) }, 'Редактировать'),
-        ' ',
-        e('button', { onClick: () => deleteSpeaker(s.id) }, 'Удалить')
+      speakers.map(s => e('div', { key: s.id, className: 'admin-list-item' },
+        e('span', { className: 'admin-item-name' }, s.name),
+        e('div', { className: 'admin-actions' },
+          e('button', { onClick: () => setEditingSpeaker(s) }, 'Редактировать'),
+          e('button', { onClick: () => deleteSpeaker(s.id) }, 'Удалить')
+        )
       ))
     );
 
@@ -240,12 +240,12 @@ function AdminApp() {
     e(TalkForm, { initial: editingTalk, speakers, onSubmit: saveTalk, onCancel: () => setEditingTalk(null) }) :
     e('div', { className: 'admin-list' },
       e('button', { onClick: () => setEditingTalk({}) }, 'Добавить выступление'),
-      talks.map(t => e('div', { key: t.id },
-        e('span', null, t.title),
-        ' (', speakers.find(s => s.id === t.speakerId)?.name || '', ') ',
-        e('button', { onClick: () => setEditingTalk(t) }, 'Редактировать'),
-        ' ',
-        e('button', { onClick: () => deleteTalk(t.id) }, 'Удалить')
+      talks.map(t => e('div', { key: t.id, className: 'admin-list-item' },
+        e('span', { className: 'admin-item-name' }, `${t.title} (${speakers.find(s => s.id === t.speakerId)?.name || ''})`),
+        e('div', { className: 'admin-actions' },
+          e('button', { onClick: () => setEditingTalk(t) }, 'Редактировать'),
+          e('button', { onClick: () => deleteTalk(t.id) }, 'Удалить')
+        )
       ))
     );
 
