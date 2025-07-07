@@ -130,6 +130,7 @@ function App() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -166,6 +167,11 @@ function App() {
   }, [filtered.length]);
 
   useEffect(() => {
+    const timer = setTimeout(() => setShowSwipeHint(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     if (viewMode !== 'cards') {
       sheetRoot.render(null);
       return;
@@ -200,6 +206,7 @@ function App() {
         on: {
           slideChange() {
             setActiveIndex(this.realIndex);
+            setShowSwipeHint(false);
           },
         },
       });
@@ -241,27 +248,29 @@ function App() {
         e('option', { value: 'upcoming' }, 'Будущие')
       )
     ),
-    viewMode === 'cards'
-      ? e(
-          'div',
-          { className: 'swiper-container', ref: swiperRef },
-          e(
+      viewMode === 'cards'
+        ? e(
             'div',
-            { className: 'swiper-wrapper' },
-            filtered.map((t, idx) =>
-              e(
-                'div',
-                {
-                  className: 'swiper-slide',
-                  key: t.id,
-                  onClick: () => {},
-                },
-                e(Card, { talk: t, speaker: t.speaker })
-              )
-            )
+            { className: 'swiper-container', ref: swiperRef },
+            e(
+              'div',
+              { className: 'swiper-wrapper' },
+              filtered.map((t, idx) =>
+                e(
+                  'div',
+                    {
+                      className: 'swiper-slide',
+                      key: t.id,
+                      onClick: () => {},
+                    },
+                    e(Card, { talk: t, speaker: t.speaker })
+                  )
+                )
+            ),
+            showSwipeHint &&
+              e('div', { className: 'swipe-hint' }, '\u2190\u00A0Листайте\u00A0\u2192')
           )
-        )
-      : e(TalkList, { items: filtered })
+        : e(TalkList, { items: filtered })
   );
 }
 
