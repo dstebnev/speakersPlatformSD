@@ -66,10 +66,5 @@ export function BottomSheet({ talk, speaker }) {
       e('div', { className: 'sheet-event' }, talk.eventName),
       link
     ),
-    e(
-      'button',
-      { className: 'sheet-select', onClick: () => setExpanded(false) },
-      'Выбрать'
-    )
   );
 }
