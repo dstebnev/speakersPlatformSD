@@ -1,14 +1,5 @@
 import { DIRECTIONS } from './directions.js';
-
-const ACCENTS = {
-  frontend: '#4caf50',
-  backend: '#795548',
-  QA: '#9c27b0',
-  mobile: '#ff9800',
-  product: '#f44336',
-  data: '#2196f3',
-  manager: '#607d8b'
-};
+import { ACCENTS } from './constants.js';
 
 async function loadData() {
   try {
