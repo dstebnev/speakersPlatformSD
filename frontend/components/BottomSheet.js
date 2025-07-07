@@ -45,7 +45,12 @@ export function BottomSheet({ talk, speaker }) {
       className: `bottom-sheet${expanded ? ' expanded' : ''}`,
       style: { borderTop: `8px solid ${accent}` },
     },
-    e('div', { className: 'handle', onPointerDown: handleStart, onTouchStart: handleStart }),
+    e('div', {
+      className: `handle${expanded ? ' arrow-down' : ''}`,
+      onPointerDown: handleStart,
+      onTouchStart: handleStart,
+      onClick: () => expanded && setExpanded(false),
+    }),
     e(
       'div',
       { className: 'sheet-content' },
