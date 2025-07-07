@@ -9,6 +9,12 @@
   --sheet-header-height: 72px;
 }
 
+/* When the bottom sheet is expanded, shrink and raise speaker images */
+body.sheet-expanded {
+  --speaker-top: 4px;
+  --speaker-height: 30vh;
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -121,6 +127,15 @@ body {
   z-index: 2;
 }
 
+body.sheet-expanded .swiper-slide-active {
+  transform: translateY(-20px) scale(1);
+}
+
+body.sheet-expanded .swiper-slide-prev,
+body.sheet-expanded .swiper-slide-next {
+  transform: translateY(0) scale(0.7);
+}
+
 .swiper-slide-active .card img {
   position: absolute;
   top: var(--speaker-top);
@@ -203,11 +218,11 @@ form select {
 }
 
 .bottom-sheet.expanded {
-  top: 0;
+  top: 20vh;
   bottom: 0;
   max-height: none;
-  height: calc(100vh - env(safe-area-inset-bottom));
-  border-radius: 0;
+  height: calc(80vh - env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
 }
 
 .bottom-sheet .sheet-content {
