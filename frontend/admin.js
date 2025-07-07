@@ -230,8 +230,16 @@ function AdminApp() {
       speakers.map(s => e('div', { key: s.id, className: 'admin-list-item' },
         e('span', { className: 'admin-item-name' }, s.name),
         e('div', { className: 'admin-actions' },
-          e('button', { onClick: () => setEditingSpeaker(s) }, 'Редактировать'),
-          e('button', { onClick: () => deleteSpeaker(s.id) }, 'Удалить')
+          e('button', {
+            className: 'icon-btn',
+            title: 'Редактировать',
+            onClick: () => setEditingSpeaker(s)
+          }, '✏️'),
+          e('button', {
+            className: 'icon-btn',
+            title: 'Удалить',
+            onClick: () => window.confirm('Удалить спикера?') && deleteSpeaker(s.id)
+          }, '🗑️')
         )
       ))
     );
@@ -243,8 +251,16 @@ function AdminApp() {
       talks.map(t => e('div', { key: t.id, className: 'admin-list-item' },
         e('span', { className: 'admin-item-name' }, `${t.title} (${speakers.find(s => s.id === t.speakerId)?.name || ''})`),
         e('div', { className: 'admin-actions' },
-          e('button', { onClick: () => setEditingTalk(t) }, 'Редактировать'),
-          e('button', { onClick: () => deleteTalk(t.id) }, 'Удалить')
+          e('button', {
+            className: 'icon-btn',
+            title: 'Редактировать',
+            onClick: () => setEditingTalk(t)
+          }, '✏️'),
+          e('button', {
+            className: 'icon-btn',
+            title: 'Удалить',
+            onClick: () => window.confirm('Удалить выступление?') && deleteTalk(t.id)
+          }, '🗑️')
         )
       ))
     );
