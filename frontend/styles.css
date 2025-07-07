@@ -69,6 +69,8 @@ body {
   height: 200px;
   border-radius: 12px;
   object-fit: cover;
+  /* Smoothly animate position and size when the active slide changes */
+  transition: top 0.3s, left 0.3s, height 0.3s, transform 0.3s;
 }
 
 .card-title {
@@ -125,7 +127,8 @@ body {
 .swiper-slide-prev .card img,
 .swiper-slide-next .card img {
   position: absolute;
-  top: var(--speaker-top)+20px;
+  /* Slightly lower the neighbouring speakers */
+  top: calc(var(--speaker-top) + 20px);
   height: calc(var(--speaker-height) * 0.55);
   z-index: 1;
   margin-top: 25%;
