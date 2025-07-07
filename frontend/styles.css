@@ -167,16 +167,23 @@ form select {
 .bottom-sheet {
   position: fixed;
   top: calc(var(--speaker-top) + var(--speaker-height));
-  bottom: calc(60px + env(safe-area-inset-bottom));
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   background: #111;
   color: #fff;
   padding: 24px;
   border-radius: 20px 20px 0 0;
-  overflow-y: auto;
-  max-height: calc(100vh - var(--speaker-top) - var(--speaker-height) - 60px - env(safe-area-inset-bottom));
+  overflow: hidden;
+  max-height: calc(100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom));
   min-height: 40vh;
+}
+
+.bottom-sheet .sheet-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: 100%;
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
 }
 
 .bottom-sheet .handle {
