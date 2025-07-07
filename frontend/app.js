@@ -1,14 +1,8 @@
 import { DIRECTIONS } from './directions.js';
-
-const ACCENTS = {
-  frontend: '#4caf50',
-  backend: '#795548',
-  QA: '#9c27b0',
-  mobile: '#ff9800',
-  product: '#f44336',
-  data: '#2196f3',
-  manager: '#607d8b',
-};
+import { ACCENTS } from './constants.js';
+import { Card } from './components/Card.js';
+import { BottomSheet } from './components/BottomSheet.js';
+import { TalkList } from './components/TalkList.js';
 
 const e = React.createElement;
 const { useState, useEffect, useRef } = React;
@@ -49,82 +43,6 @@ const TEST_TALKS = [
     recordingLink: 'https://example.com/recording',
   },
 ];
-
-function Card({ talk, speaker }) {
-  return e(
-    'div',
-    { className: 'card' },
-    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name })
-  );
-}
-
-function BottomSheet({ talk, speaker }) {
-  if (!talk) return null;
-
-  const accent = ACCENTS[talk.direction] || '#03a9f4';
-
-  const link =
-    talk.status === 'past'
-      ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
-      : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
-
-  return e(
-    'div',
-    { className: 'bottom-sheet', style: { borderTop: `8px solid ${accent}` } },
-    e('div', { className: 'handle' }),
-    e(
-      'div',
-      { className: 'sheet-content' },
-      e('h3', null, talk.title),
-      e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
-      e('div', null, talk.description),
-      e('div', { className: 'sheet-event' }, talk.eventName),
-      link
-    )
-  );
-}
-
-function TalkList({ items }) {
-  const formatDate = d => {
-    const date = new Date(d);
-    if (isNaN(date)) return d;
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const yy = String(date.getFullYear()).slice(-2);
-    return `${dd}/${mm}/${yy}`;
-  };
-
-  return e(
-    'ul',
-    { className: 'talk-list' },
-    items.map(t => {
-      const link =
-        t.status === 'past'
-          ? e('a', { href: t.recordingLink, target: '_blank' }, 'Запись')
-          : e('a', { href: t.registrationLink, target: '_blank' }, 'Регистрация');
-      return e(
-        'li',
-        { key: t.id },
-        e(
-          'div',
-          null,
-          e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
-          ' — ',
-          e('span', { className: 'list-title' }, t.title)
-        ),
-        e(
-          'div',
-          null,
-          e('span', { className: 'list-date' }, formatDate(t.date)),
-          ' | ',
-          e('span', { className: 'list-event' }, t.eventName),
-          ' | ',
-          e('span', { className: 'list-link' }, link)
-        )
-      );
-    })
-  );
-}
 
 function App() {
   const [direction, setDirection] = useState('all');
