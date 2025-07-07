@@ -8,6 +8,12 @@ export function BottomSheet({ talk, speaker }) {
   const [expanded, setExpanded] = React.useState(false);
   const startYRef = React.useRef(0);
 
+  React.useEffect(() => {
+    const nav = document.querySelector('.bottom-nav');
+    if (nav) nav.classList.add('disabled');
+    return () => nav && nav.classList.remove('disabled');
+  }, []);
+
   const handleStart = ev => {
     const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
     startYRef.current = y;
@@ -44,11 +50,11 @@ export function BottomSheet({ talk, speaker }) {
     {
       className: `bottom-sheet${expanded ? ' expanded' : ''}`,
       style: { borderTop: `8px solid ${accent}` },
+      onPointerDown: handleStart,
+      onTouchStart: handleStart,
     },
     e('div', {
       className: `handle${expanded ? ' arrow-down' : ''}`,
-      onPointerDown: handleStart,
-      onTouchStart: handleStart,
       onClick: () => expanded && setExpanded(false),
     }),
     e(
@@ -59,6 +65,11 @@ export function BottomSheet({ talk, speaker }) {
       e('div', null, talk.description),
       e('div', { className: 'sheet-event' }, talk.eventName),
       link
+    ),
+    e(
+      'button',
+      { className: 'sheet-select', onClick: () => setExpanded(false) },
+      'Выбрать'
     )
   );
 }
