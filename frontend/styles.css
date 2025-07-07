@@ -216,16 +216,16 @@ form select {
   max-height: calc(
     100vh - var(--sheet-header-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
   );
-  /* ensure last items aren't hidden under the nav */
+  /* leave room for the fixed action button */
   padding-bottom: calc(
-    var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom)
+    var(--bottom-nav-height) + 80px + env(safe-area-inset-bottom)
   );
   flex: 1;
 }
 
 .bottom-sheet.expanded .sheet-content {
   max-height: none;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
 .bottom-sheet .handle {
@@ -266,6 +266,20 @@ form select {
   margin-top: 8px;
 }
 
+.bottom-sheet .sheet-select {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  font-weight: 600;
+  background: #00e5ff;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+  position: sticky;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -279,6 +293,10 @@ form select {
   padding: 10px 0;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
   z-index: 30;
+}
+
+.bottom-nav.disabled {
+  pointer-events: none;
 }
 
 .bottom-nav a {
