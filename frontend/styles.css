@@ -5,25 +5,37 @@
   --speaker-height: 50vh;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
+html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
   background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
   background-attachment: fixed;
-  min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
   color: #fff;
 }
 
 #profile-root {
   padding: 10px;
-  padding-bottom: 70px; /* reserve space for bottom navigation */
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* reserve space for bottom navigation and safe areas */
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
 #root {
   padding: 10px;
-  padding-bottom: 150px; /* space for bottom nav and bottom sheet */
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* space for bottom nav, bottom sheet and safe areas */
+  padding-bottom: calc(150px + env(safe-area-inset-bottom));
 }
 
 .card {
@@ -202,6 +214,7 @@ form select {
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255,255,255,0.3);
   padding: 10px 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 
 .bottom-nav a {

@@ -6,6 +6,7 @@
   min-height: 100vh;
   background: #f5f5f5;
   color: #000;
+  overflow: hidden;
 }
 
 .admin-page header {
@@ -18,14 +19,16 @@
 .admin-content {
   flex: 1;
   padding: 10px;
-  padding-bottom: 70px; /* space for bottom nav */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* account for safe areas and fixed bottom navigation */
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
-/* Allow content inside tabs to scroll if it exceeds the viewport */
+/* Forms and lists layout */
 .admin-form,
 .admin-list {
-  overflow-y: auto;
-  max-height: calc(100vh - 200px);
+  /* scrolling handled by .admin-content */
 }
 
 .admin-form {
