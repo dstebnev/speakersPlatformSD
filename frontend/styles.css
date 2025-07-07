@@ -3,6 +3,8 @@
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
   --speaker-height: 50vh;
+  /* Height of the fixed bottom navigation */
+  --bottom-nav-height: 70px;
 }
 
 html, body {
@@ -76,7 +78,8 @@ body {
 .swiper-container {
   width: 100%;
   padding-top: 40px;
-  padding-bottom: 40px;
+  /* keep last slide content above the fixed nav */
+  padding-bottom: calc(40px + var(--bottom-nav-height));
 }
 
 .swiper-slide {
@@ -110,17 +113,17 @@ body {
 .swiper-slide-next .card img {
   position: absolute;
   top: var(--speaker-top);
-  height: calc(var(--speaker-height) * 0.7);
+  height: calc(var(--speaker-height) * 0.8);
   z-index: 1;
 }
 
 .swiper-slide-prev .card img {
-  left: -10%;
+  left: 70%;
   opacity: 0.8;
 }
 
 .swiper-slide-next .card img {
-  right: -10%;
+  right: 70%;
   opacity: 0.8;
 }
 
@@ -291,6 +294,8 @@ form select {
   list-style: none;
   padding: 0;
   margin-top: 60px;
+  /* avoid overlap with the fixed bottom navigation */
+  padding-bottom: var(--bottom-nav-height);
 }
 
 .talk-list li {
