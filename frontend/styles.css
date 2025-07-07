@@ -112,18 +112,19 @@ body {
 .swiper-slide-prev .card img,
 .swiper-slide-next .card img {
   position: absolute;
-  top: var(--speaker-top);
-  height: calc(var(--speaker-height) * 0.8);
+  top: var(--speaker-top)+20px;
+  height: calc(var(--speaker-height) * 0.55);
   z-index: 1;
+  margin-top: 25%;
 }
 
 .swiper-slide-prev .card img {
-  left: 70%;
+  left: 60%;
   opacity: 0.8;
 }
 
 .swiper-slide-next .card img {
-  right: 70%;
+  right: 60%;
   opacity: 0.8;
 }
 
