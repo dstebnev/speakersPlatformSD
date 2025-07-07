@@ -259,10 +259,10 @@ function App() {
                 e(Card, { talk: t, speaker: t.speaker })
               )
             )
-          )
+            )
         )
       : e(TalkList, { items: filtered })
-  );
+        );
 }
 
 // Expand the Telegram WebApp if running inside Telegram
