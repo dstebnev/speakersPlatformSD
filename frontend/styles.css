@@ -12,7 +12,9 @@ body {
   background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
   background-attachment: fixed;
   min-height: 100vh;
-  overflow: hidden;
+  /* allow scrolling so content isn't hidden behind the fixed nav */
+  overflow-x: hidden;
+  overflow-y: auto;
   color: #fff;
 }
 
