@@ -197,6 +197,7 @@ form select {
   );
   min-height: 40vh;
   transition: top 0.3s ease, bottom 0.3s ease, border-radius 0.3s ease;
+  z-index: 20;
 }
 
 .bottom-sheet.expanded {
