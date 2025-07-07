@@ -19,7 +19,7 @@
   <div id="bottom-sheet-root"></div>
   <nav class="bottom-nav">
     <a href="/" class="active" title="Выступления">🎤</a>
-    <a href="/stats" title="Статистика">📊</a>
+    <a href="/stats" id="stats-link" title="Статистика">📊</a>
     <a href="/admin" id="admin-link" title="Админка">⚙️</a>
     <a href="/profile" title="Личный кабинет">👤</a>
   </nav>
@@ -35,6 +35,7 @@
       const isAdmin = user && cfg.admins.includes(user.username);
       if (cfg.mode === 'prod' && !isAdmin) {
         document.getElementById('admin-link')?.remove();
+        document.getElementById('stats-link')?.remove();
       }
       tg?.expand();
     })();
