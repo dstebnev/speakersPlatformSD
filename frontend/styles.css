@@ -24,6 +24,12 @@ body {
   color: #fff;
 }
 
+/* Light theme for statistics page */
+.stats-page {
+  background: #f5f5f5;
+  color: #000;
+}
+
 #profile-root {
   padding: 10px;
   height: 100%;
