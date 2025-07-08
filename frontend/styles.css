@@ -34,7 +34,8 @@ body {
 
 body.admin-page,
 html.admin-page {
-  overflow-y: auto !important;
+  /* Prevent body scrolling; admin-content handles it */
+  overflow-y: hidden;
   height: 100%;
 }
 
