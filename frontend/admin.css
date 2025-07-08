@@ -20,6 +20,7 @@
   flex: 1;
   padding: 10px;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* account for safe areas and fixed bottom navigation */
   padding-bottom: calc(70px + env(safe-area-inset-bottom));
