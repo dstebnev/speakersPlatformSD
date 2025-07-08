@@ -27,7 +27,7 @@
   padding: 10px;
   overflow-y: auto;
   /* allow slight pull-down to avoid Telegram browser minimization */
-  min-height: calc(100vh - var(--bottom-nav-height));
+  height: calc(100vh - var(--bottom-nav-height));
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* account for safe areas and fixed bottom navigation */
