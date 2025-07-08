@@ -44,10 +44,8 @@
         document.getElementById('stats-link')?.remove();
       }
       const tryExpand = () => {
-        if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
           tg.ready();
           tg.expand();
-        }
       };
       if (document.readyState === 'loading') {
         window.addEventListener('DOMContentLoaded', tryExpand);
