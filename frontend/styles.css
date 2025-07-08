@@ -19,6 +19,8 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  /* Prevent pull-down gesture from closing Telegram browser */
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -36,6 +38,7 @@ body {
   color: #000;
   height: 100%;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -43,6 +46,7 @@ body {
   padding: 10px;
   height: 100%;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* reserve space for bottom navigation and safe areas */
   padding-bottom: calc(
@@ -54,6 +58,7 @@ body {
   padding: 10px;
   height: 100%;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* space for bottom nav, bottom sheet and safe areas */
   padding-bottom: calc(150px + env(safe-area-inset-bottom));
