@@ -10,9 +10,10 @@ export function BottomSheet({ talk, speaker }) {
 
   React.useEffect(() => {
     const nav = document.querySelector('.bottom-nav');
-    if (nav) nav.classList.add('disabled');
-    return () => nav && nav.classList.remove('disabled');
-  }, []);
+    if (!nav) return;
+    nav.classList.toggle('disabled', expanded);
+    return () => nav.classList.remove('disabled');
+  }, [expanded]);
 
   React.useEffect(() => {
     document.body.classList.toggle('sheet-expanded', expanded);
