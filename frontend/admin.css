@@ -6,7 +6,10 @@
   min-height: 100vh;
   background: #f5f5f5;
   color: #000;
-  overflow: hidden;
+  /* allow scrolling on long forms */
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-page header {
