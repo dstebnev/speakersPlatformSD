@@ -21,6 +21,7 @@ function AdminApp() {
   useEffect(() => {
     const load = async () => {
         const tg = window.Telegram?.WebApp;
+        tg?.ready();
         const user = tg?.initDataUnsafe?.user;
         if (user) {
           setUsername(user.username);
@@ -31,6 +32,7 @@ function AdminApp() {
           setAuthorized(ALLOWED_USERS.includes(user.username));
         }
         if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+          tg.ready();
           tg.expand();
         }
       try {

@@ -23,6 +23,7 @@
     (function() {
       const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
       const tg = window.Telegram?.WebApp;
+      tg?.ready();
       const user = tg?.initDataUnsafe?.user;
       if (user && user.username) {
         document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
@@ -34,6 +35,7 @@
       }
       const tryExpand = () => {
         if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+          tg.ready();
           tg.expand();
         }
       };
