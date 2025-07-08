@@ -161,8 +161,18 @@ function AdminApp() {
   return e('div', null,
     error && e('div', { className: 'error' }, error),
     e('div', { className: 'admin-tabs' },
-      e('button', { onClick: () => setTab('speakers') }, 'Спикеры'),
-      e('button', { onClick: () => setTab('talks') }, 'Выступления')
+      e('button', {
+        onClick: () => {
+          setEditingSpeaker(null);
+          setTab('speakers');
+        }
+      }, 'Спикеры'),
+      e('button', {
+        onClick: () => {
+          setEditingTalk(null);
+          setTab('talks');
+        }
+      }, 'Выступления')
     ),
     tab === 'speakers' ? speakerSection : talkSection
   );
