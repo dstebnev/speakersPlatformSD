@@ -21,6 +21,7 @@
 
 .admin-content {
   flex: 1;
+  height: 100%;
   padding: 10px;
   overflow-y: auto;
   /* allow slight pull-down to avoid Telegram browser minimization */
