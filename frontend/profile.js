@@ -3,8 +3,9 @@ const { useEffect, useState } = React;
 
 function ProfileApp() {
   const [user, setUser] = useState(null);
-    useEffect(() => {
+  useEffect(() => {
     const tg = window.Telegram?.WebApp;
+    tg?.ready();
     setUser(tg?.initDataUnsafe?.user || null);
     if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
       tg.expand();

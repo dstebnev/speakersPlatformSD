@@ -190,6 +190,7 @@ function App() {
 // Expand the Telegram WebApp on mobile if running inside Telegram
 const tryExpand = () => {
   const tg = window.Telegram?.WebApp;
+  tg?.ready();
   if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
     tg.expand();
   }
