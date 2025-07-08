@@ -31,7 +31,9 @@
 /* Forms and lists layout */
 .admin-form,
 .admin-list {
-  /* scrolling handled by .admin-content */
+  /* enable independent scrolling for long lists and forms */
+  overflow-y: auto;
+  max-height: calc(100vh - 200px - env(safe-area-inset-bottom));
 }
 
 .admin-form {
