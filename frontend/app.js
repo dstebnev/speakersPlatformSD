@@ -191,7 +191,7 @@ function App() {
 const tryExpand = () => {
   const tg = window.Telegram?.WebApp;
   tg?.ready();
-  if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+  if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
     tg.expand();
   }
 };

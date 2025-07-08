@@ -31,7 +31,7 @@ function AdminApp() {
         } else if (user) {
           setAuthorized(ALLOWED_USERS.includes(user.username));
         }
-        if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+        if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
           tg.ready();
           tg.expand();
         }
