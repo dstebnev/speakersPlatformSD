@@ -3,23 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Speakers Platform</title>
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <title>Statistics</title>
   <link rel="stylesheet" href="styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <!-- React and dependencies from CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Telegram WebApp JS to access Telegram features -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <div id="root"></div>
-  <div id="bottom-sheet-root"></div>
+<body class="stats-page">
+  <div class="stats-wrapper">
+    <div class="chart-block">
+      <h3 class="chart-title">Доклады по направлениям</h3>
+      <canvas id="talks-chart"></canvas>
+    </div>
+    <div class="chart-block">
+      <h3 class="chart-title">Активные спикеры</h3>
+      <canvas id="speakers-chart"></canvas>
+    </div>
+  </div>
   <nav class="bottom-nav">
-    <a href="/" class="active" title="Выступления">🎤</a>
-    <a href="/stats" id="stats-link" title="Статистика">📊</a>
+    <a href="/" title="Выступления">🎤</a>
+    <a href="/stats" id="stats-link" class="active" title="Статистика">📊</a>
     <a href="/admin" id="admin-link" title="Админка">⚙️</a>
     <a href="/profile" title="Личный кабинет">👤</a>
   </nav>
@@ -49,6 +54,6 @@
       }
     })();
   </script>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="stats.js"></script>
 </body>
 </html>

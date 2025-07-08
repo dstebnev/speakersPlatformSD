@@ -20,6 +20,7 @@
   <main id="admin-root" class="admin-content"></main>
   <nav class="bottom-nav">
     <a href="/" title="Выступления">🎤</a>
+    <a href="/stats" id="stats-link" title="Статистика">📊</a>
     <a href="/admin" id="admin-link" class="active" title="Админка">⚙️</a>
     <a href="/profile" title="Личный кабинет">👤</a>
   </nav>
@@ -28,14 +29,27 @@
     (function() {
       const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
       const tg = window.Telegram?.WebApp;
+      tg?.ready();
       const user = tg?.initDataUnsafe?.user;
+      if (user && user.username) {
+        document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
+      }
       const isAdmin = user && cfg.admins.includes(user.username);
-      if (cfg.mode === 'prod' && !isAdmin) {
+      if (cfg.mode !== 'debug' && !isAdmin) {
         document.getElementById('admin-link')?.remove();
+        document.getElementById('stats-link')?.remove();
         document.querySelector('main.admin-content').innerHTML = 'Доступ запрещён';
         return;
       }
-      tg?.expand();
+      const tryExpand = () => {
+          tg.ready();
+          tg.expand();
+      };
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', tryExpand);
+      } else {
+        tryExpand();
+      }
     })();
   </script>
   <script type="module" src="admin.js"></script>

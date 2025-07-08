@@ -5,8 +5,11 @@ function ProfileApp() {
   const [user, setUser] = useState(null);
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
+    tg?.ready();
     setUser(tg?.initDataUnsafe?.user || null);
-    tg?.expand();
+    if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+      tg.expand();
+    }
   }, []);
 
   if (!user) {

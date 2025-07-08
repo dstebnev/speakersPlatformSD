@@ -167,6 +167,18 @@ def config_js():
     )
     return Response(js, mimetype='application/javascript')
 
+
+def is_admin_request(req: request) -> bool:
+    """Check if the current request belongs to an admin user."""
+    if MODE == 'debug':
+        return True
+    username = (
+        req.cookies.get('username')
+        or req.headers.get('X-Username')
+        or req.args.get('u')
+    )
+    return username in ADMIN_USERNAMES
+
 @app.route('/')
 def index():
     return send_from_directory('frontend', 'index.html')
@@ -174,12 +186,21 @@ def index():
 
 @app.route('/admin')
 def admin_page():
+    if not is_admin_request(request):
+        return abort(403)
     return send_from_directory('frontend', 'admin.html')
 
 
 @app.route('/profile')
 def profile_page():
     return send_from_directory('frontend', 'profile.html')
+
+
+@app.route('/stats')
+def stats_page():
+    if not is_admin_request(request):
+        return abort(403)
+    return send_from_directory('frontend', 'stats.html')
 
 
 @app.route('/<path:path>')

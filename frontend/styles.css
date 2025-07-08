@@ -3,14 +3,24 @@
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
   --speaker-height: 50vh;
-  /* Height of the fixed bottom navigation */
-  --bottom-nav-height: 70px;
+  /* Height of the fixed bottom navigation. */
+  --bottom-nav-height: 64px;
+  /* Approximate height of the sheet header + handle */
+  --sheet-header-height: 72px;
+}
+
+/* When the bottom sheet is expanded, shrink and raise speaker images */
+body.sheet-expanded {
+  --speaker-top: 4px;
+  --speaker-height: 30vh;
 }
 
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  /* Prevent pull-down gesture from closing Telegram browser */
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -22,19 +32,46 @@ body {
   color: #fff;
 }
 
+body.admin-page,
+html.admin-page {
+  /* Prevent body scrolling; admin-content handles it */
+  overflow-y: hidden;
+  height: 100%;
+}
+
+/* Light theme for statistics page */
+.stats-page {
+  background: #f5f5f5;
+  color: #000;
+  height: 100%;
+  /* allow slight pull-down to avoid Telegram browser minimization */
+  min-height: calc(100% + 20px);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 #profile-root {
   padding: 10px;
   height: 100%;
+  /* allow slight pull-down to avoid Telegram browser minimization */
+  min-height: calc(100% + 20px);
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* reserve space for bottom navigation and safe areas */
-  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom)
+  );
 }
 
 #root {
   padding: 10px;
   height: 100%;
+  /* allow slight pull-down to avoid Telegram browser minimization */
+  min-height: calc(100% + 20px);
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* space for bottom nav, bottom sheet and safe areas */
   padding-bottom: calc(150px + env(safe-area-inset-bottom));
@@ -56,6 +93,8 @@ body {
   height: 200px;
   border-radius: 12px;
   object-fit: cover;
+  /* Smoothly animate position and size when the active slide changes */
+  transition: top 0.3s, left 0.3s, height 0.3s, transform 0.3s;
 }
 
 .card-title {
@@ -65,11 +104,17 @@ body {
 }
 
 .filters {
-  margin-bottom: 20px;
+  position: fixed;
+  top: 60px;
+  left: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  border-radius: 12px;
   display: none;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
+  z-index: 15;
 }
 .filters.show {
   display: flex;
@@ -100,31 +145,44 @@ body {
   z-index: 2;
 }
 
+body.sheet-expanded .swiper-slide-active {
+  transform: translateY(-20px) scale(1);
+}
+
+body.sheet-expanded .swiper-slide-prev,
+body.sheet-expanded .swiper-slide-next {
+  transform: translateY(0) scale(0.7);
+}
+
 .swiper-slide-active .card img {
   position: absolute;
   top: var(--speaker-top);
   left: 50%;
   transform: translateX(-50%);
   height: var(--speaker-height);
-  z-index: 2;
+  /* keep the active speaker photo above the bottom sheet */
+  z-index: 25;
 }
 
 .swiper-slide-prev .card img,
 .swiper-slide-next .card img {
   position: absolute;
-  top: var(--speaker-top);
-  height: calc(var(--speaker-height) * 0.8);
-  z-index: 1;
-}
-
-.swiper-slide-prev .card img {
-  left: 70%;
+  /* Slightly lower the neighbouring speakers */
+  top: calc(var(--speaker-top) + 20px);
+  height: calc(var(--speaker-height) * 0.55);
+  /* neighbour speakers should still stay above the sheet */
+  z-index: 15;
+  margin-top: 25%;
+  transform: translateX(-50%);
   opacity: 0.8;
 }
 
 .swiper-slide-next .card img {
-  right: 70%;
-  opacity: 0.8;
+  left: 14%;
+}
+
+.swiper-slide-prev .card img {
+  left: 93%;
 }
 
 button {
@@ -164,6 +222,7 @@ form select {
   border: 1px solid #ccc;
 }
 
+
 .bottom-sheet {
   position: fixed;
   top: calc(var(--speaker-top) + var(--speaker-height));
@@ -175,15 +234,40 @@ form select {
   padding: 24px;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
-  max-height: calc(100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  max-height: calc(
+    100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
+  );
   min-height: 40vh;
+  transition: top 0.3s ease, bottom 0.3s ease, border-radius 0.3s ease;
+  z-index: 20;
+}
+
+.bottom-sheet.expanded {
+  top: 20vh;
+  bottom: 0;
+  max-height: none;
+  height: calc(80vh - env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
 }
 
 .bottom-sheet .sheet-content {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  max-height: 100%;
-  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  max-height: calc(
+    100vh - var(--sheet-header-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
+  );
+  /* leave room for the fixed action button */
+  padding-bottom: calc(
+    var(--bottom-nav-height) + 80px + env(safe-area-inset-bottom)
+  );
+  flex: 1;
+}
+
+.bottom-sheet.expanded .sheet-content {
+  max-height: none;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
 .bottom-sheet .handle {
@@ -192,6 +276,17 @@ form select {
   background: #aaa;
   border-radius: 2px;
   margin: 0 auto 8px;
+}
+
+.bottom-sheet .handle.arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #aaa;
+  background: none;
+  border-radius: 0;
+  cursor: pointer;
 }
 
 .bottom-sheet h3 {
@@ -212,7 +307,6 @@ form select {
   display: inline-block;
   margin-top: 8px;
 }
-
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -225,6 +319,11 @@ form select {
   border-top: 1px solid rgba(255,255,255,0.3);
   padding: 10px 0;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 30;
+}
+
+.bottom-nav.disabled {
+  pointer-events: none;
 }
 
 .bottom-nav a {
@@ -302,7 +401,9 @@ form select {
   padding: 0;
   margin-top: 60px;
   /* avoid overlap with the fixed bottom navigation */
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom)
+  );
 }
 
 .talk-list li {
@@ -330,4 +431,34 @@ form select {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Statistics page */
+.stats-wrapper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* allow slight pull-down to avoid Telegram browser minimization */
+  min-height: calc(100% + 20px);
+  /* leave space for bottom nav */
+  padding-bottom: calc(20px + var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+.chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart-title {
+  margin: 0;
+  text-align: center;
+}
+
+.stats-wrapper canvas {
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
 }
