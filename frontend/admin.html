@@ -40,7 +40,16 @@
         document.querySelector('main.admin-content').innerHTML = 'Доступ запрещён';
         return;
       }
-      tg?.expand();
+      const tryExpand = () => {
+        if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+          tg.expand();
+        }
+      };
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', tryExpand);
+      } else {
+        tryExpand();
+      }
     })();
   </script>
   <script type="module" src="admin.js"></script>

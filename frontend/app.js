@@ -187,7 +187,17 @@ function App() {
         );
 }
 
-// Expand the Telegram WebApp if running inside Telegram
-window.Telegram?.WebApp?.expand();
+// Expand the Telegram WebApp on mobile if running inside Telegram
+const tryExpand = () => {
+  const tg = window.Telegram?.WebApp;
+  if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+    tg.expand();
+  }
+};
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', tryExpand);
+} else {
+  tryExpand();
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));

@@ -20,17 +20,19 @@ function AdminApp() {
 
   useEffect(() => {
     const load = async () => {
-      const tg = window.Telegram?.WebApp;
-      const user = tg?.initDataUnsafe?.user;
-      if (user) {
-        setUsername(user.username);
-      }
-      if (APP_CFG.mode === 'debug') {
-        setAuthorized(true);
-      } else if (user) {
-        setAuthorized(ALLOWED_USERS.includes(user.username));
-      }
-      tg?.expand();
+        const tg = window.Telegram?.WebApp;
+        const user = tg?.initDataUnsafe?.user;
+        if (user) {
+          setUsername(user.username);
+        }
+        if (APP_CFG.mode === 'debug') {
+          setAuthorized(true);
+        } else if (user) {
+          setAuthorized(ALLOWED_USERS.includes(user.username));
+        }
+        if (tg && tg.initData && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
+          tg.expand();
+        }
       try {
         const [speakersRes, talksRes] = await Promise.all([
           fetch('/api/speakers'),
