@@ -111,3 +111,15 @@
   margin-bottom: 10px;
 }
 
+.admin-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-tags label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
