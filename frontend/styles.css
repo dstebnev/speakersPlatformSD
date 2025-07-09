@@ -172,8 +172,8 @@ body.sheet-expanded .swiper-slide-next {
   height: calc(var(--speaker-height) * 0.55);
   /* neighbour speakers should still stay above the sheet */
   z-index: 15;
-  margin-top: 25%;
-  transform: translateX(-50%);
+  /* maintain vertical offset using transform instead of margin */
+  transform: translate(-50%, 25%);
   opacity: 0.8;
 }
 
