@@ -18,8 +18,8 @@ function applySlideStyles(swiper) {
     const abs = Math.abs(prog);
     const left =
       prog > 0
-        ? 50 + (14 - 50) * prog
-        : 50 + (93 - 50) * -prog;
+        ? 50 + (30 - 50) * prog
+        : 50 + (70 - 50) * -prog;
     const scale = 1.3 - 0.45 * abs;
     const heightFactor = 1 - 0.45 * abs;
     const opacity = 1 - 0.3 * abs;

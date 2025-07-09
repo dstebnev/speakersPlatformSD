@@ -178,11 +178,11 @@ body.sheet-expanded .swiper-slide-next {
 }
 
 .swiper-slide-next .card img {
-  left: 14%;
+  left: 30%;
 }
 
 .swiper-slide-prev .card img {
-  left: 93%;
+  left: 70%;
 }
 
 button {
