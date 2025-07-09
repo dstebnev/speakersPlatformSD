@@ -2,7 +2,7 @@
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
-  --speaker-height: 50vh;
+  --speaker-height: 40vh;
   /* Height of the fixed bottom navigation. */
   --bottom-nav-height: 64px;
   /* Approximate height of the sheet header + handle */
@@ -12,7 +12,7 @@
 /* When the bottom sheet is expanded, shrink and raise speaker images */
 body.sheet-expanded {
   --speaker-top: 4px;
-  --speaker-height: 30vh;
+  --speaker-height: 24vh;
 }
 
 html, body {
