@@ -93,8 +93,8 @@ html.admin-page {
   height: 200px;
   border-radius: 12px;
   object-fit: cover;
-  /* Smoothly animate position and size when the active slide changes */
-  transition: top 0.3s, left 0.3s, height 0.3s, transform 0.3s;
+  /* Smoothly animate position, size and opacity when the active slide changes */
+  transition: top 0.5s ease, left 0.5s ease, height 0.5s ease, transform 0.5s ease, opacity 0.5s ease;
 }
 
 .card-title {
@@ -129,7 +129,7 @@ html.admin-page {
 
 .swiper-slide {
   overflow: visible;
-  transition: transform 0.3s, filter 0.3s;
+  transition: transform 0.5s ease, filter 0.5s ease, opacity 0.5s ease;
 }
 
 .swiper-slide-prev,
