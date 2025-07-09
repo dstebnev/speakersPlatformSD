@@ -6,6 +6,7 @@ from uuid import uuid4
 import datetime
 from io import BytesIO
 from PIL import Image
+import storage
 
 load_dotenv(override=True)
 
@@ -15,25 +16,10 @@ app = Flask(__name__)
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/data/photos')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DB_PATH = os.getenv('DB_PATH', '/data/db.json')
-
 MODE = os.getenv('MODE', 'prod').lower()
 ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '').split(',') if u.strip()]
 
-
-def read_db():
-    if not os.path.exists(DB_PATH):
-        return {'speakers': [], 'talks': []}
-    try:
-        with open(DB_PATH, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {'speakers': [], 'talks': []}
-
-
-def write_db(data):
-    with open(DB_PATH, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+storage.init_db()
 
 
 def calc_status(date_str: str) -> str:
@@ -46,72 +32,66 @@ def calc_status(date_str: str) -> str:
 
 @app.route('/api/speakers', methods=['GET', 'POST'])
 def speakers():
-    data = read_db()
     if request.method == 'GET':
-        return jsonify(data['speakers'])
+        return jsonify(storage.all_speakers())
 
     body = request.get_json() or {}
     body.setdefault('photoUrl', '/default_icon.svg')
     new_speaker = {'id': str(uuid4()), **body}
-    data['speakers'].append(new_speaker)
-    write_db(data)
+    storage.add_speaker(new_speaker)
     return jsonify(new_speaker)
 
 
 @app.route('/api/speakers/<id>', methods=['PUT', 'DELETE'])
 def speaker_by_id(id):
-    data = read_db()
-    speakers = data['speakers']
-    idx = next((i for i, s in enumerate(speakers) if s['id'] == id), None)
-    if idx is None:
-        return abort(404)
-
     if request.method == 'DELETE':
-        speakers.pop(idx)
-        write_db(data)
+        ok = storage.delete_speaker(id)
+        if not ok:
+            return abort(404)
         return jsonify({'ok': True})
 
     body = request.get_json() or {}
     if 'photoUrl' not in body:
         body['photoUrl'] = '/default_icon.svg'
-    speakers[idx].update(body)
-    write_db(data)
-    return jsonify(speakers[idx])
+    updated = storage.update_speaker(id, body)
+    if updated is None:
+        return abort(404)
+    return jsonify(updated)
 
 
 @app.route('/api/talks', methods=['GET', 'POST'])
 def talks():
-    data = read_db()
     if request.method == 'GET':
-        talks = [ { **t, 'status': calc_status(t.get('date', '')) } for t in data['talks'] ]
+        talks = [
+            {**t, 'status': calc_status(t.get('date', ''))}
+            for t in storage.all_talks()
+        ]
         return jsonify(talks)
 
     body = request.get_json() or {}
     new_talk = {'id': str(uuid4()), **body}
     new_talk['status'] = calc_status(new_talk.get('date', ''))
-    data['talks'].append(new_talk)
-    write_db(data)
+    storage.add_talk(new_talk)
     return jsonify(new_talk)
 
 
 @app.route('/api/talks/<id>', methods=['PUT', 'DELETE'])
 def talk_by_id(id):
-    data = read_db()
-    talks = data['talks']
-    idx = next((i for i, t in enumerate(talks) if t['id'] == id), None)
-    if idx is None:
-        return abort(404)
-
     if request.method == 'DELETE':
-        talks.pop(idx)
-        write_db(data)
+        ok = storage.delete_talk(id)
+        if not ok:
+            return abort(404)
         return jsonify({'ok': True})
 
+    existing = storage.get_talk(id)
+    if existing is None:
+        return abort(404)
+
     body = request.get_json() or {}
-    talks[idx].update(body)
-    talks[idx]['status'] = calc_status(talks[idx].get('date', ''))
-    write_db(data)
-    return jsonify(talks[idx])
+    existing.update(body)
+    existing['status'] = calc_status(existing.get('date', ''))
+    storage.save_talk(existing)
+    return jsonify(existing)
 
 
 @app.route('/api/upload', methods=['POST'])
