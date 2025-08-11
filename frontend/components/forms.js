@@ -54,7 +54,9 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
 
 export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const [title, setTitle] = useState(initial.title || '');
-  const [speakerIds, setSpeakerIds] = useState(initial.speakerIds || (speakers[0]?.id ? [speakers[0]?.id] : []));
+  // Store selected speaker IDs. Default to an empty array so the user must
+  // explicitly pick one or more speakers.
+  const [speakerIds, setSpeakerIds] = useState(initial.speakerIds || []);
   const [description, setDescription] = useState(initial.description || '');
   const [eventName, setEventName] = useState(initial.eventName || '');
   const [direction, setDirection] = useState(initial.direction || 'frontend');
