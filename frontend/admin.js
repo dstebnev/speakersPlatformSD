@@ -141,21 +141,24 @@ function AdminApp() {
     e(TalkForm, { initial: editingTalk, speakers, onSubmit: saveTalk, onCancel: () => setEditingTalk(null) }) :
     e('div', { className: 'admin-list' },
       e('button', { onClick: () => setEditingTalk({}) }, 'Добавить выступление'),
-      talks.map(t => e('div', { key: t.id, className: 'admin-list-item' },
-        e('span', { className: 'admin-item-name' }, `${t.title} (${speakers.find(s => s.id === t.speakerId)?.name || ''})`),
-        e('div', { className: 'admin-actions' },
-          e('button', {
-            className: 'icon-btn',
-            title: 'Редактировать',
-            onClick: () => setEditingTalk(t)
-          }, '✏️'),
-          e('button', {
-            className: 'icon-btn',
-            title: 'Удалить',
-            onClick: () => window.confirm('Удалить выступление?') && deleteTalk(t.id)
-          }, '🗑️')
-        )
-      ))
+      talks.map(t => {
+        const names = speakers.filter(s => (t.speakerIds || []).includes(s.id)).map(s => s.name).join(', ');
+        return e('div', { key: t.id, className: 'admin-list-item' },
+          e('span', { className: 'admin-item-name' }, `${t.title} (${names})`),
+          e('div', { className: 'admin-actions' },
+            e('button', {
+              className: 'icon-btn',
+              title: 'Редактировать',
+              onClick: () => setEditingTalk(t)
+            }, '✏️'),
+            e('button', {
+              className: 'icon-btn',
+              title: 'Удалить',
+              onClick: () => window.confirm('Удалить выступление?') && deleteTalk(t.id)
+            }, '🗑️')
+          )
+        );
+      })
     );
 
   return e('div', null,
