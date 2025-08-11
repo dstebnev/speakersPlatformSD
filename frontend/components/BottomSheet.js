@@ -67,7 +67,17 @@ export function BottomSheet({ talk, speakers = [] }) {
       'div',
       { className: 'sheet-content' },
       e('h3', null, talk.title),
-      e('div', { className: 'sheet-speaker' }, speakers.map(s => s.name).join(', ')),
+      e(
+        'div',
+        { className: 'sheet-speaker' },
+        speakers.map((s, idx) =>
+          e(
+            'span',
+            { key: s.id || idx },
+            s.name + (idx < speakers.length - 1 ? ', ' : '')
+          )
+        )
+      ),
       e('div', null, talk.description),
       e('div', { className: 'sheet-event' }, talk.eventName),
       link
