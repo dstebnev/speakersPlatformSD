@@ -22,7 +22,7 @@ const TEST_SPEAKERS = [
 const TEST_TALKS = [
   {
     id: '1',
-    speakerId: '1',
+    speakerIds: ['1'],
     title: 'React Basics',
     description: 'Intro to React',
     eventName: 'JS Conf',
@@ -33,7 +33,7 @@ const TEST_TALKS = [
   },
   {
     id: '2',
-    speakerId: '1',
+    speakerIds: ['1'],
     title: 'Past Talk',
     description: 'Something done',
     eventName: 'Old Conf',
@@ -68,7 +68,7 @@ function App() {
         ]);
         const merged = talks.map(t => ({
           ...t,
-          speaker: speakers.find(s => s.id === t.speakerId),
+          speakers: speakers.filter(s => (t.speakerIds || []).includes(s.id)),
         }));
         setTalks(merged);
       } catch (err) {
@@ -93,7 +93,7 @@ function App() {
       return;
     }
     const item = filtered[activeIndex];
-    sheetRoot.render(e(BottomSheet, { talk: item, speaker: item?.speaker }));
+    sheetRoot.render(e(BottomSheet, { talk: item, speakers: item?.speakers }));
   }, [activeIndex, filtered, viewMode]);
 
   useEffect(() => {
@@ -178,7 +178,7 @@ function App() {
                   key: t.id,
                   onClick: () => {},
                 },
-                e(Card, { talk: t, speaker: t.speaker })
+                e(Card, { talk: t, speakers: t.speakers })
               )
             )
             )

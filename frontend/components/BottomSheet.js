@@ -1,7 +1,7 @@
 import { ACCENTS } from '../constants.js';
 const e = React.createElement;
 
-export function BottomSheet({ talk, speaker }) {
+export function BottomSheet({ talk, speakers = [] }) {
   if (!talk) return null;
 
   const accent = ACCENTS[talk.direction] || '#03a9f4';
@@ -67,7 +67,7 @@ export function BottomSheet({ talk, speaker }) {
       'div',
       { className: 'sheet-content' },
       e('h3', null, talk.title),
-      e('div', { className: 'sheet-speaker' }, speaker?.name || ''),
+      e('div', { className: 'sheet-speaker' }, speakers.map(s => s.name).join(', ')),
       e('div', null, talk.description),
       e('div', { className: 'sheet-event' }, talk.eventName),
       link

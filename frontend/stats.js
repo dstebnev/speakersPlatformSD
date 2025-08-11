@@ -29,7 +29,7 @@ function renderCharts(speakers, talks) {
   talks.forEach(t => {
     if (talkCount[t.direction] !== undefined) {
       talkCount[t.direction]++;
-      speakerSets[t.direction].add(t.speakerId);
+      (t.speakerIds || []).forEach(id => speakerSets[t.direction].add(id));
     }
   });
 

@@ -83,10 +83,18 @@ def speaker_by_id(id):
 def talks():
     data = read_db()
     if request.method == 'GET':
-        talks = [ { **t, 'status': calc_status(t.get('date', '')) } for t in data['talks'] ]
+        talks = []
+        for t in data['talks']:
+            item = {**t}
+            if 'speakerId' in item:
+                item['speakerIds'] = [item.pop('speakerId')]
+            item['status'] = calc_status(item.get('date', ''))
+            talks.append(item)
         return jsonify(talks)
 
     body = request.get_json() or {}
+    if 'speakerId' in body:
+        body['speakerIds'] = [body.pop('speakerId')]
     new_talk = {'id': str(uuid4()), **body}
     new_talk['status'] = calc_status(new_talk.get('date', ''))
     data['talks'].append(new_talk)
@@ -108,7 +116,11 @@ def talk_by_id(id):
         return jsonify({'ok': True})
 
     body = request.get_json() or {}
+    if 'speakerId' in body:
+        body['speakerIds'] = [body.pop('speakerId')]
     talks[idx].update(body)
+    if 'speakerId' in talks[idx]:
+        talks[idx]['speakerIds'] = [talks[idx].pop('speakerId')]
     talks[idx]['status'] = calc_status(talks[idx].get('date', ''))
     write_db(data)
     return jsonify(talks[idx])
