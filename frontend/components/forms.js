@@ -123,14 +123,26 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       null,
       e('label', null, 'Спикеры'),
       e(
-        'select',
-        {
-          multiple: true,
-          value: speakerIds,
-          onChange: ev => setSpeakerIds(Array.from(ev.target.selectedOptions).map(o => o.value)),
-          required: true,
-        },
-        speakers.map(s => e('option', { key: s.id, value: s.id }, s.name))
+        'div',
+        null,
+        speakers.map(s =>
+          e(
+            'label',
+            { key: s.id },
+            e('input', {
+              type: 'checkbox',
+              checked: speakerIds.includes(s.id),
+              onChange: ev => {
+                if (ev.target.checked) {
+                  setSpeakerIds([...speakerIds, s.id]);
+                } else {
+                  setSpeakerIds(speakerIds.filter(id => id !== s.id));
+                }
+              },
+            }),
+            s.name
+          )
+        )
       )
     ),
     e(
