@@ -83,7 +83,9 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
 
 export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const [title, setTitle] = useState(initial.title || '');
-  const [speakerId, setSpeakerId] = useState(initial.speakerId || (speakers[0]?.id || ''));
+  // Store selected speaker IDs. Default to an empty array so the user must
+  // explicitly pick one or more speakers.
+  const [speakerIds, setSpeakerIds] = useState(initial.speakerIds || []);
   const [description, setDescription] = useState(initial.description || '');
   const [eventName, setEventName] = useState(initial.eventName || '');
   const [direction, setDirection] = useState(initial.direction || 'frontend');
@@ -95,14 +97,14 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
 
   const handleSubmit = ev => {
     ev.preventDefault();
-    if (!speakerId || !title.trim() || !eventName.trim() || !direction || !date) {
+    if (!speakerIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
       alert('Заполните обязательные поля');
       return;
     }
     onSubmit({
       ...initial,
       title,
-      speakerId,
+      speakerIds,
       description,
       eventName,
       direction,
@@ -119,10 +121,15 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     e(
       'div',
       null,
-      e('label', null, 'Спикер'),
+      e('label', null, 'Спикеры'),
       e(
         'select',
-        { value: speakerId, onChange: ev => setSpeakerId(ev.target.value), required: true },
+        {
+          multiple: true,
+          value: speakerIds,
+          onChange: ev => setSpeakerIds(Array.from(ev.target.selectedOptions).map(o => o.value)),
+          required: true,
+        },
         speakers.map(s => e('option', { key: s.id, value: s.id }, s.name))
       )
     ),

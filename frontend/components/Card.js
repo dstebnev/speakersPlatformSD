@@ -1,9 +1,20 @@
 const e = React.createElement;
 
-export function Card({ talk, speaker }) {
+export function Card({ talk, speakers = [] }) {
   return e(
     'div',
     { className: 'card' },
-    e('img', { src: speaker.photoUrl || '/default_icon.svg', alt: speaker.name })
+    e(
+      'div',
+      { className: 'avatars' },
+      speakers.map((s, idx) =>
+        e('img', {
+          key: idx,
+          className: 'avatar',
+          src: s.photoUrl || '/default_icon.svg',
+          alt: s.name || '',
+        })
+      )
+    )
   );
 }

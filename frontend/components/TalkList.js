@@ -9,7 +9,7 @@ const formatDate = d => {
   return `${dd}/${mm}/${yy}`;
 };
 
-export function TalkList({ items }) {
+export function TalkList({ items, speakers = [] }) {
   return e(
     'ul',
     { className: 'talk-list' },
@@ -18,13 +18,17 @@ export function TalkList({ items }) {
         t.status === 'past'
           ? e('a', { href: t.recordingLink, target: '_blank' }, 'Запись')
           : e('a', { href: t.registrationLink, target: '_blank' }, 'Регистрация');
+      const speakerNames = speakers
+        .filter(s => (t.speakerIds || []).includes(s.id))
+        .map(s => s.name)
+        .join(', ');
       return e(
         'li',
         { key: t.id },
         e(
           'div',
           null,
-          e('span', { className: 'list-speaker' }, t.speaker?.name || ''),
+          e('span', { className: 'list-speaker' }, speakerNames),
           ' — ',
           e('span', { className: 'list-title' }, t.title)
         ),
