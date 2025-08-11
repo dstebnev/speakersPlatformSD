@@ -63,7 +63,7 @@ def speaker_by_id(id):
 def talks():
     if request.method == 'GET':
         talks = []
-        for t in data['talks']:
+        for t in storage.all_talks():
             item = {**t}
             if 'speakerId' in item:
                 item['speakerIds'] = [item.pop('speakerId')]
@@ -95,12 +95,14 @@ def talk_by_id(id):
     body = request.get_json() or {}
     if 'speakerId' in body:
         body['speakerIds'] = [body.pop('speakerId')]
-    talks[idx].update(body)
-    if 'speakerId' in talks[idx]:
-        talks[idx]['speakerIds'] = [talks[idx].pop('speakerId')]
-    talks[idx]['status'] = calc_status(talks[idx].get('date', ''))
-    write_db(data)
-    return jsonify(talks[idx])
+    updated = storage.update_talk(id, body)
+    if updated is None:
+        return abort(404)
+    if 'speakerId' in updated:
+        updated['speakerIds'] = [updated.pop('speakerId')]
+    updated['status'] = calc_status(updated.get('date', ''))
+    storage.save_talk(updated)
+    return jsonify(updated)
 
 
 @app.route('/api/upload', methods=['POST'])
