@@ -87,14 +87,16 @@ html.admin-page {
   animation: fadeInScale 0.5s forwards;
 }
 
-.card img {
-  width: auto;
-  max-width: none;
-  height: 200px;
-  border-radius: 12px;
+.card .avatars {
+  display: flex;
+  gap: 8px;
+}
+
+.card .avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   object-fit: cover;
-  /* Smoothly animate position and size when the active slide changes */
-  transition: top 0.3s, left 0.3s, height 0.3s, transform 0.3s;
 }
 
 .card-title {
@@ -152,37 +154,6 @@ body.sheet-expanded .swiper-slide-active {
 body.sheet-expanded .swiper-slide-prev,
 body.sheet-expanded .swiper-slide-next {
   transform: translateY(0) scale(0.7);
-}
-
-.swiper-slide-active .card img {
-  position: absolute;
-  top: var(--speaker-top);
-  left: 50%;
-  transform: translateX(-50%);
-  height: var(--speaker-height);
-  /* keep the active speaker photo above the bottom sheet */
-  z-index: 25;
-}
-
-.swiper-slide-prev .card img,
-.swiper-slide-next .card img {
-  position: absolute;
-  /* Slightly lower the neighbouring speakers */
-  top: calc(var(--speaker-top) + 20px);
-  height: calc(var(--speaker-height) * 0.55);
-  /* neighbour speakers should still stay above the sheet */
-  z-index: 15;
-  margin-top: 25%;
-  transform: translateX(-50%);
-  opacity: 0.8;
-}
-
-.swiper-slide-next .card img {
-  left: 14%;
-}
-
-.swiper-slide-prev .card img {
-  left: 93%;
 }
 
 button {
