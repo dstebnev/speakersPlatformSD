@@ -24,7 +24,11 @@ export function TalkList({ items }) {
         e(
           'div',
           null,
-          e('span', { className: 'list-speaker' }, (t.speakers || []).map(s => s.name).join(', ')),
+          e(
+            'span',
+            { className: 'list-speaker' },
+            t.speakers.map(s => s.name).join(', ')
+          ),
           ' — ',
           e('span', { className: 'list-title' }, t.title)
         ),
