@@ -48,6 +48,7 @@ function App() {
   const [direction, setDirection] = useState('all');
   const [status, setStatus] = useState('all');
   const [talks, setTalks] = useState([]);
+  const [speakers, setSpeakers] = useState([]);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
@@ -62,15 +63,12 @@ function App() {
           fetch('/api/talks'),
         ]);
         if (!speakersRes.ok || !talksRes.ok) throw new Error('Fetch error');
-        const [speakers, talks] = await Promise.all([
+        const [speakersData, talksData] = await Promise.all([
           speakersRes.json(),
           talksRes.json(),
         ]);
-        const merged = talks.map(t => ({
-          ...t,
-          speakers: speakers.filter(s => (t.speakerIds || []).includes(s.id)),
-        }));
-        setTalks(merged);
+        setSpeakers(speakersData);
+        setTalks(talksData);
       } catch (err) {
         setError('Не удалось загрузить данные');
       }
@@ -87,14 +85,17 @@ function App() {
     setActiveIndex(0);
   }, [filtered.length]);
 
+  const getSpeakers = talk =>
+    speakers.filter(s => (talk?.speakerIds || []).includes(s.id));
+
   useEffect(() => {
     if (viewMode !== 'cards') {
       sheetRoot.render(null);
       return;
     }
     const item = filtered[activeIndex];
-    sheetRoot.render(e(BottomSheet, { talk: item, speakers: item?.speakers }));
-  }, [activeIndex, filtered, viewMode]);
+    sheetRoot.render(e(BottomSheet, { talk: item, speakers: getSpeakers(item) }));
+  }, [activeIndex, filtered, viewMode, speakers]);
 
   useEffect(() => {
     if (viewMode !== 'cards') {
@@ -178,12 +179,12 @@ function App() {
                   key: t.id,
                   onClick: () => {},
                 },
-                e(Card, { talk: t, speakers: t.speakers })
+                e(Card, { talk: t, speakers: getSpeakers(t) })
               )
             )
             )
         )
-      : e(TalkList, { items: filtered })
+      : e(TalkList, { items: filtered, speakers })
         );
 }
 
