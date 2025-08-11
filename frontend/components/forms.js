@@ -1,4 +1,5 @@
 import { DIRECTIONS } from '../directions.js';
+import { TAGS } from '../tags.js';
 const e = React.createElement;
 const { useState } = React;
 
@@ -6,6 +7,7 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
   const [description, setDescription] = useState(initial.description || '');
   const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '');
+  const [tags, setTags] = useState(initial.tags || []);
   const [uploading, setUploading] = useState(false);
 
   const uploadFile = async f => {
@@ -24,7 +26,7 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
       className: 'admin-form',
       onSubmit: ev => {
         ev.preventDefault();
-        onSubmit({ ...initial, name, description, photoUrl });
+        onSubmit({ ...initial, name, description, photoUrl, tags });
       },
     },
     e('div', null, e('label', null, 'Имя'), e('input', { value: name, onChange: ev => setName(ev.target.value) })),
@@ -33,6 +35,33 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
       null,
       e('label', null, 'Описание'),
       e('textarea', { value: description, onChange: ev => setDescription(ev.target.value) })
+    ),
+    e(
+      'div',
+      { className: 'admin-tags' },
+      e('label', null, 'Теги'),
+      e(
+        'div',
+        null,
+        TAGS.map(t =>
+          e(
+            'label',
+            { key: t },
+            e('input', {
+              type: 'checkbox',
+              checked: tags.includes(t),
+              onChange: ev => {
+                if (ev.target.checked) {
+                  setTags([...tags, t]);
+                } else {
+                  setTags(tags.filter(x => x !== t));
+                }
+              },
+            }),
+            t
+          )
+        )
+      )
     ),
     e(
       'div',

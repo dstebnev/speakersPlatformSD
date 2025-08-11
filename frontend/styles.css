@@ -2,7 +2,7 @@
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
-  --speaker-height: 50vh;
+  --speaker-height: 40vh;
   /* Height of the fixed bottom navigation. */
   --bottom-nav-height: 64px;
   /* Approximate height of the sheet header + handle */
@@ -12,7 +12,7 @@
 /* When the bottom sheet is expanded, shrink and raise speaker images */
 body.sheet-expanded {
   --speaker-top: 4px;
-  --speaker-height: 30vh;
+  --speaker-height: 24vh;
 }
 
 html, body {
@@ -97,6 +97,7 @@ html.admin-page {
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
+  transition: top 0.5s ease, left 0.5s ease, height 0.5s ease, transform 0.5s ease, opacity 0.5s ease;
 }
 
 .card-title {
@@ -131,7 +132,7 @@ html.admin-page {
 
 .swiper-slide {
   overflow: visible;
-  transition: transform 0.3s, filter 0.3s;
+  transition: transform 0.5s ease, filter 0.5s ease, opacity 0.5s ease;
 }
 
 .swiper-slide-prev,
@@ -154,6 +155,37 @@ body.sheet-expanded .swiper-slide-active {
 body.sheet-expanded .swiper-slide-prev,
 body.sheet-expanded .swiper-slide-next {
   transform: translateY(0) scale(0.7);
+}
+
+.swiper-slide-active .card img {
+  position: absolute;
+  top: var(--speaker-top);
+  left: 50%;
+  transform: translateX(-50%);
+  height: var(--speaker-height);
+  /* keep the active speaker photo above the bottom sheet */
+  z-index: 25;
+}
+
+.swiper-slide-prev .card img,
+.swiper-slide-next .card img {
+  position: absolute;
+  /* Slightly lower the neighbouring speakers */
+  top: calc(var(--speaker-top) + 20px);
+  height: calc(var(--speaker-height) * 0.55);
+  /* neighbour speakers should still stay above the sheet */
+  z-index: 15;
+  /* maintain vertical offset using transform instead of margin */
+  transform: translate(-50%, 25%);
+  opacity: 0.8;
+}
+
+.swiper-slide-next .card img {
+  left: 30%;
+}
+
+.swiper-slide-prev .card img {
+  left: 70%;
 }
 
 button {

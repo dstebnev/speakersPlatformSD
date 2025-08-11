@@ -9,6 +9,29 @@ const { useState, useEffect, useRef } = React;
 
 const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
 
+function applySlideStyles(swiper) {
+  if (!swiper) return;
+  swiper.slides.forEach(slide => {
+    const img = slide.querySelector('.card img');
+    if (!img) return;
+    const prog = Math.max(Math.min(slide.progress, 1), -1);
+    const abs = Math.abs(prog);
+    const left =
+      prog > 0
+        ? 50 + (30 - 50) * prog
+        : 50 + (70 - 50) * -prog;
+    const scale = 1.3 - 0.45 * abs;
+    const heightFactor = 1 - 0.45 * abs;
+    const opacity = 1 - 0.3 * abs;
+    img.style.left = `${left}%`;
+    img.style.transform = `translateX(-50%) scale(${scale})`;
+    img.style.top = `calc(var(--speaker-top) + ${20 * abs}px)`;
+    img.style.height = `calc(var(--speaker-height) * ${heightFactor})`;
+    img.style.opacity = opacity;
+    img.style.zIndex = 20 - Math.round(abs * 10);
+  });
+}
+
 
 const TEST_SPEAKERS = [
   {
@@ -113,6 +136,7 @@ function App() {
         spaceBetween: 20,
         loop: false,
         effect: 'coverflow',
+        watchSlidesProgress: true,
         coverflowEffect: {
           rotate: 0,
           stretch: 0,
@@ -124,8 +148,15 @@ function App() {
           slideChange() {
             setActiveIndex(this.realIndex);
           },
+          progress() {
+            applySlideStyles(this);
+          },
+          setTranslate() {
+            applySlideStyles(this);
+          },
         },
       });
+      applySlideStyles(swiperRef.current.swiper);
     }
   }, [filtered.length, viewMode]);
 
