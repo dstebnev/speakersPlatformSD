@@ -61,7 +61,7 @@ function App() {
 
   return e(
     'div',
-    null,
+    { className: 'talks-page' },
     e(Header, {
       onToggleFilters: () => setShowFilters(!showFilters),
       filtersOpen: showFilters,
@@ -81,7 +81,7 @@ function App() {
       ? e('div', { className: 'error' }, error)
       : e(
           'main',
-          null,
+          { className: 'talks-container' },
           e(
             'section',
             null,
