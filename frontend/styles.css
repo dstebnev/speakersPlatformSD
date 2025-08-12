@@ -340,50 +340,6 @@ form select {
 
 }
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 20px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #ccc;
-  transition: background-color 0.3s;
-  border-radius: 20px;
-}
-
-.slider:before {
-  position: absolute;
-  content: '';
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background: #fff;
-  transition: transform 0.3s;
-  border-radius: 50%;
-}
-
-.switch input:checked + .slider {
-  background: #00e5ff;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(20px);
-}
 
 .talk-list {
   list-style: none;
@@ -474,11 +430,6 @@ body {
   font-size: 1.2rem;
 }
 
-.view-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
 .filter-panel {
   position: fixed;
@@ -521,19 +472,13 @@ body {
   font-size: 0.75rem;
 }
 
-.talk-list,
-.card-grid {
+.talk-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.card-grid {
-  flex-direction: row;
-  flex-wrap: wrap;
 }
 
 .talk-card {
