@@ -150,12 +150,28 @@ function App() {
   );
 }
 
-// Expand the Telegram WebApp on mobile if running inside Telegram
+// Раскрываем мини-приложение, переводим его в полноэкранный режим и отключаем вертикальные свайпы
 const tryExpand = () => {
-  const tg = window.Telegram.WebApp;
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return;
   tg.ready();
-  tg.expand();
+  // Разворачиваем BottomSheet на мобильных устройствах
+  tg.expand?.();
+  // Запрашиваем полноэкранный режим (Bot API 8.0+)
+  if (typeof tg.requestFullscreen === 'function') {
+    tg.requestFullscreen();
+    // Настраиваем цвет заголовка для контрастности (при необходимости)
+    tg.setHeaderColor?.('#FFFFFF');
+  }
+  // Отключаем вертикальные свайпы, чтобы приложение не сворачивалось при прокрутке
+  if (typeof tg.disableVerticalSwipes === 'function') {
+    tg.disableVerticalSwipes();
+  } else if (typeof tg.postEvent === 'function') {
+    // Новый вариант API — web_app_setup_swipe_behavior
+    tg.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
+  }
 };
+// Инициализируем при загрузке
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', tryExpand);
 } else {

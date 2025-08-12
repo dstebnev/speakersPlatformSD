@@ -35,7 +35,10 @@
       }
       const tryExpand = () => {
           tg.ready();
-          tg.expand();
+          tg.expand?.();
+          tg.requestFullscreen?.();
+          tg.disableVerticalSwipes?.();
+          tg.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
       };
       if (document.readyState === 'loading') {
         window.addEventListener('DOMContentLoaded', tryExpand);
