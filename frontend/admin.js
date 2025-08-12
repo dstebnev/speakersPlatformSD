@@ -22,6 +22,10 @@ function AdminApp() {
     const load = async () => {
         const tg = window.Telegram?.WebApp;
         tg?.ready();
+        tg?.expand?.();
+        tg?.requestFullscreen?.();
+        tg?.disableVerticalSwipes?.();
+        tg?.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
         const user = tg?.initDataUnsafe?.user;
         if (user) {
           setUsername(user.username);
@@ -30,10 +34,6 @@ function AdminApp() {
           setAuthorized(true);
         } else if (user) {
           setAuthorized(ALLOWED_USERS.includes(user.username));
-        }
-        if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
-          tg.ready();
-          tg.expand();
         }
       try {
         const [speakersRes, talksRes] = await Promise.all([

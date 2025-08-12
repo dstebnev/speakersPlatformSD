@@ -7,9 +7,10 @@ function ProfileApp() {
     const tg = window.Telegram?.WebApp;
     tg?.ready();
     setUser(tg?.initDataUnsafe?.user || null);
-    if (tg && (tg.platform === 'android' || tg.platform === 'ios') && !tg.isExpanded) {
-      tg.expand();
-    }
+    tg?.expand?.();
+    tg?.requestFullscreen?.();
+    tg?.disableVerticalSwipes?.();
+    tg?.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
   }, []);
 
   if (!user) {
