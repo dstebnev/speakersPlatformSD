@@ -11,7 +11,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="stats-page">
+<body class="stats-page page">
   <div class="stats-wrapper">
     <div class="chart-block">
       <h3 class="chart-title">Доклады по направлениям</h3>
@@ -43,13 +43,30 @@
         document.getElementById('admin-link')?.remove();
         document.getElementById('stats-link')?.remove();
       }
+      function updateSafeArea() {
+        const safe = tg?.safeAreaInset;
+        const contentSafe = tg?.contentSafeAreaInset;
+        if (safe) {
+          document.documentElement.style.setProperty('--safe-area-top', `${safe.top}px`);
+          document.documentElement.style.setProperty('--safe-area-bottom', `${safe.bottom}px`);
+        }
+        if (contentSafe) {
+          document.documentElement.style.setProperty('--content-safe-area-top', `${contentSafe.top}px`);
+          document.documentElement.style.setProperty('--content-safe-area-bottom', `${contentSafe.bottom}px`);
+        }
+      }
       const tryExpand = () => {
           tg.ready();
           tg.expand?.();
           tg.requestFullscreen?.();
           tg.disableVerticalSwipes?.();
           tg.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
+          tg.requestSafeArea?.();
+          tg.requestContentSafeArea?.();
+          updateSafeArea();
       };
+      tg?.onEvent?.('safeAreaChanged', updateSafeArea);
+      tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
       if (document.readyState === 'loading') {
         window.addEventListener('DOMContentLoaded', tryExpand);
       } else {

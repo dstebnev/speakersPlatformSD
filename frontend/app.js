@@ -10,6 +10,20 @@ const { useState, useEffect } = React;
 
 const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
 const navRoot = ReactDOM.createRoot(document.getElementById('nav-root'));
+const tg = window.Telegram?.WebApp;
+
+function updateSafeArea() {
+  const safe = tg?.safeAreaInset;
+  const contentSafe = tg?.contentSafeAreaInset;
+  if (safe) {
+    document.documentElement.style.setProperty('--safe-area-top', `${safe.top}px`);
+    document.documentElement.style.setProperty('--safe-area-bottom', `${safe.bottom}px`);
+  }
+  if (contentSafe) {
+    document.documentElement.style.setProperty('--content-safe-area-top', `${contentSafe.top}px`);
+    document.documentElement.style.setProperty('--content-safe-area-bottom', `${contentSafe.bottom}px`);
+  }
+}
 
 function App() {
   const [filters, setFilters] = useState({
@@ -152,7 +166,6 @@ function App() {
 
 // Раскрываем мини-приложение, переводим его в полноэкранный режим и отключаем вертикальные свайпы
 const tryExpand = () => {
-  const tg = window.Telegram?.WebApp;
   if (!tg) return;
   tg.ready();
   // Разворачиваем BottomSheet на мобильных устройствах
@@ -170,6 +183,9 @@ const tryExpand = () => {
     // Новый вариант API — web_app_setup_swipe_behavior
     tg.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
   }
+  tg.requestSafeArea?.();
+  tg.requestContentSafeArea?.();
+  updateSafeArea();
 };
 // Инициализируем при загрузке
 if (document.readyState === 'loading') {
@@ -177,5 +193,7 @@ if (document.readyState === 'loading') {
 } else {
   tryExpand();
 }
+tg?.onEvent?.('safeAreaChanged', updateSafeArea);
+tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
