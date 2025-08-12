@@ -310,48 +310,12 @@ form select {
   display: inline-block;
   margin-top: 8px;
 }
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255,255,255,0.3);
-  padding: 10px 0;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  z-index: 30;
-}
-
-.bottom-nav.disabled {
-  pointer-events: none;
-}
-
-.bottom-nav a {
-  text-decoration: none;
-  font-size: 24px;
-  color: #fff;
-}
-
-.bottom-nav a.active {
-  color: #00e5ff;
-}
 
 .error {
   color: red;
   margin-bottom: 10px;
 }
 
-.view-switch {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .switch {
@@ -464,4 +428,173 @@ form select {
   border-radius: 8px;
   padding: 10px;
   width: 100%;
+}
+
+/* ===== New styles for updated talk list page ===== */
+body {
+  background: var(--tg-bg-color, #ffffff);
+  color: var(--tg-text-color, #000000);
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
+  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.main-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.view-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--tg-secondary-bg-color, #fff);
+  color: var(--tg-text-color, #000);
+  padding: 16px;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-panel.show {
+  transform: translateY(0);
+}
+
+.filter-panel input,
+.filter-panel select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 16px;
+}
+
+.active-filters span {
+  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.talk-list,
+.card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.talk-card {
+  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.05));
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.talk-card.past {
+  opacity: 0.7;
+}
+
+.talk-card .speakers strong {
+  font-weight: 700;
+}
+
+.talk-card .action {
+  margin-top: 8px;
+}
+
+.talk-card .action a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--tg-button-color, #00e5ff);
+  color: var(--tg-button-text-color, #000);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.talk-card.past .action a {
+  background: none;
+  color: var(--tg-link-color, #00e5ff);
+  text-decoration: underline;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
+  padding-bottom: env(safe-area-inset-bottom);
+  height: var(--bottom-nav-height);
+}
+
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--tg-text-color, #000);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.bottom-nav .icon {
+  font-size: 1.2rem;
+}
+
+.loader {
+  margin: 40px auto;
+  border: 4px solid var(--tg-secondary-bg-color, #ccc);
+  border-top-color: var(--tg-button-color, #00e5ff);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.bottom-nav.disabled {
+  pointer-events: none;
+  opacity: 0.4;
 }

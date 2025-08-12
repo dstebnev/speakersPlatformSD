@@ -47,7 +47,7 @@ export function BottomSheet({ talk, speakers = [] }) {
   };
 
   const link =
-    talk.status === 'past'
+    new Date(talk.date) < new Date()
       ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
       : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
 
@@ -58,6 +58,8 @@ export function BottomSheet({ talk, speakers = [] }) {
       style: { borderTop: `8px solid ${accent}` },
       onPointerDown: handleStart,
       onTouchStart: handleStart,
+      role: 'dialog',
+      'aria-modal': true,
     },
     e('div', {
       className: `handle${expanded ? ' arrow-down' : ''}`,
@@ -79,8 +81,21 @@ export function BottomSheet({ talk, speakers = [] }) {
         )
       ),
       e('div', null, talk.description),
+      speakers.length > 0 &&
+        e(
+          'div',
+          { className: 'sheet-bio' },
+          speakers.map((s, idx) =>
+            e(
+              'p',
+              { key: s.id || idx },
+              e('strong', null, s.name + ': '),
+              s.description
+            )
+          )
+        ),
       e('div', { className: 'sheet-event' }, talk.eventName),
       link
-    ),
+    )
   );
 }

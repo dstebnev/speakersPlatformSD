@@ -1,222 +1,153 @@
-import { DIRECTIONS } from './directions.js';
-import { ACCENTS } from './constants.js';
-import { Card } from './components/Card.js';
+import { TalkCard } from './components/TalkCard.js';
+import { FilterPanel } from './components/FilterPanel.js';
+import { NavigationBar } from './components/NavigationBar.js';
+import { Header } from './components/Header.js';
 import { BottomSheet } from './components/BottomSheet.js';
-import { TalkList } from './components/TalkList.js';
+import { useTalkData } from './hooks/useTalkData.js';
 
 const e = React.createElement;
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect } = React;
 
 const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
-
-function applySlideStyles(swiper) {
-  if (!swiper) return;
-  swiper.slides.forEach(slide => {
-    const img = slide.querySelector('.card img');
-    if (!img) return;
-    const prog = Math.max(Math.min(slide.progress, 1), -1);
-    const abs = Math.abs(prog);
-    const left =
-      prog > 0
-        ? 50 + (30 - 50) * prog
-        : 50 + (70 - 50) * -prog;
-    const scale = 1.3 - 0.45 * abs;
-    const heightFactor = 1 - 0.45 * abs;
-    const opacity = 1 - 0.3 * abs;
-    img.style.left = `${left}%`;
-    img.style.transform = `translateX(-50%) scale(${scale})`;
-    img.style.top = `calc(var(--speaker-top) + ${20 * abs}px)`;
-    img.style.height = `calc(var(--speaker-height) * ${heightFactor})`;
-    img.style.opacity = opacity;
-    img.style.zIndex = 20 - Math.round(abs * 10);
-  });
-}
-
-
-const TEST_SPEAKERS = [
-  {
-    id: '1',
-    name: 'Alice',
-    photoUrl: 'https://placekitten.com/300/200',
-    description: 'Frontend developer',
-  },
-];
-
-const TEST_TALKS = [
-  {
-    id: '1',
-    speakerIds: ['1'],
-    title: 'React Basics',
-    description: 'Intro to React',
-    eventName: 'JS Conf',
-    direction: 'frontend',
-    status: 'upcoming',
-    date: '2024-08-20',
-    registrationLink: 'https://example.com/register',
-  },
-  {
-    id: '2',
-    speakerIds: ['1'],
-    title: 'Past Talk',
-    description: 'Something done',
-    eventName: 'Old Conf',
-    direction: 'frontend',
-    status: 'past',
-    date: '2024-01-10',
-    recordingLink: 'https://example.com/recording',
-  },
-];
+const navRoot = ReactDOM.createRoot(document.getElementById('nav-root'));
 
 function App() {
-  const [direction, setDirection] = useState('all');
-  const [status, setStatus] = useState('all');
-  const [talks, setTalks] = useState([]);
-  const [speakers, setSpeakers] = useState([]);
-  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    direction: 'all',
+    status: 'all',
+    query: '',
+    speaker: '',
+    from: '',
+    to: '',
+  });
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
-  const [activeIndex, setActiveIndex] = useState(0);
-  const swiperRef = useRef(null);
+  const [viewMode, setViewMode] = useState('list');
+  const [selectedTalk, setSelectedTalk] = useState(null);
+
+  const { upcoming, past, speakers, loading, error } = useTalkData(filters);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [speakersRes, talksRes] = await Promise.all([
-          fetch('/api/speakers'),
-          fetch('/api/talks'),
-        ]);
-        if (!speakersRes.ok || !talksRes.ok) throw new Error('Fetch error');
-        const [speakersData, talksData] = await Promise.all([
-          speakersRes.json(),
-          talksRes.json(),
-        ]);
-        setSpeakers(speakersData);
-        setTalks(talksData);
-      } catch (err) {
-        setError('Не удалось загрузить данные');
-      }
-    };
-    load();
+    const tg = window.Telegram?.WebApp;
+    const theme = tg?.themeParams || {};
+    const root = document.documentElement;
+    Object.entries(theme).forEach(([k, v]) => root.style.setProperty(`--tg-${k}`, v));
   }, []);
 
-  let filtered = talks;
-  if (direction !== 'all') filtered = filtered.filter(t => t.direction === direction);
-  if (status !== 'all') filtered = filtered.filter(t => t.status === status);
-  filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
-
   useEffect(() => {
-    setActiveIndex(0);
-  }, [filtered.length]);
+    navRoot.render(e(NavigationBar));
+  }, []);
 
   const getSpeakers = talk =>
     speakers.filter(s => (talk?.speakerIds || []).includes(s.id));
 
   useEffect(() => {
-    if (viewMode !== 'cards') {
-      sheetRoot.render(null);
-      return;
-    }
-    const item = filtered[activeIndex];
-    sheetRoot.render(e(BottomSheet, { talk: item, speakers: getSpeakers(item) }));
-  }, [activeIndex, filtered, viewMode, speakers]);
+    sheetRoot.render(
+      selectedTalk
+        ? e(BottomSheet, {
+            talk: selectedTalk,
+            speakers: getSpeakers(selectedTalk),
+          })
+        : null
+    );
+  }, [selectedTalk, speakers]);
 
-  useEffect(() => {
-    if (viewMode !== 'cards') {
-      if (swiperRef.current?.swiper) {
-        swiperRef.current.swiper.destroy();
-        swiperRef.current.swiper = null;
-      }
-      return;
-    }
-    if (window.Swiper && swiperRef.current) {
-      if (swiperRef.current.swiper) swiperRef.current.swiper.destroy();
-      swiperRef.current.swiper = new window.Swiper(swiperRef.current, {
-        centeredSlides: true,
-        slidesPerView: 'auto',
-        spaceBetween: 20,
-        loop: false,
-        effect: 'coverflow',
-        watchSlidesProgress: true,
-        coverflowEffect: {
-          rotate: 0,
-          stretch: 0,
-          depth: 120,
-          modifier: 2,
-          slideShadows: false,
-        },
-        on: {
-          slideChange() {
-            setActiveIndex(this.realIndex);
-          },
-          progress() {
-            applySlideStyles(this);
-          },
-          setTranslate() {
-            applySlideStyles(this);
-          },
-        },
-      });
-      applySlideStyles(swiperRef.current.swiper);
-    }
-  }, [filtered.length, viewMode]);
+  const activeFilters = [];
+  if (filters.query) activeFilters.push(`Название: ${filters.query}`);
+  if (filters.speaker) activeFilters.push(`Спикер: ${filters.speaker}`);
+  if (filters.direction !== 'all') activeFilters.push(`Направление: ${filters.direction}`);
+  if (filters.status !== 'all') activeFilters.push(`Статус: ${filters.status}`);
+  if (filters.from) activeFilters.push(`С ${filters.from}`);
+  if (filters.to) activeFilters.push(`По ${filters.to}`);
 
   return e(
     'div',
     null,
-    error && e('div', { className: 'error' }, error),
-    e('button', { className: 'filter-btn', onClick: () => setShowFilters(!showFilters) }, 'Фильтры'),
-    e(
-      'div',
-      { className: 'view-switch' },
-      e('span', null, 'Список'),
+    e(Header, {
+      onToggleFilters: () => setShowFilters(!showFilters),
+      filtersOpen: showFilters,
+      viewMode,
+      onViewChange: setViewMode,
+    }),
+    e(FilterPanel, { filters, onChange: setFilters, visible: showFilters }),
+    activeFilters.length > 0 &&
       e(
-        'label',
-        { className: 'switch' },
-        e('input', {
-          type: 'checkbox',
-          checked: viewMode === 'list',
-          onChange: () => setViewMode(viewMode === 'cards' ? 'list' : 'cards'),
-        }),
-        e('span', { className: 'slider' })
-      )
-    ),
-    e(
-      'div',
-      { className: `filters${showFilters ? ' show' : ''}` },
-      e('select', { value: direction, onChange: e => setDirection(e.target.value) },
-        e('option', { value: 'all' }, 'Все направления'),
-        DIRECTIONS.map(d =>
-          e('option', { key: d, value: d }, d)
-        )
+        'div',
+        { className: 'active-filters' },
+        activeFilters.map((f, i) => e('span', { key: i }, f))
       ),
-      e('select', { value: status, onChange: e => setStatus(e.target.value) },
-        e('option', { value: 'all' }, 'Все статусы'),
-        e('option', { value: 'past' }, 'Прошедшие'),
-        e('option', { value: 'upcoming' }, 'Будущие')
-      )
-    ),
-    viewMode === 'cards'
-      ? e(
-          'div',
-          { className: 'swiper-container', ref: swiperRef },
+    loading
+      ? e('div', { className: 'loader', 'aria-live': 'polite' })
+      : error
+      ? e('div', { className: 'error' }, error)
+      : e(
+          'main',
+          null,
           e(
-            'div',
-            { className: 'swiper-wrapper' },
-            filtered.map((t, idx) =>
-              e(
-                'div',
-                {
-                  className: 'swiper-slide',
-                  key: t.id,
-                  onClick: () => {},
-                },
-                e(Card, { talk: t, speakers: getSpeakers(t) })
-              )
-            )
-            )
+            'section',
+            null,
+            e('h2', null, 'Будущие'),
+            upcoming.length === 0
+              ? e('p', null, 'Нет докладов')
+              : viewMode === 'list'
+              ? e(
+                  'div',
+                  { className: 'talk-list' },
+                  upcoming.map(t =>
+                    e(TalkCard, {
+                      key: t.id,
+                      talk: t,
+                      speakers: getSpeakers(t),
+                      onSelect: setSelectedTalk,
+                    })
+                  )
+                )
+              : e(
+                  'div',
+                  { className: 'card-grid' },
+                  upcoming.map(t =>
+                    e(TalkCard, {
+                      key: t.id,
+                      talk: t,
+                      speakers: getSpeakers(t),
+                      onSelect: setSelectedTalk,
+                    })
+                  )
+                )
+          ),
+          e(
+            'section',
+            null,
+            e('h2', null, 'Прошедшие'),
+            past.length === 0
+              ? e('p', null, 'Нет докладов')
+              : viewMode === 'list'
+              ? e(
+                  'div',
+                  { className: 'talk-list past' },
+                  past.map(t =>
+                    e(TalkCard, {
+                      key: t.id,
+                      talk: t,
+                      speakers: getSpeakers(t),
+                      onSelect: setSelectedTalk,
+                    })
+                  )
+                )
+              : e(
+                  'div',
+                  { className: 'card-grid past' },
+                  past.map(t =>
+                    e(TalkCard, {
+                      key: t.id,
+                      talk: t,
+                      speakers: getSpeakers(t),
+                      onSelect: setSelectedTalk,
+                    })
+                  )
+                )
+          )
         )
-      : e(TalkList, { items: filtered, speakers })
-        );
+  );
 }
 
 // Expand the Telegram WebApp on mobile if running inside Telegram

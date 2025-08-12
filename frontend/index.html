@@ -17,12 +17,7 @@
 <body>
   <div id="root"></div>
   <div id="bottom-sheet-root"></div>
-  <nav class="bottom-nav">
-    <a href="/" class="active" title="Выступления">🎤</a>
-    <a href="/stats" id="stats-link" title="Статистика">📊</a>
-    <a href="/admin" id="admin-link" title="Админка">⚙️</a>
-    <a href="/profile" title="Личный кабинет">👤</a>
-  </nav>
+  <div id="nav-root"></div>
   <script src="/config.js"></script>
   <script>
     (function() {
@@ -34,13 +29,10 @@
         document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
       }
       const isAdmin = user && cfg.admins.includes(user.username);
-      if (cfg.mode !== 'debug' && !isAdmin) {
-        document.getElementById('admin-link')?.remove();
-        document.getElementById('stats-link')?.remove();
-      }
+      window.__IS_ADMIN__ = cfg.mode === 'debug' || isAdmin;
       const tryExpand = () => {
-          tg.ready();
-          tg.expand();
+        tg.ready();
+        tg.expand();
       };
       if (document.readyState === 'loading') {
         window.addEventListener('DOMContentLoaded', tryExpand);
