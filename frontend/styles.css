@@ -1,4 +1,8 @@
 :root {
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
+  --content-safe-area-top: 0px;
+  --content-safe-area-bottom: 0px;
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
@@ -21,6 +25,12 @@ html, body {
   padding: 0;
   /* Prevent pull-down gesture from closing Telegram browser */
   overscroll-behavior-y: contain;
+}
+
+/* Provide default safe area offsets for page containers */
+.page {
+  padding-top: calc(var(--content-safe-area-top) + 12px);
+  padding-bottom: var(--content-safe-area-bottom);
 }
 
 body {
@@ -61,7 +71,7 @@ html.admin-page {
   -webkit-overflow-scrolling: touch;
   /* reserve space for bottom navigation and safe areas */
   padding-bottom: calc(
-    var(--bottom-nav-height) + env(safe-area-inset-bottom)
+    var(--bottom-nav-height) + var(--safe-area-bottom)
   );
 }
 
@@ -74,7 +84,7 @@ html.admin-page {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* space for bottom nav, bottom sheet and safe areas */
-  padding-bottom: calc(150px + env(safe-area-inset-bottom));
+  padding-bottom: calc(150px + var(--safe-area-bottom));
 }
 
 .talks-page {
@@ -241,7 +251,7 @@ form select {
 .bottom-sheet {
   position: fixed;
   top: calc(var(--speaker-top) + var(--speaker-height));
-  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
   left: 0;
   right: 0;
   background: #111;
@@ -252,7 +262,7 @@ form select {
   display: flex;
   flex-direction: column;
   max-height: calc(
-    100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
+    100vh - var(--speaker-top) - var(--speaker-height) - var(--bottom-nav-height) - var(--safe-area-bottom)
   );
   min-height: 40vh;
   transition: top 0.3s ease, bottom 0.3s ease, border-radius 0.3s ease;
@@ -263,7 +273,7 @@ form select {
   top: 20vh;
   bottom: 0;
   max-height: none;
-  height: calc(80vh - env(safe-area-inset-bottom));
+  height: calc(80vh - var(--safe-area-bottom));
   border-radius: 20px 20px 0 0;
 }
 
@@ -271,18 +281,18 @@ form select {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   max-height: calc(
-    100vh - var(--sheet-header-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom)
+    100vh - var(--sheet-header-height) - var(--bottom-nav-height) - var(--safe-area-bottom)
   );
   /* leave room for the fixed action button */
   padding-bottom: calc(
-    var(--bottom-nav-height) + 80px + env(safe-area-inset-bottom)
+    var(--bottom-nav-height) + 80px + var(--safe-area-bottom)
   );
   flex: 1;
 }
 
 .bottom-sheet.expanded .sheet-content {
   max-height: none;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
 .bottom-sheet .handle {
@@ -381,7 +391,7 @@ form select {
   margin-top: 60px;
   /* avoid overlap with the fixed bottom navigation */
   padding-bottom: calc(
-    var(--bottom-nav-height) + env(safe-area-inset-bottom)
+    var(--bottom-nav-height) + var(--safe-area-bottom)
   );
 }
 
@@ -421,7 +431,7 @@ form select {
   /* allow slight pull-down to avoid Telegram browser minimization */
   min-height: calc(100% + 20px);
   /* leave space for bottom nav */
-  padding-bottom: calc(20px + var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: calc(20px + var(--bottom-nav-height) + var(--safe-area-bottom));
 }
 
 .chart-block {
@@ -452,7 +462,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
+  padding: calc(var(--safe-area-top) + 8px) 16px 8px;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
   position: sticky;
   top: 0;
@@ -572,7 +582,7 @@ body {
   display: flex;
   justify-content: space-around;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-area-bottom);
   height: var(--bottom-nav-height);
 }
 
