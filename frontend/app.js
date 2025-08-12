@@ -35,7 +35,6 @@ function App() {
     to: '',
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('list');
   const [selectedTalk, setSelectedTalk] = useState(null);
 
   const { upcoming, past, speakers, loading, error } = useTalkData(filters);
@@ -79,8 +78,6 @@ function App() {
     e(Header, {
       onToggleFilters: () => setShowFilters(!showFilters),
       filtersOpen: showFilters,
-      viewMode,
-      onViewChange: setViewMode,
     }),
     e(FilterPanel, { filters, onChange: setFilters, visible: showFilters }),
     activeFilters.length > 0 &&
@@ -102,22 +99,9 @@ function App() {
             e('h2', null, 'Будущие'),
             upcoming.length === 0
               ? e('p', null, 'Нет докладов')
-              : viewMode === 'list'
-              ? e(
-                  'div',
-                  { className: 'talk-list' },
-                  upcoming.map(t =>
-                    e(TalkCard, {
-                      key: t.id,
-                      talk: t,
-                      speakers: getSpeakers(t),
-                      onSelect: setSelectedTalk,
-                    })
-                  )
-                )
               : e(
                   'div',
-                  { className: 'card-grid' },
+                  { className: 'talk-list' },
                   upcoming.map(t =>
                     e(TalkCard, {
                       key: t.id,
@@ -134,22 +118,9 @@ function App() {
             e('h2', null, 'Прошедшие'),
             past.length === 0
               ? e('p', null, 'Нет докладов')
-              : viewMode === 'list'
-              ? e(
-                  'div',
-                  { className: 'talk-list past' },
-                  past.map(t =>
-                    e(TalkCard, {
-                      key: t.id,
-                      talk: t,
-                      speakers: getSpeakers(t),
-                      onSelect: setSelectedTalk,
-                    })
-                  )
-                )
               : e(
                   'div',
-                  { className: 'card-grid past' },
+                  { className: 'talk-list past' },
                   past.map(t =>
                     e(TalkCard, {
                       key: t.id,
