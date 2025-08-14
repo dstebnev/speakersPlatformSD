@@ -100,10 +100,9 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
 
   useEffect(() => {
     if (!speakerRef.current) return;
-    (initial.speakerIds || []).forEach(id => {
-      const opt = speakerRef.current?.querySelector(`option[value="${id}"]`);
-      if (opt) opt.selected = true;
-    });
+    // Recreate the Choices instance every time we edit a talk or the speaker
+    // list changes so that previously selected speakers are shown when
+    // editing.
     choicesRef.current = new Choices(speakerRef.current, {
       removeItemButton: true,
       searchEnabled: true,
@@ -111,8 +110,11 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       itemSelectText: '',
       shouldSort: false,
     });
+    const ids = initial.speakerIds || [];
+    ids.forEach(id => choicesRef.current.setChoiceByValue(id));
+    setSpeakerIds(ids);
     return () => choicesRef.current?.destroy();
-  }, [speakers]);
+  }, [speakers, initial]);
 
   const handleSubmit = ev => {
     ev.preventDefault();
