@@ -104,6 +104,8 @@ html.admin-page {
   height: calc(
     100% - var(--header-height) - var(--footer-height) - var(--tg-content-safe-area-inset-top) - var(--tg-content-safe-area-inset-bottom)
   );
+  /* Allow scrolling past the last talk so it isn't hidden by the fixed footer */
+  padding-bottom: calc(var(--footer-height) + var(--tg-content-safe-area-inset-bottom));
 }
 
 .talks-container {
