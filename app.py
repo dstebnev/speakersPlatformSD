@@ -18,6 +18,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 MODE = os.getenv('MODE', 'prod').lower()
 ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '').split(',') if u.strip()]
+CACHE_TIMEOUT = int(os.getenv('CACHE_TIMEOUT', '3600'))
 
 storage.init_db()
 
@@ -138,7 +139,7 @@ def upload():
 
 @app.route('/photos/<path:filename>')
 def serve_photo(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    return send_from_directory(UPLOAD_FOLDER, filename, max_age=CACHE_TIMEOUT)
 
 
 @app.route('/config.js')
@@ -164,31 +165,31 @@ def is_admin_request(req: request) -> bool:
 
 @app.route('/')
 def index():
-    return send_from_directory('frontend', 'index.html')
+    return send_from_directory('frontend', 'index.html', max_age=CACHE_TIMEOUT)
 
 
 @app.route('/admin')
 def admin_page():
     if not is_admin_request(request):
         return abort(403)
-    return send_from_directory('frontend', 'admin.html')
+    return send_from_directory('frontend', 'admin.html', max_age=CACHE_TIMEOUT)
 
 
 @app.route('/profile')
 def profile_page():
-    return send_from_directory('frontend', 'profile.html')
+    return send_from_directory('frontend', 'profile.html', max_age=CACHE_TIMEOUT)
 
 
 @app.route('/stats')
 def stats_page():
     if not is_admin_request(request):
         return abort(403)
-    return send_from_directory('frontend', 'stats.html')
+    return send_from_directory('frontend', 'stats.html', max_age=CACHE_TIMEOUT)
 
 
 @app.route('/<path:path>')
 def static_proxy(path):
-    return send_from_directory('frontend', path)
+    return send_from_directory('frontend', path, max_age=CACHE_TIMEOUT)
 
 
 if __name__ == '__main__':
