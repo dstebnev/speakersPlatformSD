@@ -525,25 +525,24 @@ body {
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 2rem;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
   padding-bottom: var(--safe-area-bottom);
   height: var(--bottom-nav-height);
 }
 
 .bottom-nav a {
-  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   color: var(--tg-text-color, #000);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
 }
 
 .bottom-nav .icon {
-  font-size: 1.2rem;
+  font-size: inherit;
 }
 
 .loader {
