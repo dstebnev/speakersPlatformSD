@@ -65,15 +65,13 @@ def talks():
         talks = []
         for t in storage.all_talks():
             item = {**t}
-            if 'speakerId' in item:
-                item['speakerIds'] = [item.pop('speakerId')]
             item['status'] = calc_status(item.get('date', ''))
             talks.append(item)
         return jsonify(talks)
 
     body = request.get_json() or {}
-    if 'speakerId' in body:
-        body['speakerIds'] = [body.pop('speakerId')]
+    if not isinstance(body.get('speakerIds'), list):
+        return abort(400)
     new_talk = {'id': str(uuid4()), **body}
     new_talk['status'] = calc_status(new_talk.get('date', ''))
     storage.add_talk(new_talk)
@@ -88,18 +86,12 @@ def talk_by_id(id):
             return abort(404)
         return jsonify({'ok': True})
 
-    existing = storage.get_talk(id)
-    if existing is None:
-        return abort(404)
-
     body = request.get_json() or {}
-    if 'speakerId' in body:
-        body['speakerIds'] = [body.pop('speakerId')]
+    if 'speakerIds' in body and not isinstance(body['speakerIds'], list):
+        return abort(400)
     updated = storage.update_talk(id, body)
     if updated is None:
         return abort(404)
-    if 'speakerId' in updated:
-        updated['speakerIds'] = [updated.pop('speakerId')]
     updated['status'] = calc_status(updated.get('date', ''))
     storage.save_talk(updated)
     return jsonify(updated)

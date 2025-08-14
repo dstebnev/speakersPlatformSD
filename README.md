@@ -5,6 +5,10 @@ This project contains a tiny Flask backend and a static front-end written in Rea
 Data is stored in a SQLite file at `/data/app.db` by default (the location can be changed via the `DB_PATH` environment variable).
 If you previously used `db.json`, run `python migrate_json_to_sqlite.py` once to import the old data.
 
+## Data model
+
+Talk objects reference their speakers via a `speakerIds` array. Each value in the array should be the `id` of an existing speaker. The legacy singular `speakerId` field is no longer supported.
+
 ## Running locally
 
 ```bash
