@@ -1,7 +1,7 @@
 import { DIRECTIONS } from '../directions.js';
 import { TAGS } from '../tags.js';
 const e = React.createElement;
-const { useState } = React;
+const { useState, useEffect } = React;
 
 export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
@@ -95,6 +95,25 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
 
   const status = date && new Date(date) < new Date().setHours(0, 0, 0, 0) ? 'past' : 'upcoming';
 
+  const speakerRef = React.useRef(null);
+  const choicesRef = React.useRef(null);
+
+  useEffect(() => {
+    if (!speakerRef.current) return;
+    (initial.speakerIds || []).forEach(id => {
+      const opt = speakerRef.current?.querySelector(`option[value="${id}"]`);
+      if (opt) opt.selected = true;
+    });
+    choicesRef.current = new Choices(speakerRef.current, {
+      removeItemButton: true,
+      searchEnabled: true,
+      placeholderValue: 'Введите имя спикера',
+      itemSelectText: '',
+      shouldSort: false,
+    });
+    return () => choicesRef.current?.destroy();
+  }, [speakers]);
+
   const handleSubmit = ev => {
     ev.preventDefault();
     if (!speakerIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
@@ -125,8 +144,10 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       e(
         'select',
         {
+          id: 'speakers',
+          name: 'speakers[]',
+          ref: speakerRef,
           multiple: true,
-          value: speakerIds,
           onChange: ev =>
             setSpeakerIds(
               Array.from(ev.target.selectedOptions, opt => opt.value)
