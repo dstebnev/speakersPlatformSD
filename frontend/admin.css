@@ -134,7 +134,9 @@
 }
 
 .choices__item .choices__button:hover,
-.choices__item .choices__button:focus {
+.choices__item .choices__button:focus,
+.choices__item .choices__button:active {
   background-color: transparent !important;
+  outline: none;
 }
 
