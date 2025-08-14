@@ -116,6 +116,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
 
   const handleSubmit = ev => {
     ev.preventDefault();
+    const speakerIds = choicesRef.current.getValue(true);
     if (!speakerIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
       alert('Заполните обязательные поля');
       return;
