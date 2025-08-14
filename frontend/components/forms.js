@@ -85,7 +85,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const [title, setTitle] = useState(initial.title || '');
   // Store selected speaker IDs. Default to an empty array so the user must
   // explicitly pick one or more speakers.
-  const [speakerIds, setSpeakerIds] = useState(initial.speakerIds || []);
+  const [speakerIds, setSpeakerIds] = useState((initial.speakerIds || []).map(String));
   const [description, setDescription] = useState(initial.description || '');
   const [eventName, setEventName] = useState(initial.eventName || '');
   const [direction, setDirection] = useState(initial.direction || 'frontend');
@@ -123,7 +123,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       // attribute on <option> was ignored by Choices.
       choicesRef.current.setChoiceByValue(ids);
     }
-    setSpeakerIds(ids.map(Number));
+    setSpeakerIds(ids);
 
     return () => choicesRef.current?.destroy();
   }, [speakers, initial]);
@@ -131,7 +131,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const handleSubmit = ev => {
     ev.preventDefault();
     const selectedIds = choicesRef.current
-      ? choicesRef.current.getValue(true).map(Number)
+      ? choicesRef.current.getValue(true)
       : [];
     if (!selectedIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
       alert('Заполните обязательные поля');
@@ -167,7 +167,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
           multiple: true,
           onChange: ev =>
             setSpeakerIds(
-              Array.from(ev.target.selectedOptions, opt => Number(opt.value))
+              Array.from(ev.target.selectedOptions, opt => opt.value)
             ),
         },
         speakers.map(s =>
@@ -176,7 +176,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
             {
               key: s.id,
               value: String(s.id),
-              selected: (initial.speakerIds || []).includes(s.id),
+              selected: (initial.speakerIds || []).map(String).includes(String(s.id)),
             },
             s.name
           )
