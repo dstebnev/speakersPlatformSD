@@ -3,6 +3,10 @@
   --safe-area-bottom: 0px;
   --content-safe-area-top: 0px;
   --content-safe-area-bottom: 0px;
+  --tg-content-safe-area-inset-top: 0px;
+  --tg-content-safe-area-inset-bottom: 0px;
+  --header-height: 56px;
+  --footer-height: var(--bottom-nav-height);
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
   /* Slightly reduce the height so prev/next speakers remain visible */
@@ -25,12 +29,18 @@ html, body {
   padding: 0;
   /* Prevent pull-down gesture from closing Telegram browser */
   overscroll-behavior-y: contain;
+  overflow: hidden;
 }
 
 /* Provide default safe area offsets for page containers */
 .page {
-  padding-top: calc(var(--content-safe-area-top) + 12px);
-  padding-bottom: var(--content-safe-area-bottom);
+  padding-top: calc(var(--tg-content-safe-area-inset-top) + 12px);
+  padding-bottom: var(--tg-content-safe-area-inset-bottom);
+}
+
+body.talks-body {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 body {
@@ -38,7 +48,7 @@ body {
   background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
   background-attachment: fixed;
   overflow-x: hidden;
-  /* prevent double scroll; #root manages scrolling */
+  /* prevent double scroll; .talks-scroll manages scrolling */
   overflow-y: hidden;
   color: #fff;
 }
@@ -77,15 +87,9 @@ html.admin-page {
 }
 
 #root {
-  padding: 10px;
   height: 100%;
-  /* allow slight pull-down to avoid Telegram browser minimization */
-  min-height: calc(100% + 20px);
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
-  /* space for bottom nav, bottom sheet and safe areas */
-  padding-bottom: calc(150px + var(--safe-area-bottom));
+  overflow: hidden;
+  padding: 0;
 }
 
 .talks-page {
@@ -94,10 +98,16 @@ html.admin-page {
   flex-direction: column;
 }
 
-.talks-container {
-  flex: 1;
+.talks-scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  height: calc(
+    100% - var(--header-height) - var(--footer-height) - var(--tg-content-safe-area-inset-top) - var(--tg-content-safe-area-inset-bottom)
+  );
+}
+
+.talks-container {
+  flex: 1;
 }
 
 .card {
@@ -348,7 +358,7 @@ form select {
   margin-top: 60px;
   /* avoid overlap with the fixed bottom navigation */
   padding-bottom: calc(
-    var(--bottom-nav-height) + var(--safe-area-bottom)
+    var(--bottom-nav-height) + var(--tg-content-safe-area-inset-bottom)
   );
 }
 
@@ -419,7 +429,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(var(--safe-area-top) + 8px) 16px 8px;
+  padding: calc(var(--tg-content-safe-area-inset-top) + 8px) 16px 8px;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
   position: sticky;
   top: 0;
@@ -522,7 +532,7 @@ body {
   justify-content: center;
   gap: 2rem;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
-  padding-bottom: var(--safe-area-bottom);
+  padding-bottom: var(--tg-content-safe-area-inset-bottom);
   height: var(--bottom-nav-height);
 }
 
@@ -557,4 +567,21 @@ body {
 .bottom-nav.disabled {
   pointer-events: none;
   opacity: 0.4;
+}
+
+.talks-page footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height);
+  padding-bottom: var(--tg-content-safe-area-inset-bottom);
+  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
+  z-index: 10;
+}
+
+.talks-page footer .bottom-nav {
+  position: static;
+  padding-bottom: 0;
+  height: 100%;
 }
