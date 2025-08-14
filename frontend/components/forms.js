@@ -117,6 +117,12 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       shouldSort: false,
     });
 
+    const input = choicesRef.current.input.element;
+    const container = choicesRef.current.containerOuter.element;
+    const focusInput = () => input.focus();
+    container.addEventListener('click', focusInput);
+    container.addEventListener('touchstart', focusInput);
+
     const ids = (initial.speakerIds || []).map(String);
     if (ids.length) {
       // Ensure the required speakers are selected even if the `selected`
@@ -124,8 +130,11 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       choicesRef.current.setChoiceByValue(ids);
     }
     setSpeakerIds(ids);
-
-    return () => choicesRef.current?.destroy();
+    return () => {
+      container.removeEventListener('click', focusInput);
+      container.removeEventListener('touchstart', focusInput);
+      choicesRef.current?.destroy();
+    };
   }, [speakers, initial]);
 
   const handleSubmit = ev => {
