@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, abort, send_from_directory, Response
+from flask_compress import Compress
 import os
 import json
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ import storage
 load_dotenv(override=True)
 
 app = Flask(__name__)
+Compress(app)
 
 # Where uploaded photos will be stored
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/data/photos')
