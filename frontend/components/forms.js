@@ -6,7 +6,7 @@ const { useState } = React;
 export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
   const [description, setDescription] = useState(initial.description || '');
-  const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '');
+  const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '/default_icon.svg');
   const [tags, setTags] = useState(initial.tags || []);
   const [uploading, setUploading] = useState(false);
 
@@ -76,7 +76,7 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
         ? e('div', null, 'Загрузка фото...')
         : e('input', { type: 'file', onChange: ev => ev.target.files[0] && uploadFile(ev.target.files[0]) })
     ),
-    e('button', { type: 'submit', disabled: uploading || !photoUrl }, 'Сохранить'),
+    e('button', { type: 'submit', disabled: uploading }, 'Сохранить'),
     e('button', { type: 'button', onClick: onCancel }, 'Отмена')
   );
 }
