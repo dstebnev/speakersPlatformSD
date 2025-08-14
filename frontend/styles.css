@@ -5,7 +5,7 @@
   --content-safe-area-bottom: 0px;
   --tg-content-safe-area-inset-top: 0px;
   --tg-content-safe-area-inset-bottom: 0px;
-  --header-height: 56px;
+  --header-height: 64px;
   --footer-height: var(--bottom-nav-height);
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
@@ -431,7 +431,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(var(--tg-content-safe-area-inset-top) + 8px) 16px 8px;
+  padding: calc(var(--tg-content-safe-area-inset-top) + 16px) 16px 8px;
   background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
   position: sticky;
   top: 0;
