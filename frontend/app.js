@@ -9,7 +9,6 @@ const e = React.createElement;
 const { useState, useEffect } = React;
 
 const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
-const navRoot = ReactDOM.createRoot(document.getElementById('nav-root'));
 const tg = window.Telegram?.WebApp;
 
 function updateSafeArea() {
@@ -22,6 +21,8 @@ function updateSafeArea() {
   if (contentSafe) {
     document.documentElement.style.setProperty('--content-safe-area-top', `${contentSafe.top}px`);
     document.documentElement.style.setProperty('--content-safe-area-bottom', `${contentSafe.bottom}px`);
+    document.documentElement.style.setProperty('--tg-content-safe-area-inset-top', `${contentSafe.top}px`);
+    document.documentElement.style.setProperty('--tg-content-safe-area-inset-bottom', `${contentSafe.bottom}px`);
   }
 }
 
@@ -44,10 +45,6 @@ function App() {
     const theme = tg?.themeParams || {};
     const root = document.documentElement;
     Object.entries(theme).forEach(([k, v]) => root.style.setProperty(`--tg-${k}`, v));
-  }, []);
-
-  useEffect(() => {
-    navRoot.render(e(NavigationBar));
   }, []);
 
   const getSpeakers = talk =>
@@ -79,59 +76,64 @@ function App() {
       onToggleFilters: () => setShowFilters(!showFilters),
       filtersOpen: showFilters,
     }),
-    e(FilterPanel, { filters, onChange: setFilters, visible: showFilters }),
-    activeFilters.length > 0 &&
-      e(
-        'div',
-        { className: 'active-filters' },
-        activeFilters.map((f, i) => e('span', { key: i }, f))
-      ),
-    loading
-      ? e('div', { className: 'loader', 'aria-live': 'polite' })
-      : error
-      ? e('div', { className: 'error' }, error)
-      : e(
-          'main',
-          { className: 'talks-container' },
-          e(
-            'section',
-            null,
-            e('h2', null, 'Будущие'),
-            upcoming.length === 0
-              ? e('p', null, 'Нет докладов')
-              : e(
-                  'div',
-                  { className: 'talk-list' },
-                  upcoming.map(t =>
-                    e(TalkCard, {
-                      key: t.id,
-                      talk: t,
-                      speakers: getSpeakers(t),
-                      onSelect: setSelectedTalk,
-                    })
+    e(
+      'div',
+      { className: 'talks-scroll' },
+      e(FilterPanel, { filters, onChange: setFilters, visible: showFilters }),
+      activeFilters.length > 0 &&
+        e(
+          'div',
+          { className: 'active-filters' },
+          activeFilters.map((f, i) => e('span', { key: i }, f))
+        ),
+      loading
+        ? e('div', { className: 'loader', 'aria-live': 'polite' })
+        : error
+        ? e('div', { className: 'error' }, error)
+        : e(
+            'main',
+            { className: 'talks-container' },
+            e(
+              'section',
+              null,
+              e('h2', null, 'Будущие'),
+              upcoming.length === 0
+                ? e('p', null, 'Нет докладов')
+                : e(
+                    'div',
+                    { className: 'talk-list' },
+                    upcoming.map(t =>
+                      e(TalkCard, {
+                        key: t.id,
+                        talk: t,
+                        speakers: getSpeakers(t),
+                        onSelect: setSelectedTalk,
+                      })
+                    )
                   )
-                )
-          ),
-          e(
-            'section',
-            null,
-            e('h2', null, 'Прошедшие'),
-            past.length === 0
-              ? e('p', null, 'Нет докладов')
-              : e(
-                  'div',
-                  { className: 'talk-list past' },
-                  past.map(t =>
-                    e(TalkCard, {
-                      key: t.id,
-                      talk: t,
-                      speakers: getSpeakers(t),
-                      onSelect: setSelectedTalk,
-                    })
+            ),
+            e(
+              'section',
+              null,
+              e('h2', null, 'Прошедшие'),
+              past.length === 0
+                ? e('p', null, 'Нет докладов')
+                : e(
+                    'div',
+                    { className: 'talk-list past' },
+                    past.map(t =>
+                      e(TalkCard, {
+                        key: t.id,
+                        talk: t,
+                        speakers: getSpeakers(t),
+                        onSelect: setSelectedTalk,
+                      })
+                    )
                   )
-                )
+            )
           )
-        )
+    ),
+    e('footer', null, e(NavigationBar))
   );
 }
 
@@ -165,6 +167,8 @@ if (document.readyState === 'loading') {
   tryExpand();
 }
 tg?.onEvent?.('safeAreaChanged', updateSafeArea);
+tg?.onEvent?.('safe_area_changed', updateSafeArea);
 tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
+tg?.onEvent?.('content_safe_area_changed', updateSafeArea);
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));

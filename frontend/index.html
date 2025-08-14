@@ -11,10 +11,9 @@
   <!-- Telegram WebApp JS to access Telegram features -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body class="page">
+<body class="page talks-body">
   <div id="root"></div>
   <div id="bottom-sheet-root"></div>
-  <div id="nav-root"></div>
   <script src="/config.js"></script>
   <script>
     (function() {
@@ -37,6 +36,8 @@
         if (contentSafe) {
           document.documentElement.style.setProperty('--content-safe-area-top', `${contentSafe.top}px`);
           document.documentElement.style.setProperty('--content-safe-area-bottom', `${contentSafe.bottom}px`);
+          document.documentElement.style.setProperty('--tg-content-safe-area-inset-top', `${contentSafe.top}px`);
+          document.documentElement.style.setProperty('--tg-content-safe-area-inset-bottom', `${contentSafe.bottom}px`);
         }
       }
       const tryExpand = () => {
@@ -50,7 +51,9 @@
         updateSafeArea();
       };
       tg?.onEvent?.('safeAreaChanged', updateSafeArea);
+      tg?.onEvent?.('safe_area_changed', updateSafeArea);
       tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
+      tg?.onEvent?.('content_safe_area_changed', updateSafeArea);
       if (document.readyState === 'loading') {
         window.addEventListener('DOMContentLoaded', tryExpand);
       } else {
