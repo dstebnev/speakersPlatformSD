@@ -38,7 +38,8 @@ body {
   background: linear-gradient(180deg, #cf00ff 0%, #3100ff 100%);
   background-attachment: fixed;
   overflow-x: hidden;
-  overflow-y: auto;
+  /* prevent double scroll; #root manages scrolling */
+  overflow-y: hidden;
   color: #fff;
 }
 
