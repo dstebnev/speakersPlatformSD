@@ -5,7 +5,16 @@
   --content-safe-area-bottom: 0px;
   --tg-content-safe-area-inset-top: 0px;
   --tg-content-safe-area-inset-bottom: 0px;
-  --header-height: 64px;
+  /* height of Telegram overlay buttons (capsule) */
+  --tg-overlay-buttons-height: 44px;
+  /* extra spacing below overlay buttons */
+  --header-extra-gap: 8px;
+  /* total top offset for the header */
+  --header-top-offset: calc(
+    var(--tg-content-safe-area-inset-top) +
+    var(--tg-overlay-buttons-height) +
+    var(--header-extra-gap)
+  );
   --footer-height: var(--bottom-nav-height);
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
@@ -94,18 +103,13 @@ html.admin-page {
 
 .talks-page {
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
 
 .talks-scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  height: calc(
-    100% - var(--header-height) - var(--footer-height) - var(--tg-content-safe-area-inset-top) - var(--tg-content-safe-area-inset-bottom)
-  );
-  /* Allow scrolling past the last talk so it isn't hidden by the fixed footer */
-  padding-bottom: calc(var(--footer-height) + var(--tg-content-safe-area-inset-bottom));
 }
 
 .talks-container {
@@ -431,11 +435,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(var(--tg-content-safe-area-inset-top) + 16px) 16px 8px;
-  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.1));
+  padding: var(--header-top-offset) 16px 8px;
+  background: #fff;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .main-header h1 {
@@ -574,16 +578,11 @@ body {
 }
 
 .talks-page footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   height: var(--footer-height);
   padding-bottom: var(--tg-content-safe-area-inset-bottom);
   background-color: var(--tg-secondary-bg-color, #fff);
   opacity: 1;
   backdrop-filter: none;
-  z-index: 10;
 }
 
 .talks-page footer .bottom-nav {
