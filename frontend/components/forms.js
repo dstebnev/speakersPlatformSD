@@ -99,10 +99,16 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
   const choicesRef = React.useRef(null);
 
   useEffect(() => {
-    if (!speakerRef.current) return;
-    // Recreate the Choices instance every time we edit a talk or the speaker
-    // list changes so that previously selected speakers are shown when
-    // editing.
+    // Don't try to initialise the widget until we have a select element and
+    // at least one option rendered. Initialising Choices too early leads to an
+    // empty widget that never receives preselected values.
+    if (!speakerRef.current || !speakers.length) return;
+
+    // Destroy previous instance if any. React will also call the cleanup when
+    // dependencies change, but destroying explicitly guards against manual
+    // re-renders.
+    choicesRef.current?.destroy();
+
     choicesRef.current = new Choices(speakerRef.current, {
       removeItemButton: true,
       searchEnabled: true,
@@ -110,23 +116,31 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       itemSelectText: '',
       shouldSort: false,
     });
-    const ids = initial.speakerIds || [];
-    ids.forEach(id => choicesRef.current.setChoiceByValue(id));
-    setSpeakerIds(ids);
+
+    const ids = (initial.speakerIds || []).map(String);
+    if (ids.length) {
+      // Ensure the required speakers are selected even if the `selected`
+      // attribute on <option> was ignored by Choices.
+      choicesRef.current.setChoiceByValue(ids);
+    }
+    setSpeakerIds(ids.map(Number));
+
     return () => choicesRef.current?.destroy();
   }, [speakers, initial]);
 
   const handleSubmit = ev => {
     ev.preventDefault();
-    const speakerIds = choicesRef.current.getValue(true);
-    if (!speakerIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
+    const selectedIds = choicesRef.current
+      ? choicesRef.current.getValue(true).map(Number)
+      : [];
+    if (!selectedIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
       alert('Заполните обязательные поля');
       return;
     }
     onSubmit({
       ...initial,
       title,
-      speakerIds,
+      speakerIds: selectedIds,
       description,
       eventName,
       direction,
@@ -153,11 +167,19 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
           multiple: true,
           onChange: ev =>
             setSpeakerIds(
-              Array.from(ev.target.selectedOptions, opt => opt.value)
+              Array.from(ev.target.selectedOptions, opt => Number(opt.value))
             ),
         },
         speakers.map(s =>
-          e('option', { key: s.id, value: s.id }, s.name)
+          e(
+            'option',
+            {
+              key: s.id,
+              value: String(s.id),
+              selected: (initial.speakerIds || []).includes(s.id),
+            },
+            s.name
+          )
         )
       )
     ),
