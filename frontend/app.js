@@ -11,19 +11,17 @@ const { useState, useEffect } = React;
 const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
 const tg = window.Telegram?.WebApp;
 
-function updateSafeArea() {
-  const safe = tg?.safeAreaInset;
-  const contentSafe = tg?.contentSafeAreaInset;
-  if (safe) {
-    document.documentElement.style.setProperty('--safe-area-top', `${safe.top}px`);
-    document.documentElement.style.setProperty('--safe-area-bottom', `${safe.bottom}px`);
-  }
-  if (contentSafe) {
-    document.documentElement.style.setProperty('--content-safe-area-top', `${contentSafe.top}px`);
-    document.documentElement.style.setProperty('--content-safe-area-bottom', `${contentSafe.bottom}px`);
-    document.documentElement.style.setProperty('--tg-content-safe-area-inset-top', `${contentSafe.top}px`);
-    document.documentElement.style.setProperty('--tg-content-safe-area-inset-bottom', `${contentSafe.bottom}px`);
-  }
+function applyContentSafeArea() {
+  const top = tg?.contentSafeAreaInset?.top ?? 0;
+  const bottom = tg?.contentSafeAreaInset?.bottom ?? 0;
+  document.documentElement.style.setProperty(
+    '--tg-content-safe-area-inset-top',
+    `${top}px`
+  );
+  document.documentElement.style.setProperty(
+    '--tg-content-safe-area-inset-bottom',
+    `${bottom}px`
+  );
 }
 
 function App() {
@@ -156,9 +154,8 @@ const tryExpand = () => {
     // Новый вариант API — web_app_setup_swipe_behavior
     tg.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
   }
-  tg.requestSafeArea?.();
   tg.requestContentSafeArea?.();
-  updateSafeArea();
+  applyContentSafeArea();
 };
 // Инициализируем при загрузке
 if (document.readyState === 'loading') {
@@ -166,9 +163,7 @@ if (document.readyState === 'loading') {
 } else {
   tryExpand();
 }
-tg?.onEvent?.('safeAreaChanged', updateSafeArea);
-tg?.onEvent?.('safe_area_changed', updateSafeArea);
-tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
-tg?.onEvent?.('content_safe_area_changed', updateSafeArea);
+tg?.onEvent?.('contentSafeAreaChanged', applyContentSafeArea);
+tg?.onEvent?.('content_safe_area_changed', applyContentSafeArea);
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
