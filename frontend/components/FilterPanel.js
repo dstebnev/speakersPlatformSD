@@ -1,7 +1,7 @@
 import { TAGS as DIRECTIONS } from '../tags.js';
 const e = React.createElement;
 
-export function FilterPanel({ filters, onChange, visible }) {
+export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
   const { direction, status, query, speaker, from, to } = filters;
   const set = (key, value) => onChange({ ...filters, [key]: value });
   const reset = () =>
@@ -22,11 +22,17 @@ export function FilterPanel({ filters, onChange, visible }) {
     }),
     e('input', {
       type: 'text',
+      list: 'speakers-list',
       placeholder: 'Спикер',
       value: speaker,
       onChange: ev => set('speaker', ev.target.value),
       'aria-label': 'Поиск по спикеру',
     }),
+    e(
+      'datalist',
+      { id: 'speakers-list' },
+      speakers.map(s => e('option', { key: s.id, value: s.name }))
+    ),
     e(
       'select',
       {
