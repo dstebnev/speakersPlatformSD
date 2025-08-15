@@ -1,4 +1,4 @@
-import { DIRECTIONS } from './directions.js';
+import { TAGS as DIRECTIONS } from './tags.js';
 import { ACCENTS } from './constants.js';
 
 async function loadData() {

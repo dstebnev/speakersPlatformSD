@@ -1,4 +1,4 @@
-import { DIRECTIONS } from '../directions.js';
+import { TAGS as DIRECTIONS } from '../tags.js';
 const e = React.createElement;
 
 export function FilterPanel({ filters, onChange, visible }) {

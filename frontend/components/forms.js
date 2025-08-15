@@ -1,5 +1,5 @@
-import { DIRECTIONS } from '../directions.js';
 import { TAGS } from '../tags.js';
+const DIRECTIONS = TAGS;
 const e = React.createElement;
 const { useState, useEffect } = React;
 
