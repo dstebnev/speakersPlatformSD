@@ -7,8 +7,29 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
   const [description, setDescription] = useState(initial.description || '');
   const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '/default_icon.svg');
-  const [tags, setTags] = useState(initial.tags || []);
   const [uploading, setUploading] = useState(false);
+  const tagRef = React.useRef(null);
+  const choicesRef = React.useRef(null);
+
+  useEffect(() => {
+    if (!tagRef.current) return;
+
+    choicesRef.current?.destroy();
+    choicesRef.current = new Choices(tagRef.current, {
+      removeItemButton: true,
+      searchEnabled: true,
+      placeholderValue: 'Выберите тег',
+      itemSelectText: '',
+      shouldSort: false,
+    });
+
+    const values = initial.tags || [];
+    if (values.length) {
+      choicesRef.current.setChoiceByValue(values);
+    }
+
+    return () => choicesRef.current?.destroy();
+  }, [initial]);
 
   const uploadFile = async f => {
     setUploading(true);
@@ -26,7 +47,10 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
       className: 'admin-form',
       onSubmit: ev => {
         ev.preventDefault();
-        onSubmit({ ...initial, name, description, photoUrl, tags });
+        const selectedTags = choicesRef.current
+          ? choicesRef.current.getValue(true)
+          : [];
+        onSubmit({ ...initial, name, description, photoUrl, tags: selectedTags });
       },
     },
     e('div', null, e('label', null, 'Имя'), e('input', { value: name, onChange: ev => setName(ev.target.value) })),
@@ -38,26 +62,19 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
     ),
     e(
       'div',
-      { className: 'admin-tags' },
+      null,
       e('label', null, 'Теги'),
       e(
-        'div',
-        null,
+        'select',
+        { id: 'tags', name: 'tags[]', ref: tagRef, multiple: true },
         TAGS.map(t =>
           e(
-            'label',
-            { key: t },
-            e('input', {
-              type: 'checkbox',
-              checked: tags.includes(t),
-              onChange: ev => {
-                if (ev.target.checked) {
-                  setTags([...tags, t]);
-                } else {
-                  setTags(tags.filter(x => x !== t));
-                }
-              },
-            }),
+            'option',
+            {
+              key: t,
+              value: t,
+              selected: (initial.tags || []).includes(t),
+            },
             t
           )
         )
