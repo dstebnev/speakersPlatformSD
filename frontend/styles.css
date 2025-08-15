@@ -5,16 +5,8 @@
   --content-safe-area-bottom: 0px;
   --tg-content-safe-area-inset-top: 0px;
   --tg-content-safe-area-inset-bottom: 0px;
-  /* height of Telegram overlay buttons (capsule) */
-  --tg-overlay-buttons-height: 44px;
-  /* extra spacing below overlay buttons */
-  --header-extra-gap: 8px;
-  /* total top offset for the header */
-  --header-top-offset: calc(
-    var(--tg-content-safe-area-inset-top) +
-    var(--tg-overlay-buttons-height) +
-    var(--header-extra-gap)
-  );
+  /* total top offset for the header (overlay buttons already included) */
+  --header-top-offset: var(--tg-content-safe-area-inset-top);
   --footer-height: var(--bottom-nav-height);
   /* Lift speaker images higher on the screen */
   --speaker-top: 20px;
