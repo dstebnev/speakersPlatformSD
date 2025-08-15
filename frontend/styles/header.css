@@ -1,9 +1,9 @@
 :root {
   /* Будут выставляться из JS */
   --safe-top: 0px;                 /* tg.contentSafeAreaInset.top */
-  --overlay-h: 44px;               /* капсулы Telegram */
-  --header-gap: 8px;               /* воздух */
-  --header-top-offset: calc(var(--safe-top) + var(--overlay-h) + var(--header-gap));
+  /* Telegram now includes overlay buttons in content safe area,
+     so use the value directly without extra offsets */
+  --header-top-offset: var(--safe-top);
 
   --header-bg: #fff;
   --header-fg: #111;
