@@ -48,6 +48,21 @@
   width: 100%;
 }
 
+.admin-speaker-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.admin-speaker-photo {
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .admin-item-details {
   width: 100%;
   max-height: 0;

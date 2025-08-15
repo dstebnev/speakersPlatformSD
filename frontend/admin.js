@@ -169,7 +169,10 @@ function AdminApp() {
           onClick: () => toggleSpeaker(s.id)
         },
           e('div', { className: 'admin-item-header' },
-            e('span', { className: 'admin-item-name' }, s.name),
+            e('div', { className: 'admin-speaker-info' },
+              e('img', { src: s.photoUrl || '/default_icon.svg', alt: '', className: 'admin-speaker-photo' }),
+              e('span', { className: 'admin-item-name' }, s.name)
+            ),
             e('div', {
               className: 'admin-actions',
               onClick: ev => ev.stopPropagation()
