@@ -17,9 +17,13 @@ function updateSafeArea() {
 
 function ProfileApp() {
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     tg?.ready();
-    setUser(tg?.initDataUnsafe?.user || null);
+    const u = tg?.initDataUnsafe?.user || null;
+    setUser(u);
+    const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
+    setIsAdmin(cfg.mode === 'debug' || (u && cfg.admins.includes(u.username)));
     tg?.expand?.();
     tg?.requestFullscreen?.();
     tg?.disableVerticalSwipes?.();
@@ -38,13 +42,31 @@ function ProfileApp() {
     }
   }, []);
 
+  const handleClearCache = async () => {
+    try {
+      await fetch('/api/cache/clear', { method: 'POST' });
+      if (window.caches) {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+      try {
+        localStorage?.clear();
+        sessionStorage?.clear();
+      } catch (err) {}
+      alert('Кэш сброшен');
+    } catch (err) {
+      alert('Не удалось сбросить кэш');
+    }
+  };
+
   if (!user) {
     return e('div', null, 'Информация о пользователе недоступна');
   }
 
   return e('div', null,
     e('div', null, `Имя: ${user.first_name} ${user.last_name || ''}`),
-    e('div', null, `Username: @${user.username || ''}`)
+    e('div', null, `Username: @${user.username || ''}`),
+    isAdmin && e('button', { onClick: handleClearCache }, 'Сбросить кэш')
   );
 }
 

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from uuid import uuid4
 import datetime
 from io import BytesIO
+import shutil
 from PIL import Image
 import storage
 
@@ -164,6 +165,16 @@ def is_admin_request(req: request) -> bool:
         or req.args.get('u')
     )
     return username in ADMIN_USERNAMES
+
+
+@app.route('/api/cache/clear', methods=['POST'])
+def clear_cache():
+    if not is_admin_request(request):
+        return abort(403)
+    for root, dirs, _ in os.walk('.'):
+        if '__pycache__' in dirs:
+            shutil.rmtree(os.path.join(root, '__pycache__'), ignore_errors=True)
+    return jsonify({'ok': True})
 
 @app.route('/')
 def index():
