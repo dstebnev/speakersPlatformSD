@@ -73,12 +73,6 @@ html.admin-page {
 .stats-page {
   background: #f5f5f5;
   color: #000;
-  height: 100%;
-  /* allow slight pull-down to avoid Telegram browser minimization */
-  min-height: calc(100% + 20px);
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 #profile-root {

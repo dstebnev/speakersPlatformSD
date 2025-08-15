@@ -5,19 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles/header.css" />
   <link rel="stylesheet" href="admin.css" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <!-- Telegram WebApp JS -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="safe-area.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 <body class="admin-page page">
-  <header>
-    <h1>Панель администратора</h1>
+  <header class="app-header app-header--hero">
+    <div class="app-header__spacer" aria-hidden="true"></div>
+    <div class="app-header__bar">
+      <h1 class="app-header__title">Панель администратора</h1>
+    </div>
+    <div class="app-header__subbar app-header__subbar--tabs">
+      <button class="tab is-active" id="tab-speakers">Спикеры</button>
+      <button class="tab" id="tab-talks">Выступления</button>
+      <button class="cta" id="add-speaker">Добавить спикера</button>
+    </div>
   </header>
-  <main id="admin-root" class="admin-content"></main>
+  <main class="page__scroll">
+    <div id="admin-root" class="admin-content"></div>
+  </main>
   <nav class="bottom-nav">
     <a href="/" title="Выступления">🎤</a>
     <a href="/stats" id="stats-link" title="Статистика">📊</a>
@@ -38,7 +50,7 @@
       if (cfg.mode !== 'debug' && !isAdmin) {
         document.getElementById('admin-link')?.remove();
         document.getElementById('stats-link')?.remove();
-        document.querySelector('main.admin-content').innerHTML = 'Доступ запрещён';
+        document.getElementById('admin-root').innerHTML = 'Доступ запрещён';
         return;
       }
       function updateSafeArea() {

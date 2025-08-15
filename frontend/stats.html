@@ -5,22 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Statistics</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles/header.css" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="safe-area.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="stats-page page">
-  <div class="stats-wrapper">
-    <div class="chart-block">
-      <h3 class="chart-title">Доклады по направлениям</h3>
-      <canvas id="talks-chart"></canvas>
+  <header class="app-header app-header--plain">
+    <div class="app-header__spacer" aria-hidden="true"></div>
+    <div class="app-header__bar">
+      <h1 class="app-header__title">Статистика</h1>
     </div>
-    <div class="chart-block">
-      <h3 class="chart-title">Активные спикеры</h3>
-      <canvas id="speakers-chart"></canvas>
+  </header>
+  <main class="page__scroll">
+    <div class="stats-wrapper">
+      <div class="chart-block">
+        <h3 class="chart-title">Доклады по направлениям</h3>
+        <canvas id="talks-chart"></canvas>
+      </div>
+      <div class="chart-block">
+        <h3 class="chart-title">Активные спикеры</h3>
+        <canvas id="speakers-chart"></canvas>
+      </div>
     </div>
-  </div>
+  </main>
   <nav class="bottom-nav">
     <a href="/" title="Выступления">🎤</a>
     <a href="/stats" id="stats-link" class="active" title="Статистика">📊</a>

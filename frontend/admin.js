@@ -19,6 +19,48 @@ function AdminApp() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const btnSpeakers = document.getElementById('tab-speakers');
+    const btnTalks = document.getElementById('tab-talks');
+
+    const handleSpeakers = () => {
+      setEditingSpeaker(null);
+      setEditingTalk(null);
+      setTab('speakers');
+    };
+    const handleTalks = () => {
+      setEditingSpeaker(null);
+      setEditingTalk(null);
+      setTab('talks');
+    };
+
+    btnSpeakers?.addEventListener('click', handleSpeakers);
+    btnTalks?.addEventListener('click', handleTalks);
+
+    return () => {
+      btnSpeakers?.removeEventListener('click', handleSpeakers);
+      btnTalks?.removeEventListener('click', handleTalks);
+    };
+  }, []);
+
+  useEffect(() => {
+    const btnSpeakers = document.getElementById('tab-speakers');
+    const btnTalks = document.getElementById('tab-talks');
+    const addBtn = document.getElementById('add-speaker');
+    if (!btnSpeakers || !btnTalks || !addBtn) return;
+    if (tab === 'speakers') {
+      btnSpeakers.classList.add('is-active');
+      btnTalks.classList.remove('is-active');
+      addBtn.textContent = 'Добавить спикера';
+      addBtn.onclick = () => setEditingSpeaker({});
+    } else {
+      btnTalks.classList.add('is-active');
+      btnSpeakers.classList.remove('is-active');
+      addBtn.textContent = 'Добавить выступление';
+      addBtn.onclick = () => setEditingTalk({});
+    }
+  }, [tab]);
+
+  useEffect(() => {
     const load = async () => {
         const tg = window.Telegram?.WebApp;
         tg?.ready();
@@ -119,7 +161,6 @@ function AdminApp() {
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
     e('div', { className: 'admin-list' },
-      e('button', { onClick: () => setEditingSpeaker({}) }, 'Добавить спикера'),
       speakers.map(s => e('div', { key: s.id, className: 'admin-list-item' },
         e('span', { className: 'admin-item-name' }, s.name),
         e('div', { className: 'admin-actions' },
@@ -140,7 +181,6 @@ function AdminApp() {
   const talkSection = editingTalk ?
     e(TalkForm, { initial: editingTalk, speakers, onSubmit: saveTalk, onCancel: () => setEditingTalk(null) }) :
     e('div', { className: 'admin-list' },
-      e('button', { onClick: () => setEditingTalk({}) }, 'Добавить выступление'),
       talks.map(t => {
         const names = speakers.filter(s => (t.speakerIds || []).includes(s.id)).map(s => s.name).join(', ');
         return e('div', { key: t.id, className: 'admin-list-item' },
@@ -163,20 +203,6 @@ function AdminApp() {
 
   return e('div', null,
     error && e('div', { className: 'error' }, error),
-    e('div', { className: 'admin-tabs' },
-      e('button', {
-        onClick: () => {
-          setEditingSpeaker(null);
-          setTab('speakers');
-        }
-      }, 'Спикеры'),
-      e('button', {
-        onClick: () => {
-          setEditingTalk(null);
-          setTab('talks');
-        }
-      }, 'Выступления')
-    ),
     tab === 'speakers' ? speakerSection : talkSection
   );
 }
