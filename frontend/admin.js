@@ -1,4 +1,3 @@
-import { DIRECTIONS } from './directions.js';
 import { SpeakerForm, TalkForm } from './components/forms.js';
 
 const e = React.createElement;
