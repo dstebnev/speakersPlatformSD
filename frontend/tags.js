@@ -1,2 +1,2 @@
-export const TAGS = ['frontend','backend','QA','mobile','product','data','manager'];
+export const TAGS = ['frontend','backend','QA','mobile','product','data','manager','AI','embedded'];
 
