@@ -417,22 +417,6 @@ body {
   color: var(--tg-text-color, #000000);
 }
 
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--header-top-offset) 16px 8px;
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.main-header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
 
 .filter-panel {
   background: var(--tg-secondary-bg-color, #fff);

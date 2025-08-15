@@ -1,7 +1,7 @@
 import { TalkCard } from './components/TalkCard.js';
 import { FilterPanel } from './components/FilterPanel.js';
 import { NavigationBar } from './components/NavigationBar.js';
-import { Header } from './components/Header.js';
+import { Header } from './components/Header.js'; // app-header layout
 import { useTalkData } from './hooks/useTalkData.js';
 
 const e = React.createElement;
