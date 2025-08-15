@@ -50,13 +50,22 @@
 }
 
 .icon-btn {
-  background: transparent;
+  background: transparent !important;
   border: none;
   padding: 4px;
   cursor: pointer;
   font-size: 20px;
-  box-shadow: none;
+  box-shadow: none !important;
   filter: none;
+  outline: none;
+}
+
+.icon-btn:hover,
+.icon-btn:focus,
+.icon-btn:active {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none;
 }
 
 .admin-form label {
@@ -91,8 +100,9 @@
 .choices__item .choices__button {
   background-color: transparent !important;
   border: none;
-  box-shadow: none;
+  box-shadow: none !important;
   filter: none;
+  outline: none;
 }
 
 .choices__item .choices__button::after {
@@ -104,7 +114,7 @@
 .choices__item .choices__button:active {
   background-color: transparent !important;
   outline: none;
-  box-shadow: none;
+  box-shadow: none !important;
   filter: none;
 }
 
