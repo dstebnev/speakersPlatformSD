@@ -33,10 +33,11 @@
   background: var(--header-bg);
   color: var(--header-fg);
   box-shadow: var(--shadow-sm);
+  padding-top: var(--header-top-offset);
 }
 
-/* Spacer уводит шапку из-под Close/стрелки */
-.app-header__spacer { height: var(--header-top-offset); }
+/* Spacer больше не нужен, но оставлен для совместимости */
+.app-header__spacer { height: 0; }
 
 /* Основная строка */
 .app-header__bar {
