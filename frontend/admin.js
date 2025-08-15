@@ -45,18 +45,13 @@ function AdminApp() {
   useEffect(() => {
     const btnSpeakers = document.getElementById('tab-speakers');
     const btnTalks = document.getElementById('tab-talks');
-    const addBtn = document.getElementById('add-speaker');
-    if (!btnSpeakers || !btnTalks || !addBtn) return;
+    if (!btnSpeakers || !btnTalks) return;
     if (tab === 'speakers') {
       btnSpeakers.classList.add('is-active');
       btnTalks.classList.remove('is-active');
-      addBtn.textContent = 'Добавить спикера';
-      addBtn.onclick = () => setEditingSpeaker({});
     } else {
       btnTalks.classList.add('is-active');
       btnSpeakers.classList.remove('is-active');
-      addBtn.textContent = 'Добавить выступление';
-      addBtn.onclick = () => setEditingTalk({});
     }
   }, [tab]);
 
@@ -161,6 +156,7 @@ function AdminApp() {
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
     e('div', { className: 'admin-list' },
+      e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingSpeaker({}) }, '+'),
       speakers.map(s => e('div', { key: s.id, className: 'admin-list-item' },
         e('span', { className: 'admin-item-name' }, s.name),
         e('div', { className: 'admin-actions' },
@@ -181,6 +177,7 @@ function AdminApp() {
   const talkSection = editingTalk ?
     e(TalkForm, { initial: editingTalk, speakers, onSubmit: saveTalk, onCancel: () => setEditingTalk(null) }) :
     e('div', { className: 'admin-list' },
+      e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingTalk({}) }, '+'),
       talks.map(t => {
         const names = speakers.filter(s => (t.speakerIds || []).includes(s.id)).map(s => s.name).join(', ');
         return e('div', { key: t.id, className: 'admin-list-item' },

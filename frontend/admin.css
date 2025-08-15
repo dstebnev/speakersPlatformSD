@@ -49,6 +49,13 @@
   margin-top: 0;
 }
 
+.admin-add-btn {
+  justify-content: center;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 700;
+}
+
 .icon-btn {
   background: transparent;
   border: none;
