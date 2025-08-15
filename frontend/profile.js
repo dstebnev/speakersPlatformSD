@@ -29,6 +29,13 @@ function ProfileApp() {
     updateSafeArea();
     tg?.onEvent?.('safeAreaChanged', updateSafeArea);
     tg?.onEvent?.('contentSafeAreaChanged', updateSafeArea);
+    const bar = document.querySelector('.app-header__bar');
+    if (bar) {
+      const title = document.createElement('h1');
+      title.className = 'app-header__title';
+      title.textContent = 'Личный кабинет';
+      bar.appendChild(title);
+    }
   }, []);
 
   if (!user) {
@@ -36,7 +43,6 @@ function ProfileApp() {
   }
 
   return e('div', null,
-    e('h2', null, 'Личный кабинет'),
     e('div', null, `Имя: ${user.first_name} ${user.last_name || ''}`),
     e('div', null, `Username: @${user.username || ''}`)
   );
