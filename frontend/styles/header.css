@@ -1,0 +1,134 @@
+:root {
+  /* Будут выставляться из JS */
+  --safe-top: 0px;                 /* tg.contentSafeAreaInset.top */
+  --overlay-h: 44px;               /* капсулы Telegram */
+  --header-gap: 8px;               /* воздух */
+  --header-top-offset: calc(var(--safe-top) + var(--overlay-h) + var(--header-gap));
+
+  --header-bg: #fff;
+  --header-fg: #111;
+  --shadow-sm: 0 2px 12px rgba(0,0,0,.06);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.12);
+
+  --title-lg: 28px;
+  --title-md: 22px;
+  --title-w-b: 800;
+  --title-w-sb: 700;
+
+  --hero-bg: #0ecbff;              /* фирменный голубой */
+  --hero-fg: #fff;
+  --tab-bg: #eaf9ff;
+  --tab-active-bg: #9be8ff;
+  --cta-bg: #12e7ff;
+}
+
+/* Базовая шапка */
+.app-header {
+  position: sticky;         /* можно fixed, если нужно */
+  top: 0;
+  z-index: 1000;
+  background: var(--header-bg);
+  color: var(--header-fg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Spacer уводит шапку из-под Close/стрелки */
+.app-header__spacer { height: var(--header-top-offset); }
+
+/* Основная строка */
+.app-header__bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.app-header__title {
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* Варианты */
+.app-header--plain .app-header__title {
+  font-size: var(--title-md);
+  font-weight: var(--title-w-sb);
+}
+
+.app-header--hero {
+  background: var(--hero-bg);
+  color: var(--hero-fg);
+  box-shadow: var(--shadow-md);
+}
+
+.app-header--hero .app-header__bar {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.app-header--hero .app-header__title {
+  font-size: var(--title-lg);
+  font-weight: var(--title-w-b);
+}
+
+/* Подбар (табы/кнопки) */
+.app-header__subbar {
+  padding: 10px 16px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Табы и кнопки */
+.app-header__subbar .tab {
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--tab-bg);
+  color: #063a47;
+  font-weight: 600;
+}
+
+.app-header__subbar .tab.is-active {
+  background: var(--tab-active-bg);
+}
+
+.app-header__subbar .cta {
+  margin-left: auto;
+  border: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--cta-bg);
+  color: #063a47;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(18, 231, 255, 0.35);
+}
+
+/* Страница: фиксируем футер, скролл только у контента */
+html, body { height: 100%; }
+body { overflow: hidden; }
+.page {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;  /* header | content | footer */
+}
+.page__scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #f7f7f7;
+}
+.app-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+  background: #fff;              /* непрозрачный */
+  box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+}
+
+/* Мелкие адаптивные правки */
+@media (max-width: 360px) {
+  .app-header--hero .app-header__title { font-size: 24px; }
+}
+
