@@ -40,7 +40,8 @@
         }
       }
       const tryExpand = () => {
-        tg.ready();
+        if (!tg) return;
+        tg.ready?.();
         tg.expand?.();
         tg.requestFullscreen?.();
         tg.disableVerticalSwipes?.();
