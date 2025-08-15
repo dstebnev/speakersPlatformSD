@@ -9,19 +9,6 @@ const { useState, useEffect } = React;
 
 const tg = window.Telegram?.WebApp;
 
-function applyContentSafeArea() {
-  const top = tg?.contentSafeAreaInset?.top ?? 0;
-  const bottom = tg?.contentSafeAreaInset?.bottom ?? 0;
-  document.documentElement.style.setProperty(
-    '--tg-content-safe-area-inset-top',
-    `${top}px`
-  );
-  document.documentElement.style.setProperty(
-    '--tg-content-safe-area-inset-bottom',
-    `${bottom}px`
-  );
-}
-
 function App() {
   const [filters, setFilters] = useState({
     direction: 'all',
@@ -155,8 +142,6 @@ const tryExpand = () => {
     // Новый вариант API — web_app_setup_swipe_behavior
     tg.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
   }
-  tg.requestContentSafeArea?.();
-  applyContentSafeArea();
 };
 // Инициализируем при загрузке
 if (document.readyState === 'loading') {
@@ -164,7 +149,5 @@ if (document.readyState === 'loading') {
 } else {
   tryExpand();
 }
-tg?.onEvent?.('contentSafeAreaChanged', applyContentSafeArea);
-tg?.onEvent?.('content_safe_area_changed', applyContentSafeArea);
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
