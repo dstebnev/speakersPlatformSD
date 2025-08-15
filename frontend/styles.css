@@ -486,28 +486,65 @@ body {
 }
 
 .talk-card {
-  background: var(--tg-secondary-bg-color, rgba(0,0,0,0.05));
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  border-radius: 14px;
+  background: #f4f4f4;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
 .talk-card.past {
   opacity: 0.7;
 }
 
-.talk-card .speakers strong {
+.talk-card__header {
+  display: grid;
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.talk-card__header .speakers strong {
   font-weight: 700;
 }
 
-.talk-card .action {
-  margin-top: 8px;
+.talk-card__header:focus-visible {
+  outline: 2px solid #0ecbff;
 }
 
-.talk-card .action a {
+.talk-card__expander {
+  overflow: clip;
+}
+
+.talk-card__details {
+  padding: 16px;
+  background: #111;
+  color: #fff;
+}
+
+.talk-card[aria-expanded="true"] .talk-card__header::after {
+  transform: rotate(180deg);
+}
+
+.talk-card__header::after {
+  content: '';
+  justify-self: end;
+  width: 12px;
+  height: 12px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+.talk-card__details .talk-desc {
+  margin-top: 0;
+}
+
+.talk-actions a {
   display: inline-block;
   padding: 6px 10px;
   border-radius: 4px;
@@ -517,7 +554,7 @@ body {
   font-weight: 600;
 }
 
-.talk-card.past .action a {
+.talk-card.past .talk-actions a {
   background: none;
   color: var(--tg-link-color, #00e5ff);
   text-decoration: underline;
