@@ -61,7 +61,7 @@ function App() {
     e(
       'div',
       { className: 'talks-scroll' },
-      e(FilterPanel, { filters, onChange: setFilters, visible: showFilters }),
+      e(FilterPanel, { filters, onChange: setFilters, visible: showFilters, speakers }),
       activeFilters.length > 0 &&
         e(
           'div',
