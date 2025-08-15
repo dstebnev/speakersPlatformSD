@@ -33,7 +33,7 @@
   background: var(--header-bg);
   color: var(--header-fg);
   box-shadow: var(--shadow-sm);
-  padding-top: calc(var(--header-top-offset) + 30px);
+  padding-top: calc(var(--header-top-offset) + 150px);
 }
 
 /* Spacer больше не нужен, но оставлен для совместимости */
