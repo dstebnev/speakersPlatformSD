@@ -5,12 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profile</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles/header.css" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="safe-area.js"></script>
 </head>
 <body class="page">
-  <div id="profile-root"></div>
+  <header class="app-header app-header--plain">
+    <div class="app-header__spacer" aria-hidden="true"></div>
+    <div class="app-header__bar"></div>
+  </header>
+  <main class="page__scroll">
+    <div id="profile-root"></div>
+  </main>
   <nav class="bottom-nav">
     <a href="/" title="Выступления">🎤</a>
     <a href="/stats" id="stats-link" title="Статистика">📊</a>
@@ -18,7 +26,6 @@
     <a href="/profile" class="active" title="Личный кабинет">👤</a>
   </nav>
   <script src="/config.js"></script>
-  <script src="safe-area.js"></script>
   <script>
     (function() {
       const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
