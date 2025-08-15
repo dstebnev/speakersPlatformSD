@@ -1,9 +1,9 @@
 :root {
   /* Будут выставляться из JS */
-  --safe-top: 0px;                 /* tg.contentSafeAreaInset.top */
+  --tg-content-safe-area-inset-top: 0px; /* tg.contentSafeAreaInset.top */
   /* Telegram now includes overlay buttons in content safe area,
      so use the value directly without extra offsets */
-  --header-top-offset: var(--safe-top);
+  --header-top-offset: var(--tg-content-safe-area-inset-top);
 
   --header-bg: #fff;
   --header-fg: #111;
@@ -131,4 +131,3 @@ body { overflow: hidden; }
 @media (max-width: 360px) {
   .app-header--hero .app-header__title { font-size: 24px; }
 }
-
