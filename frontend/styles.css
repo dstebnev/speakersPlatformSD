@@ -35,7 +35,6 @@ html, body {
 
 /* Provide default safe area offsets for page containers */
 .page {
-  padding-top: calc(var(--tg-content-safe-area-inset-top) + 12px);
   padding-bottom: var(--tg-content-safe-area-inset-bottom);
 }
 
