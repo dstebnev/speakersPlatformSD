@@ -2,13 +2,11 @@ import { TalkCard } from './components/TalkCard.js';
 import { FilterPanel } from './components/FilterPanel.js';
 import { NavigationBar } from './components/NavigationBar.js';
 import { Header } from './components/Header.js';
-import { BottomSheet } from './components/BottomSheet.js';
 import { useTalkData } from './hooks/useTalkData.js';
 
 const e = React.createElement;
 const { useState, useEffect } = React;
 
-const sheetRoot = ReactDOM.createRoot(document.getElementById('bottom-sheet-root'));
 const tg = window.Telegram?.WebApp;
 
 function applyContentSafeArea() {
@@ -34,7 +32,7 @@ function App() {
     to: '',
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedTalk, setSelectedTalk] = useState(null);
+  const [openedId, setOpenedId] = useState(null);
 
   const { upcoming, past, speakers, loading, error } = useTalkData(filters);
 
@@ -49,15 +47,14 @@ function App() {
     speakers.filter(s => (talk?.speakerIds || []).includes(s.id));
 
   useEffect(() => {
-    sheetRoot.render(
-      selectedTalk
-        ? e(BottomSheet, {
-            talk: selectedTalk,
-            speakers: getSpeakers(selectedTalk),
-          })
-        : null
-    );
-  }, [selectedTalk, speakers]);
+    const onKey = e => {
+      if (e.key === 'Escape') setOpenedId(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => setOpenedId(null), [filters]);
 
   const activeFilters = [];
   if (filters.query) activeFilters.push(`Название: ${filters.query}`);
@@ -105,7 +102,9 @@ function App() {
                         key: t.id,
                         talk: t,
                         speakers: getSpeakers(t),
-                        onSelect: setSelectedTalk,
+                        isOpen: openedId === t.id,
+                        onToggle: id =>
+                          setOpenedId(prev => (prev === id ? null : id)),
                       })
                     )
                   )
@@ -124,7 +123,9 @@ function App() {
                         key: t.id,
                         talk: t,
                         speakers: getSpeakers(t),
-                        onSelect: setSelectedTalk,
+                        isOpen: openedId === t.id,
+                        onToggle: id =>
+                          setOpenedId(prev => (prev === id ? null : id)),
                       })
                     )
                   )
@@ -139,7 +140,7 @@ function App() {
 const tryExpand = () => {
   if (!tg) return;
   tg.ready();
-  // Разворачиваем BottomSheet на мобильных устройствах
+  // Разворачиваем приложение на мобильных устройствах
   tg.expand?.();
   // Запрашиваем полноэкранный режим (Bot API 8.0+)
   if (typeof tg.requestFullscreen === 'function') {
