@@ -50,11 +50,13 @@
 }
 
 .icon-btn {
-  background: none;
+  background: transparent;
   border: none;
   padding: 4px;
   cursor: pointer;
   font-size: 20px;
+  box-shadow: none;
+  filter: none;
 }
 
 .admin-form label {
@@ -89,6 +91,8 @@
 .choices__item .choices__button {
   background-color: transparent !important;
   border: none;
+  box-shadow: none;
+  filter: none;
 }
 
 .choices__item .choices__button::after {
@@ -100,5 +104,7 @@
 .choices__item .choices__button:active {
   background-color: transparent !important;
   outline: none;
+  box-shadow: none;
+  filter: none;
 }
 
