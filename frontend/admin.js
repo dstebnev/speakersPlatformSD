@@ -14,6 +14,7 @@ function AdminApp() {
   const [talks, setTalks] = useState([]);
   const [editingSpeaker, setEditingSpeaker] = useState(null);
   const [editingTalk, setEditingTalk] = useState(null);
+  const [expandedSpeakerId, setExpandedSpeakerId] = useState(null);
   const [tab, setTab] = useState('speakers');
   const [error, setError] = useState(null);
 
@@ -119,6 +120,10 @@ function AdminApp() {
     }
   };
 
+  const toggleSpeaker = id => {
+    setExpandedSpeakerId(expandedSpeakerId === id ? null : id);
+  };
+
   const saveTalk = async data => {
     try {
       if (data.id) {
@@ -156,21 +161,43 @@ function AdminApp() {
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
     e('div', { className: 'admin-list' },
       e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingSpeaker({}) }, '+'),
-      speakers.map(s => e('div', { key: s.id, className: 'admin-list-item' },
-        e('span', { className: 'admin-item-name' }, s.name),
-        e('div', { className: 'admin-actions' },
-          e('button', {
-            className: 'icon-btn',
-            title: 'Редактировать',
-            onClick: () => setEditingSpeaker(s)
-          }, '✏️'),
-          e('button', {
-            className: 'icon-btn',
-            title: 'Удалить',
-            onClick: () => window.confirm('Удалить спикера?') && deleteSpeaker(s.id)
-          }, '🗑️')
-        )
-      ))
+      speakers.map(s => {
+        const expanded = expandedSpeakerId === s.id;
+        return e('div', {
+          key: s.id,
+          className: `admin-list-item admin-speaker-item${expanded ? ' expanded' : ''}`,
+          onClick: () => toggleSpeaker(s.id)
+        },
+          e('div', { className: 'admin-item-header' },
+            e('span', { className: 'admin-item-name' }, s.name),
+            e('div', {
+              className: 'admin-actions',
+              onClick: ev => ev.stopPropagation()
+            },
+              e('button', {
+                className: 'icon-btn',
+                title: 'Редактировать',
+                onClick: () => setEditingSpeaker(s)
+              }, '✏️'),
+              e('button', {
+                className: 'icon-btn',
+                title: 'Удалить',
+                onClick: () => window.confirm('Удалить спикера?') && deleteSpeaker(s.id)
+              }, '🗑️')
+            )
+          ),
+          e('div', { className: `admin-item-details${expanded ? ' expanded' : ''}` },
+            e('p', null, s.description),
+            e('div', { className: 'admin-tags' },
+              (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))
+            ),
+            e('button', {
+              className: 'collapse-btn',
+              onClick: ev => { ev.stopPropagation(); toggleSpeaker(s.id); }
+            }, 'Свернуть')
+          )
+        );
+      })
     );
 
   const talkSection = editingTalk ?
