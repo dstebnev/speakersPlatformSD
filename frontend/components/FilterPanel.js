@@ -1,9 +1,30 @@
 import { TAGS as DIRECTIONS } from '../tags.js';
+import { useDebounce } from '../hooks/useDebounce.js';
 const e = React.createElement;
+const { useState, useEffect } = React;
 
 export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
   const { direction, status, query, speaker, from, to } = filters;
+
+  const [localQuery, setLocalQuery] = useState(query);
+  const [localSpeaker, setLocalSpeaker] = useState(speaker);
+
+  useEffect(() => setLocalQuery(query), [query]);
+  useEffect(() => setLocalSpeaker(speaker), [speaker]);
+
+  const debouncedQuery = useDebounce(localQuery, 300);
+  const debouncedSpeaker = useDebounce(localSpeaker, 300);
+
   const set = (key, value) => onChange({ ...filters, [key]: value });
+
+  useEffect(() => {
+    if (debouncedQuery !== query) set('query', debouncedQuery);
+  }, [debouncedQuery, query]);
+
+  useEffect(() => {
+    if (debouncedSpeaker !== speaker) set('speaker', debouncedSpeaker);
+  }, [debouncedSpeaker, speaker]);
+
   const reset = () =>
     onChange({ direction: 'all', status: 'all', query: '', speaker: '', from: '', to: '' });
 
@@ -16,16 +37,16 @@ export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
     e('input', {
       type: 'text',
       placeholder: 'Название доклада',
-      value: query,
-      onChange: ev => set('query', ev.target.value),
+      value: localQuery,
+      onChange: ev => setLocalQuery(ev.target.value),
       'aria-label': 'Поиск по названию',
     }),
     e('input', {
       type: 'text',
       list: 'speakers-list',
       placeholder: 'Спикер',
-      value: speaker,
-      onChange: ev => set('speaker', ev.target.value),
+      value: localSpeaker,
+      onChange: ev => setLocalSpeaker(ev.target.value),
       'aria-label': 'Поиск по спикеру',
     }),
     e(
