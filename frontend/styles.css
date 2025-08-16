@@ -484,6 +484,11 @@ body {
   overflow-wrap: anywhere;
 }
 
+.talk-card__header > *,
+.talk-card__details > * {
+  min-width: 0;
+}
+
 .talk-card.past {
   opacity: 0.7;
 }
