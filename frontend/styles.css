@@ -466,7 +466,7 @@ body {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   margin-bottom: 12px;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .talk-card.past {
@@ -486,7 +486,7 @@ body {
 
 .talk-card__header .talk-title {
   margin: 4px 0;
-  font-size: 1.25em;
+  font-size: 1em;
   font-weight: 600;
 }
 
@@ -507,6 +507,10 @@ body {
   background: #111;
   color: #fff;
   font-size: inherit;
+}
+
+.talk-card__details h4 {
+  font-size: 1em;
 }
 
 .talk-card[aria-expanded="true"] .talk-card__header::after {
