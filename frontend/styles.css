@@ -474,14 +474,17 @@ body {
 }
 
 .talk-card__header {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
   text-align: left;
-  padding: 16px;
+  padding: 16px 40px 16px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: inherit;
+  position: relative;
 }
 
 .talk-card__header .talk-title {
@@ -513,19 +516,21 @@ body {
   font-size: 1em;
 }
 
-.talk-card[aria-expanded="true"] .talk-card__header::after {
-  transform: rotate(180deg);
-}
-
 .talk-card__header::after {
   content: '';
-  justify-self: end;
+  position: absolute;
+  right: 16px;
+  top: 50%;
   width: 12px;
   height: 12px;
   border: solid currentColor;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
   transition: transform 0.2s;
+}
+
+.talk-card[aria-expanded="true"] .talk-card__header::after {
+  transform: translateY(-50%) rotate(225deg);
 }
 
 .talk-card__details .talk-desc {
