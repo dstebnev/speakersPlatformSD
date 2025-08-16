@@ -18,6 +18,10 @@
   --sheet-header-height: 72px;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* When the bottom sheet is expanded, shrink and raise speaker images */
 body.sheet-expanded {
   --speaker-top: 4px;
@@ -31,6 +35,8 @@ html, body {
   /* Prevent pull-down gesture from closing Telegram browser */
   overscroll-behavior-y: contain;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Provide default safe area offsets for page containers */
@@ -467,6 +473,7 @@ body {
   overflow: hidden;
   margin-bottom: 12px;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .talk-card.past {
@@ -479,11 +486,13 @@ body {
   align-items: flex-start;
   width: 100%;
   text-align: left;
-  padding: 16px 40px 16px 16px;
+  padding: 16px;
+  padding-right: 40px;
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: inherit;
+  line-height: inherit;
   position: relative;
 }
 
@@ -491,6 +500,15 @@ body {
   margin: 4px 0;
   font-size: 1em;
   font-weight: 600;
+  line-height: inherit;
+}
+
+.talk-card__header .speakers,
+.talk-card__header time,
+.talk-card__header .talk-event {
+  margin: 0;
+  font-size: 1em;
+  line-height: inherit;
 }
 
 .talk-card__header .speakers strong {
@@ -510,6 +528,7 @@ body {
   background: #111;
   color: #fff;
   font-size: inherit;
+  line-height: inherit;
 }
 
 .talk-card__details h4 {
