@@ -476,6 +476,14 @@ body {
   line-height: 1.4;
 }
 
+.talk-card__header,
+.talk-card__header *,
+.talk-card__details,
+.talk-card__details * {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .talk-card.past {
   opacity: 0.7;
 }
