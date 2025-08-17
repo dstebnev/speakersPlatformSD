@@ -480,8 +480,9 @@ body {
 .talk-card__header *,
 .talk-card__details,
 .talk-card__details * {
-  word-break: break-word;
   overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: manual;
 }
 
 .talk-card__header > *,

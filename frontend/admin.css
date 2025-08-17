@@ -95,7 +95,9 @@
 
 .admin-item-name {
   font-weight: 600;
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: manual;
   flex: 1;
 }
 
