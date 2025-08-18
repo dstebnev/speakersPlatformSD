@@ -19,6 +19,17 @@
   gap: 10px;
 }
 
+.admin-speaker-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.admin-speaker-filters input {
+  width: 100%;
+}
+
 .admin-list {
   display: flex;
   flex-direction: column;
