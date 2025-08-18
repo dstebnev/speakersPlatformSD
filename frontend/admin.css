@@ -21,13 +21,15 @@
 
 .admin-speaker-filters {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
 .admin-speaker-filters input {
-  width: 100%;
+  flex: 1 1 200px;
+  min-width: 160px;
 }
 
 .admin-list {
@@ -155,16 +157,43 @@
 .admin-tags {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
+  flex: 1 1 auto;
+  overflow-x: auto;
 }
 
 .admin-tags > * {
-  margin: 0 8px 8px 0;
+  margin: 0;
 }
 
-.admin-tags label {
+@media (max-width: 360px) {
+  .admin-tags {
+    flex-wrap: nowrap;
+  }
+}
+
+.filter-chip {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 32px;
+}
+
+.filter-chip input {
+  margin: 0;
+}
+
+.filter-chip:has(input:checked) {
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
 .admin-speaker-talks {

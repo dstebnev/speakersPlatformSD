@@ -1,5 +1,6 @@
 import { SpeakerForm, TalkForm } from './components/forms.js';
 import { TAGS } from './tags.js';
+import { useDebounce } from './hooks/useDebounce.js';
 
 const e = React.createElement;
 const { useState, useEffect } = React;
@@ -19,6 +20,7 @@ function AdminApp() {
   const [tab, setTab] = useState('speakers');
   const [error, setError] = useState(null);
   const [filterName, setFilterName] = useState('');
+  const debouncedName = useDebounce(filterName, 250);
   const [filterTags, setFilterTags] = useState([]);
 
   useEffect(() => {
@@ -167,7 +169,7 @@ function AdminApp() {
   }
 
   const filteredSpeakers = speakers.filter(s => {
-    if (filterName && !s.name.toLowerCase().includes(filterName.toLowerCase())) {
+    if (debouncedName && !s.name.toLowerCase().includes(debouncedName.toLowerCase())) {
       return false;
     }
     if (filterTags.length) {
@@ -177,21 +179,27 @@ function AdminApp() {
     return true;
   });
 
-  const speakerFilters = e('div', { className: 'admin-speaker-filters' },
+  const speakerFilters = e(
+    'div',
+    { className: 'admin-speaker-filters' },
     e('input', {
       placeholder: 'Фильтр по имени',
       value: filterName,
       onChange: ev => setFilterName(ev.target.value),
     }),
-    e('div', { className: 'admin-tags' },
+    e(
+      'div',
+      { className: 'admin-tags' },
       TAGS.map(t =>
-        e('label', { key: t },
+        e(
+          'label',
+          { key: t, className: 'filter-chip' },
           e('input', {
             type: 'checkbox',
             checked: filterTags.includes(t),
             onChange: () => toggleFilterTag(t),
           }),
-          t
+          e('span', null, t)
         )
       )
     )
