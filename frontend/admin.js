@@ -236,6 +236,16 @@ function AdminApp() {
               e('div', { className: 'admin-tags' },
                 (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))
               ),
+              (() => {
+                const speakerTalks = talks.filter(t => (t.speakerIds || []).includes(s.id));
+                return speakerTalks.length
+                  ? e('ul', { className: 'admin-speaker-talks' },
+                      speakerTalks.map(t =>
+                        e('li', { key: t.id }, `${t.title} — ${t.eventName}`)
+                      )
+                    )
+                  : null;
+              })(),
               e('button', {
                 className: 'collapse-btn',
                 onClick: ev => { ev.stopPropagation(); toggleSpeaker(s.id); }
