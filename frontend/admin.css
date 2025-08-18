@@ -27,7 +27,9 @@
   margin-bottom: 10px;
 }
 
-.admin-speaker-filters input {
+
+.admin-speaker-filters input,
+.admin-speaker-filters .choices {
   flex: 1 1 200px;
   min-width: 160px;
 }
@@ -158,43 +160,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  flex: 1 1 auto;
-  overflow-x: auto;
 }
 
-.admin-tags > * {
-  margin: 0;
-}
-
-@media (max-width: 360px) {
-  .admin-tags {
-    flex-wrap: nowrap;
-  }
-}
-
-.filter-chip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 16px;
-  background: #fff;
-  color: #000;
-  cursor: pointer;
-  white-space: nowrap;
-  min-height: 32px;
-}
-
-.filter-chip input {
-  margin: 0;
-}
-
-.filter-chip:has(input:checked) {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-}
 
 .admin-speaker-talks {
   margin-top: 8px;
