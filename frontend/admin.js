@@ -1,6 +1,6 @@
 import { SpeakerForm, TalkForm } from './components/forms.js';
-import { TAGS } from './tags.js';
 import { useDebounce } from './hooks/useDebounce.js';
+import { TagMultiSelect } from './components/TagMultiSelect.js';
 
 const e = React.createElement;
 const { useState, useEffect } = React;
@@ -125,12 +125,6 @@ function AdminApp() {
     }
   };
 
-  const toggleFilterTag = t => {
-    setFilterTags(prev =>
-      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
-    );
-  };
-
   const toggleSpeaker = id => {
     setExpandedSpeakerId(expandedSpeakerId === id ? null : id);
   };
@@ -187,22 +181,7 @@ function AdminApp() {
       value: filterName,
       onChange: ev => setFilterName(ev.target.value),
     }),
-    e(
-      'div',
-      { className: 'admin-tags' },
-      TAGS.map(t =>
-        e(
-          'label',
-          { key: t, className: 'filter-chip' },
-          e('input', {
-            type: 'checkbox',
-            checked: filterTags.includes(t),
-            onChange: () => toggleFilterTag(t),
-          }),
-          e('span', null, t)
-        )
-      )
-    )
+    e(TagMultiSelect, { selected: filterTags, onChange: setFilterTags })
   );
 
   const speakerSection = editingSpeaker ?
