@@ -12,10 +12,16 @@ async function loadData() {
       speakersRes.json(),
       talksRes.json()
     ]);
+    renderSummary(speakers, talks);
     renderCharts(speakers, talks);
   } catch (err) {
     document.querySelector('.stats-wrapper').innerText = 'Не удалось загрузить данные';
   }
+}
+
+function renderSummary(speakers, talks) {
+  document.getElementById('total-speakers').textContent = speakers.length;
+  document.getElementById('total-talks').textContent = talks.length;
 }
 
 function renderCharts(speakers, talks) {
