@@ -168,7 +168,7 @@ function AdminApp() {
     }
     if (filterTags.length) {
       const tags = s.tags || [];
-      return filterTags.every(t => tags.includes(t));
+      return filterTags.some(t => tags.includes(t));
     }
     return true;
   });
