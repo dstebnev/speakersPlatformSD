@@ -1,4 +1,5 @@
 import { SpeakerForm, TalkForm } from './components/forms.js';
+import { TAGS } from './tags.js';
 
 const e = React.createElement;
 const { useState, useEffect } = React;
@@ -17,6 +18,8 @@ function AdminApp() {
   const [expandedSpeakerId, setExpandedSpeakerId] = useState(null);
   const [tab, setTab] = useState('speakers');
   const [error, setError] = useState(null);
+  const [filterName, setFilterName] = useState('');
+  const [filterTags, setFilterTags] = useState([]);
 
   useEffect(() => {
     const btnSpeakers = document.getElementById('tab-speakers');
@@ -120,6 +123,12 @@ function AdminApp() {
     }
   };
 
+  const toggleFilterTag = t => {
+    setFilterTags(prev =>
+      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
+    );
+  };
+
   const toggleSpeaker = id => {
     setExpandedSpeakerId(expandedSpeakerId === id ? null : id);
   };
@@ -157,50 +166,84 @@ function AdminApp() {
     return e('div', null, 'Доступ запрещён для ', username || 'guest');
   }
 
+  const filteredSpeakers = speakers.filter(s => {
+    if (filterName && !s.name.toLowerCase().includes(filterName.toLowerCase())) {
+      return false;
+    }
+    if (filterTags.length) {
+      const tags = s.tags || [];
+      return filterTags.every(t => tags.includes(t));
+    }
+    return true;
+  });
+
+  const speakerFilters = e('div', { className: 'admin-speaker-filters' },
+    e('input', {
+      placeholder: 'Фильтр по имени',
+      value: filterName,
+      onChange: ev => setFilterName(ev.target.value),
+    }),
+    e('div', { className: 'admin-tags' },
+      TAGS.map(t =>
+        e('label', { key: t },
+          e('input', {
+            type: 'checkbox',
+            checked: filterTags.includes(t),
+            onChange: () => toggleFilterTag(t),
+          }),
+          t
+        )
+      )
+    )
+  );
+
   const speakerSection = editingSpeaker ?
     e(SpeakerForm, { initial: editingSpeaker, onSubmit: saveSpeaker, onCancel: () => setEditingSpeaker(null) }) :
-    e('div', { className: 'admin-list' },
-      e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingSpeaker({}) }, '+'),
-      speakers.map(s => {
-        const expanded = expandedSpeakerId === s.id;
-        return e('div', {
-          key: s.id,
-          className: `admin-list-item admin-speaker-item${expanded ? ' expanded' : ''}`,
-          onClick: () => toggleSpeaker(s.id)
-        },
-          e('div', { className: 'admin-item-header' },
-            e('div', { className: 'admin-speaker-info' },
-              e('img', { src: s.photoUrl || '/default_icon.svg', alt: '', className: 'admin-speaker-photo' }),
-              e('span', { className: 'admin-item-name' }, s.name)
+    e('div', null,
+      speakerFilters,
+      e('div', { className: 'admin-list' },
+        e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingSpeaker({}) }, '+'),
+        filteredSpeakers.map(s => {
+          const expanded = expandedSpeakerId === s.id;
+          return e('div', {
+            key: s.id,
+            className: `admin-list-item admin-speaker-item${expanded ? ' expanded' : ''}`,
+            onClick: () => toggleSpeaker(s.id)
+          },
+            e('div', { className: 'admin-item-header' },
+              e('div', { className: 'admin-speaker-info' },
+                e('img', { src: s.photoUrl || '/default_icon.svg', alt: '', className: 'admin-speaker-photo' }),
+                e('span', { className: 'admin-item-name' }, s.name)
+              ),
+              e('div', {
+                className: 'admin-actions',
+                onClick: ev => ev.stopPropagation()
+              },
+                e('button', {
+                  className: 'icon-btn',
+                  title: 'Редактировать',
+                  onClick: () => setEditingSpeaker(s)
+                }, '✏️'),
+                e('button', {
+                  className: 'icon-btn',
+                  title: 'Удалить',
+                  onClick: () => window.confirm('Удалить спикера?') && deleteSpeaker(s.id)
+                }, '🗑️')
+              )
             ),
-            e('div', {
-              className: 'admin-actions',
-              onClick: ev => ev.stopPropagation()
-            },
+            e('div', { className: `admin-item-details${expanded ? ' expanded' : ''}` },
+              e('p', null, s.description),
+              e('div', { className: 'admin-tags' },
+                (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))
+              ),
               e('button', {
-                className: 'icon-btn',
-                title: 'Редактировать',
-                onClick: () => setEditingSpeaker(s)
-              }, '✏️'),
-              e('button', {
-                className: 'icon-btn',
-                title: 'Удалить',
-                onClick: () => window.confirm('Удалить спикера?') && deleteSpeaker(s.id)
-              }, '🗑️')
+                className: 'collapse-btn',
+                onClick: ev => { ev.stopPropagation(); toggleSpeaker(s.id); }
+              }, 'Свернуть')
             )
-          ),
-          e('div', { className: `admin-item-details${expanded ? ' expanded' : ''}` },
-            e('p', null, s.description),
-            e('div', { className: 'admin-tags' },
-              (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))
-            ),
-            e('button', {
-              className: 'collapse-btn',
-              onClick: ev => { ev.stopPropagation(); toggleSpeaker(s.id); }
-            }, 'Свернуть')
-          )
-        );
-      })
+          );
+        })
+      )
     );
 
   const talkSection = editingTalk ?
