@@ -15,13 +15,14 @@ function App() {
     status: 'all',
     query: '',
     speaker: '',
+    event: '',
     from: '',
     to: '',
   });
   const [showFilters, setShowFilters] = useState(false);
   const [openedId, setOpenedId] = useState(null);
 
-  const { upcoming, past, speakers, loading, error } = useTalkData(filters);
+  const { upcoming, past, speakers, events, loading, error } = useTalkData(filters);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
@@ -46,6 +47,7 @@ function App() {
   const activeFilters = [];
   if (filters.query) activeFilters.push(`Название: ${filters.query}`);
   if (filters.speaker) activeFilters.push(`Спикер: ${filters.speaker}`);
+  if (filters.event) activeFilters.push(`Мероприятие: ${filters.event}`);
   if (filters.direction !== 'all') activeFilters.push(`Направление: ${filters.direction}`);
   if (filters.status !== 'all') activeFilters.push(`Статус: ${filters.status}`);
   if (filters.from) activeFilters.push(`С ${filters.from}`);
@@ -61,7 +63,7 @@ function App() {
     e(
       'div',
       { className: 'talks-scroll' },
-      e(FilterPanel, { filters, onChange: setFilters, visible: showFilters, speakers }),
+      e(FilterPanel, { filters, onChange: setFilters, visible: showFilters, speakers, events }),
       activeFilters.length > 0 &&
         e(
           'div',

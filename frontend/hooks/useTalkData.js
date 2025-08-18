@@ -43,6 +43,7 @@ export function useTalkData(filters) {
       speaker = '',
       from = '',
       to = '',
+      event = '',
     } = filters || {};
     let list = talks.slice();
     if (direction !== 'all') list = list.filter(t => t.direction === direction);
@@ -58,6 +59,7 @@ export function useTalkData(filters) {
           .map(s => s.name.toLowerCase());
         return names.some(n => n.includes(speaker.toLowerCase()));
       });
+    if (event) list = list.filter(t => t.eventName === event);
     if (from) list = list.filter(t => new Date(t.date) >= new Date(from));
     if (to) list = list.filter(t => new Date(t.date) <= new Date(to));
     list.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -67,6 +69,11 @@ export function useTalkData(filters) {
   const now = new Date();
   const upcoming = filtered.filter(t => new Date(t.date) >= now);
   const past = filtered.filter(t => new Date(t.date) < now);
+  const events = useMemo(
+    () =>
+      Array.from(new Set(talks.map(t => t.eventName).filter(Boolean))).sort(),
+    [talks]
+  );
 
-  return { upcoming, past, speakers, loading, error };
+  return { upcoming, past, speakers, events, loading, error };
 }

@@ -3,8 +3,8 @@ import { useDebounce } from '../hooks/useDebounce.js';
 const e = React.createElement;
 const { useState, useEffect } = React;
 
-export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
-  const { direction, status, query, speaker, from, to } = filters;
+export function FilterPanel({ filters, onChange, visible, speakers = [], events = [] }) {
+  const { direction, status, query, speaker, from, to, event: eventName } = filters;
 
   const [localQuery, setLocalQuery] = useState(query);
   const [localSpeaker, setLocalSpeaker] = useState(speaker);
@@ -26,7 +26,7 @@ export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
   }, [debouncedSpeaker, speaker]);
 
   const reset = () =>
-    onChange({ direction: 'all', status: 'all', query: '', speaker: '', from: '', to: '' });
+    onChange({ direction: 'all', status: 'all', query: '', speaker: '', event: '', from: '', to: '' });
 
   return e(
     'section',
@@ -53,6 +53,16 @@ export function FilterPanel({ filters, onChange, visible, speakers = [] }) {
       'datalist',
       { id: 'speakers-list' },
       speakers.map(s => e('option', { key: s.id, value: s.name }))
+    ),
+    e(
+      'select',
+      {
+        value: eventName,
+        onChange: ev => set('event', ev.target.value),
+        'aria-label': 'Мероприятие',
+      },
+      e('option', { value: '' }, 'Все мероприятия'),
+      events.map(evName => e('option', { key: evName, value: evName }, evName))
     ),
     e(
       'select',
