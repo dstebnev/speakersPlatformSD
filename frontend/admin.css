@@ -155,7 +155,10 @@
 .admin-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+}
+
+.admin-tags > * {
+  margin: 0 8px 8px 0;
 }
 
 .admin-tags label {
