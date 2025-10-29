@@ -5,6 +5,9 @@ const { useState, useEffect } = React;
 
 export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
   const [name, setName] = useState(initial.name || '');
+  const [personnelId, setPersonnelId] = useState(initial.personnel_id || '');
+  const [structure, setStructure] = useState(initial.structure || '');
+  const [role, setRole] = useState(initial.role || '');
   const [description, setDescription] = useState(initial.description || '');
   const [photoUrl, setPhotoUrl] = useState(initial.photoUrl || '/default_icon.svg');
   const [uploading, setUploading] = useState(false);
@@ -50,10 +53,37 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
         const selectedTags = choicesRef.current
           ? choicesRef.current.getValue(true)
           : [];
-        onSubmit({ ...initial, name, description, photoUrl, tags: selectedTags });
+        onSubmit({
+          ...initial,
+          name,
+          personnel_id: personnelId,
+          structure,
+          role,
+          description,
+          photoUrl,
+          tags: selectedTags,
+        });
       },
     },
     e('div', null, e('label', null, 'Имя'), e('input', { value: name, onChange: ev => setName(ev.target.value) })),
+    e(
+      'div',
+      null,
+      e('label', null, 'Табельный номер'),
+      e('input', { value: personnelId, onChange: ev => setPersonnelId(ev.target.value) })
+    ),
+    e(
+      'div',
+      null,
+      e('label', null, 'Структура'),
+      e('input', { value: structure, onChange: ev => setStructure(ev.target.value) })
+    ),
+    e(
+      'div',
+      null,
+      e('label', null, 'Роль'),
+      e('input', { value: role, onChange: ev => setRole(ev.target.value) })
+    ),
     e(
       'div',
       null,

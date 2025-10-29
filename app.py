@@ -9,6 +9,8 @@ from io import BytesIO
 import shutil
 from PIL import Image
 import storage
+from pathlib import Path
+import import_speakers_csv
 
 load_dotenv(override=True)
 
@@ -40,10 +42,20 @@ def speakers():
         return jsonify(storage.all_speakers())
 
     body = request.get_json() or {}
-    body.setdefault('photoUrl', '/default_icon.svg')
-    new_speaker = {'id': str(uuid4()), **body}
+    defaults = {
+        'photoUrl': '/default_icon.svg',
+        'description': '',
+        'tags': [],
+        'personnel_id': '',
+        'structure': '',
+        'role': '',
+    }
+    for key, value in defaults.items():
+        body.setdefault(key, value)
+    new_speaker = {**defaults, **body, 'id': str(uuid4())}
     storage.add_speaker(new_speaker)
-    return jsonify(new_speaker)
+    created = storage.get_speaker(new_speaker['id'])
+    return jsonify(created)
 
 
 @app.route('/api/speakers/<id>', methods=['PUT', 'DELETE'])
@@ -57,6 +69,11 @@ def speaker_by_id(id):
     body = request.get_json() or {}
     if 'photoUrl' not in body:
         body['photoUrl'] = '/default_icon.svg'
+    if 'tags' in body and body['tags'] is None:
+        body['tags'] = []
+    for key in ('personnel_id', 'structure', 'role', 'description'):
+        if key in body and body[key] is None:
+            body[key] = ''
     updated = storage.update_speaker(id, body)
     if updated is None:
         return abort(404)
@@ -175,6 +192,20 @@ def clear_cache():
         if '__pycache__' in dirs:
             shutil.rmtree(os.path.join(root, '__pycache__'), ignore_errors=True)
     return jsonify({'ok': True})
+
+
+@app.route('/api/speakers/import', methods=['POST'])
+def import_speakers():
+    if not is_admin_request(request):
+        return abort(403)
+    csv_path = Path(os.getenv('SPEAKERS_CSV', 'speakers_new_base.csv'))
+    try:
+        updated, created = import_speakers_csv.import_csv(csv_path)
+    except FileNotFoundError:
+        return jsonify({'ok': False, 'error': f'CSV file not found: {csv_path}'}), 404
+    except Exception as exc:
+        return jsonify({'ok': False, 'error': str(exc)}), 500
+    return jsonify({'ok': True, 'updated': updated, 'created': created})
 
 @app.route('/')
 def index():

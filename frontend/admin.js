@@ -219,6 +219,11 @@ function AdminApp() {
               )
             ),
             e('div', { className: `admin-item-details${expanded ? ' expanded' : ''}` },
+              e('div', { className: 'admin-speaker-meta' },
+                e('p', null, `Табельный номер: ${s.personnel_id || '—'}`),
+                e('p', null, `Структура: ${s.structure || '—'}`),
+                e('p', null, `Роль: ${s.role || '—'}`)
+              ),
               e('p', null, s.description),
               e('div', { className: 'admin-tags' },
                 (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))

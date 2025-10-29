@@ -18,6 +18,7 @@ function updateSafeArea() {
 function ProfileApp() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   useEffect(() => {
     tg?.ready();
     const u = tg?.initDataUnsafe?.user || null;
@@ -59,6 +60,25 @@ function ProfileApp() {
     }
   };
 
+  const handleSyncSpeakers = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/speakers/import', { method: 'POST' });
+      let data = { ok: res.ok };
+      try {
+        data = await res.json();
+      } catch (err) {}
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Import failed');
+      }
+      alert(`Синхронизация завершена. Обновлено: ${data.updated}, добавлено: ${data.created}`);
+    } catch (err) {
+      alert('Не удалось синхронизовать данные спикеров');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (!user) {
     return e('div', null, 'Информация о пользователе недоступна');
   }
@@ -66,7 +86,12 @@ function ProfileApp() {
   return e('div', null,
     e('div', null, `Имя: ${user.first_name} ${user.last_name || ''}`),
     e('div', null, `Username: @${user.username || ''}`),
-    isAdmin && e('button', { onClick: handleClearCache }, 'Сбросить кэш')
+    isAdmin && e(
+      'div',
+      { className: 'admin-actions' },
+      e('button', { onClick: handleClearCache }, 'Сбросить кэш'),
+      e('button', { onClick: handleSyncSpeakers, disabled: syncing }, syncing ? 'Синхронизация...' : 'Синхронизовать данные спикеров')
+    )
   );
 }
 
