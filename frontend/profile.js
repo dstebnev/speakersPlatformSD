@@ -71,7 +71,14 @@ function ProfileApp() {
       if (!res.ok || !data.ok) {
         throw new Error(data.error || 'Import failed');
       }
-      alert(`Синхронизация завершена. Обновлено: ${data.updated}, добавлено: ${data.created}`);
+      const speakersStats = data.speakers || {};
+      const talksStats = data.talks || {};
+      let message = `Синхронизация завершена.\nСпикеры — обновлено: ${speakersStats.updated || 0}, добавлено: ${speakersStats.created || 0}.\nДоклады — обновлено: ${talksStats.updated || 0}, добавлено: ${talksStats.created || 0}.`;
+      const missing = talksStats.missing_speakers || [];
+      if (missing.length) {
+        message += `\nНе найдены спикеры: ${missing.join(', ')}`;
+      }
+      alert(message);
     } catch (err) {
       alert('Не удалось синхронизовать данные спикеров');
     } finally {

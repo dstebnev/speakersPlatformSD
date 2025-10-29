@@ -7,7 +7,22 @@ If you previously used `db.json`, run `python migrate_json_to_sqlite.py` once to
 
 ## Data model
 
-Talk objects reference their speakers via a `speakerIds` array. Each value in the array should be the `id` of an existing speaker. The legacy singular `speakerId` field is no longer supported.
+Talk objects reference their speakers via a `speaker_ids` array. Each value in the array should be the `id` of an existing speaker.
+
+### Talk schema
+
+Each talk now stores structured columns in the database with the following keys:
+
+- `id` – UUID string (primary key)
+- `name` – talk title
+- `description` – free-form description
+- `event` – event or conference name
+- `tags` – JSON array of tags (replaces the legacy `direction`)
+- `date` – ISO `YYYY-MM-DD` when available
+- `speaker_ids` – JSON array of speaker ids
+- `link` – registration or recording URL
+- `status` – `upcoming` or `past` (derived from `date`)
+- `rate` – numeric rating (optional)
 
 ## Running locally
 

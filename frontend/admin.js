@@ -229,11 +229,11 @@ function AdminApp() {
                 (s.tags || []).map(t => e('span', { key: t, className: 'admin-tag' }, t))
               ),
               (() => {
-                const speakerTalks = talks.filter(t => (t.speakerIds || []).includes(s.id));
+                const speakerTalks = talks.filter(t => (t.speaker_ids || t.speakerIds || []).includes(s.id));
                 return speakerTalks.length
                   ? e('ul', { className: 'admin-speaker-talks' },
                       speakerTalks.map(t =>
-                        e('li', { key: t.id }, `${t.title} — ${t.eventName}`)
+                        e('li', { key: t.id }, `${t.name} — ${t.event}`)
                       )
                     )
                   : null;
@@ -253,9 +253,10 @@ function AdminApp() {
     e('div', { className: 'admin-list' },
       e('div', { key: 'add', className: 'admin-list-item admin-add-btn', onClick: () => setEditingTalk({}) }, '+'),
       talks.map(t => {
-        const names = speakers.filter(s => (t.speakerIds || []).includes(s.id)).map(s => s.name).join(', ');
+        const ids = (t.speaker_ids || t.speakerIds || []).map(String);
+        const names = speakers.filter(s => ids.includes(String(s.id))).map(s => s.name).join(', ');
         return e('div', { key: t.id, className: 'admin-list-item' },
-          e('span', { className: 'admin-item-name' }, `${t.title} (${names})`),
+          e('span', { className: 'admin-item-name' }, `${t.name} (${names})`),
           e('div', { className: 'admin-actions' },
             e('button', {
               className: 'icon-btn',

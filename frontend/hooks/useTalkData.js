@@ -37,7 +37,7 @@ export function useTalkData(filters) {
 
   const filtered = useMemo(() => {
     const {
-      direction = 'all',
+      tag = 'all',
       status = 'all',
       query = '',
       speaker = '',
@@ -46,20 +46,21 @@ export function useTalkData(filters) {
       event = '',
     } = filters || {};
     let list = talks.slice();
-    if (direction !== 'all') list = list.filter(t => t.direction === direction);
+    if (tag !== 'all') list = list.filter(t => (t.tags || []).includes(tag));
     if (status !== 'all') list = list.filter(t => t.status === status);
     if (query)
       list = list.filter(t =>
-        (t.title || '').toLowerCase().includes(query.toLowerCase())
+        (t.name || '').toLowerCase().includes(query.toLowerCase())
       );
     if (speaker)
       list = list.filter(t => {
+        const ids = (t.speaker_ids || t.speakerIds || []).map(String);
         const names = speakers
-          .filter(s => (t.speakerIds || []).includes(s.id))
+          .filter(s => ids.includes(String(s.id)))
           .map(s => s.name.toLowerCase());
         return names.some(n => n.includes(speaker.toLowerCase()));
       });
-    if (event) list = list.filter(t => t.eventName === event);
+    if (event) list = list.filter(t => t.event === event);
     if (from) list = list.filter(t => new Date(t.date) >= new Date(from));
     if (to) list = list.filter(t => new Date(t.date) <= new Date(to));
     list.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -71,7 +72,7 @@ export function useTalkData(filters) {
   const past = filtered.filter(t => new Date(t.date) < now);
   const events = useMemo(
     () =>
-      Array.from(new Set(talks.map(t => t.eventName).filter(Boolean))).sort(),
+      Array.from(new Set(talks.map(t => t.event).filter(Boolean))).sort(),
     [talks]
   );
 

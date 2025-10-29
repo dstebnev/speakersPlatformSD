@@ -11,6 +11,7 @@ from PIL import Image
 import storage
 from pathlib import Path
 import import_speakers_csv
+import import_performs_csv
 
 load_dotenv(override=True)
 
@@ -86,17 +87,43 @@ def talks():
         talks = []
         for t in storage.all_talks():
             item = {**t}
-            item['status'] = calc_status(item.get('date', ''))
+            status = calc_status(item.get('date', ''))
+            if status != item.get('status'):
+                item['status'] = status
+                try:
+                    storage.save_talk(item)
+                except Exception:
+                    pass
+            else:
+                item['status'] = status
             talks.append(item)
         return jsonify(talks)
 
     body = request.get_json() or {}
-    if not isinstance(body.get('speakerIds'), list):
+    speaker_ids = body.get('speaker_ids')
+    if speaker_ids is None and 'speakerIds' in body:
+        speaker_ids = body.get('speakerIds')
+    if not isinstance(speaker_ids, list):
         return abort(400)
-    new_talk = {'id': str(uuid4()), **body}
-    new_talk['status'] = calc_status(new_talk.get('date', ''))
-    storage.add_talk(new_talk)
-    return jsonify(new_talk)
+    defaults = {
+        'description': '',
+        'event': '',
+        'tags': [],
+        'date': '',
+        'link': '',
+        'rate': None,
+        'status': '',
+    }
+    talk_data = {**defaults, **body}
+    talk_data['speaker_ids'] = speaker_ids
+    talk_data['name'] = (talk_data.get('name') or '').strip()
+    if not talk_data['name']:
+        return abort(400)
+    talk_data['status'] = calc_status(talk_data.get('date', ''))
+    talk_data['id'] = str(uuid4())
+    storage.add_talk(talk_data)
+    created = storage.get_talk(talk_data['id'])
+    return jsonify(created)
 
 
 @app.route('/api/talks/<id>', methods=['PUT', 'DELETE'])
@@ -108,9 +135,21 @@ def talk_by_id(id):
         return jsonify({'ok': True})
 
     body = request.get_json() or {}
-    if 'speakerIds' in body and not isinstance(body['speakerIds'], list):
+    speaker_ids = None
+    if 'speaker_ids' in body:
+        speaker_ids = body['speaker_ids']
+    elif 'speakerIds' in body:
+        speaker_ids = body['speakerIds']
+    if speaker_ids is not None and not isinstance(speaker_ids, list):
         return abort(400)
-    updated = storage.update_talk(id, body)
+    updates = dict(body)
+    if speaker_ids is not None:
+        updates['speaker_ids'] = speaker_ids
+    if updates.get('tags') is None and 'tags' in updates:
+        updates['tags'] = []
+    if 'rate' in updates and updates['rate'] == '':
+        updates['rate'] = None
+    updated = storage.update_talk(id, updates)
     if updated is None:
         return abort(404)
     updated['status'] = calc_status(updated.get('date', ''))
@@ -200,12 +239,27 @@ def import_speakers():
         return abort(403)
     csv_path = Path(os.getenv('SPEAKERS_CSV', 'speakers_new_base.csv'))
     try:
-        updated, created = import_speakers_csv.import_csv(csv_path)
+        sp_updated, sp_created = import_speakers_csv.import_csv(csv_path)
     except FileNotFoundError:
         return jsonify({'ok': False, 'error': f'CSV file not found: {csv_path}'}), 404
     except Exception as exc:
         return jsonify({'ok': False, 'error': str(exc)}), 500
-    return jsonify({'ok': True, 'updated': updated, 'created': created})
+    performs_path = Path(os.getenv('PERFORMS_CSV', 'performs_new_base.csv'))
+    try:
+        talk_updated, talk_created, missing = import_performs_csv.import_performs(performs_path)
+    except FileNotFoundError:
+        return jsonify({'ok': False, 'error': f'CSV file not found: {performs_path}'}), 404
+    except Exception as exc:
+        return jsonify({'ok': False, 'error': str(exc)}), 500
+    return jsonify({
+        'ok': True,
+        'speakers': {'updated': sp_updated, 'created': sp_created},
+        'talks': {
+            'updated': talk_updated,
+            'created': talk_created,
+            'missing_speakers': sorted(missing),
+        },
+    })
 
 @app.route('/')
 def index():

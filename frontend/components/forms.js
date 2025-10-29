@@ -129,31 +129,41 @@ export function SpeakerForm({ initial = {}, onSubmit, onCancel }) {
 }
 
 export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
-  const [title, setTitle] = useState(initial.title || '');
-  // Store selected speaker IDs. Default to an empty array so the user must
-  // explicitly pick one or more speakers.
-  const [speakerIds, setSpeakerIds] = useState((initial.speakerIds || []).map(String));
-  const [description, setDescription] = useState(initial.description || '');
-  const [eventName, setEventName] = useState(initial.eventName || '');
-  const [direction, setDirection] = useState(initial.direction || 'frontend');
-  const [date, setDate] = useState(initial.date || '');
-  const [registrationLink, setRegistrationLink] = useState(initial.registrationLink || '');
-  const [recordingLink, setRecordingLink] = useState(initial.recordingLink || '');
+  const initialTags = Array.isArray(initial.tags) ? initial.tags : [];
+  const defaultTag = initial.direction || initialTags[0] || 'frontend';
+  const initialSpeakerIds = (initial.speaker_ids || initial.speakerIds || []).map(String);
 
-  const status = date && new Date(date) < new Date().setHours(0, 0, 0, 0) ? 'past' : 'upcoming';
+  const [name, setName] = useState(initial.name || initial.title || '');
+  const [description, setDescription] = useState(initial.description || '');
+  const [event, setEvent] = useState(initial.event || initial.eventName || '');
+  const [tag, setTag] = useState(defaultTag);
+  const [date, setDate] = useState(initial.date || '');
+  const [link, setLink] = useState(
+    initial.link || initial.registrationLink || initial.recordingLink || ''
+  );
+  const [rate, setRate] = useState(
+    initial.rate === null || initial.rate === undefined ? '' : String(initial.rate)
+  );
+  const [speakerIds, setSpeakerIds] = useState(initialSpeakerIds);
 
   const speakerRef = React.useRef(null);
   const choicesRef = React.useRef(null);
 
   useEffect(() => {
-    // Don't try to initialise the widget until we have a select element and
-    // at least one option rendered. Initialising Choices too early leads to an
-    // empty widget that never receives preselected values.
+    setName(initial.name || initial.title || '');
+    setDescription(initial.description || '');
+    setEvent(initial.event || initial.eventName || '');
+    const nextTag = (Array.isArray(initial.tags) && initial.tags[0]) || initial.direction || 'frontend';
+    setTag(nextTag);
+    setDate(initial.date || '');
+    setLink(initial.link || initial.registrationLink || initial.recordingLink || '');
+    setRate(initial.rate === null || initial.rate === undefined ? '' : String(initial.rate));
+    setSpeakerIds((initial.speaker_ids || initial.speakerIds || []).map(String));
+  }, [initial]);
+
+  useEffect(() => {
     if (!speakerRef.current || !speakers.length) return;
 
-    // Destroy previous instance if any. React will also call the cleanup when
-    // dependencies change, but destroying explicitly guards against manual
-    // re-renders.
     choicesRef.current?.destroy();
 
     choicesRef.current = new Choices(speakerRef.current, {
@@ -170,13 +180,12 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     container.addEventListener('click', focusInput);
     container.addEventListener('touchstart', focusInput);
 
-    const ids = (initial.speakerIds || []).map(String);
+    const ids = (initial.speaker_ids || initial.speakerIds || []).map(String);
     if (ids.length) {
-      // Ensure the required speakers are selected even if the `selected`
-      // attribute on <option> was ignored by Choices.
       choicesRef.current.setChoiceByValue(ids);
     }
     setSpeakerIds(ids);
+
     return () => {
       container.removeEventListener('click', focusInput);
       container.removeEventListener('touchstart', focusInput);
@@ -189,21 +198,21 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
     const selectedIds = choicesRef.current
       ? choicesRef.current.getValue(true)
       : [];
-    if (!selectedIds.length || !title.trim() || !eventName.trim() || !direction || !date) {
+    if (!selectedIds.length || !name.trim() || !event.trim() || !tag || !date) {
       alert('Заполните обязательные поля');
       return;
     }
+    const numericRate = rate === '' ? null : Number(rate);
     onSubmit({
       ...initial,
-      title,
-      speakerIds: selectedIds,
+      name,
+      speaker_ids: selectedIds,
       description,
-      eventName,
-      direction,
-      status,
+      event,
+      tags: tag ? [tag] : [],
       date,
-      registrationLink,
-      recordingLink,
+      link,
+      rate: Number.isFinite(numericRate) ? numericRate : null,
     });
   };
 
@@ -232,7 +241,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
             {
               key: s.id,
               value: String(s.id),
-              selected: (initial.speakerIds || []).map(String).includes(String(s.id)),
+              selected: speakerIds.includes(String(s.id)),
             },
             s.name
           )
@@ -243,7 +252,7 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       'div',
       null,
       e('label', null, 'Название'),
-      e('input', { value: title, onChange: ev => setTitle(ev.target.value), required: true })
+      e('input', { value: name, onChange: ev => setName(ev.target.value), required: true })
     ),
     e(
       'div',
@@ -255,15 +264,15 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       'div',
       null,
       e('label', null, 'Мероприятие'),
-      e('input', { value: eventName, onChange: ev => setEventName(ev.target.value), required: true })
+      e('input', { value: event, onChange: ev => setEvent(ev.target.value), required: true })
     ),
     e(
       'div',
       null,
-      e('label', null, 'Направление'),
+      e('label', null, 'Тег'),
       e(
         'select',
-        { value: direction, onChange: ev => setDirection(ev.target.value), required: true },
+        { value: tag, onChange: ev => setTag(ev.target.value), required: true },
         DIRECTIONS.map(d => e('option', { key: d, value: d }, d))
       )
     ),
@@ -273,20 +282,24 @@ export function TalkForm({ initial = {}, speakers, onSubmit, onCancel }) {
       e('label', null, 'Дата'),
       e('input', { type: 'date', value: date, onChange: ev => setDate(ev.target.value), required: true })
     ),
-    status === 'upcoming' &&
-      e(
-        'div',
-        null,
-        e('label', null, 'Ссылка регистрации'),
-        e('input', { value: registrationLink, onChange: ev => setRegistrationLink(ev.target.value) })
-      ),
-    status === 'past' &&
-      e(
-        'div',
-        null,
-        e('label', null, 'Ссылка записи'),
-        e('input', { value: recordingLink, onChange: ev => setRecordingLink(ev.target.value) })
-      ),
+    e(
+      'div',
+      null,
+      e('label', null, 'Ссылка'),
+      e('input', { value: link, onChange: ev => setLink(ev.target.value) })
+    ),
+    e(
+      'div',
+      null,
+      e('label', null, 'Рейтинг'),
+      e('input', {
+        type: 'number',
+        step: '0.1',
+        min: '0',
+        value: rate,
+        onChange: ev => setRate(ev.target.value),
+      })
+    ),
     e('button', { type: 'submit' }, 'Сохранить'),
     e('button', { type: 'button', onClick: onCancel }, 'Отмена')
   );

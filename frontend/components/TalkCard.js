@@ -26,10 +26,12 @@ function animateExpander(el, open) {
 }
 
 export function TalkCard({ talk, speakers = [], isOpen, onToggle }) {
-  const isPast = new Date(talk.date) < new Date();
-  const accent = ACCENTS[talk.direction] || '#03a9f4';
+  const primaryTag = (talk.tags || [])[0];
+  const accent = ACCENTS[primaryTag] || '#03a9f4';
+  const rawStatus = (talk.status || '').toLowerCase();
+  const isPast = rawStatus ? rawStatus === 'past' : new Date(talk.date) < new Date();
   const actionLabel = isPast ? 'Запись' : 'Регистрация';
-  const actionLink = isPast ? talk.recordingLink : talk.registrationLink;
+  const actionLink = talk.link;
   const cardRef = useRef(null);
   const expanderRef = useRef(null);
 
@@ -73,9 +75,9 @@ export function TalkCard({ talk, speakers = [], isOpen, onToggle }) {
           )
         )
       ),
-      e('h3', { className: 'talk-title' }, talk.title),
+      e('h3', { className: 'talk-title' }, talk.name),
       e('time', { dateTime: talk.date }, formatDate(talk.date)),
-      e('div', { className: 'talk-event' }, talk.eventName)
+      e('div', { className: 'talk-event' }, talk.event)
     ),
     e(
       'div',
@@ -88,11 +90,7 @@ export function TalkCard({ talk, speakers = [], isOpen, onToggle }) {
       e(
         'div',
         { className: 'talk-card__details' },
-        e(
-          'p',
-          { className: 'talk-desc' },
-          talk.description || 'Описание появится позже'
-        ),
+        e('p', { className: 'talk-desc' }, talk.description || 'Описание появится позже'),
         speakers.length > 0 &&
           e(
             'div',
@@ -107,18 +105,27 @@ export function TalkCard({ talk, speakers = [], isOpen, onToggle }) {
         e(
           'div',
           { className: 'talk-meta' },
-          e(
-            'div',
-            { className: 'meta-row' },
-            'Ивент: ',
-            e('strong', null, talk.eventName)
-          ),
+          e('div', { className: 'meta-row' }, 'Ивент: ', e('strong', null, talk.event)),
           e(
             'div',
             { className: 'meta-row' },
             'Дата: ',
             e('strong', null, formatDate(talk.date))
-          )
+          ),
+          primaryTag &&
+            e(
+              'div',
+              { className: 'meta-row' },
+              'Тег: ',
+              e('strong', null, primaryTag)
+            ),
+          talk.rate !== null && talk.rate !== undefined &&
+            e(
+              'div',
+              { className: 'meta-row' },
+              'Рейтинг: ',
+              e('strong', null, talk.rate)
+            )
         ),
         actionLink &&
           e(
@@ -140,4 +147,3 @@ export function TalkCard({ talk, speakers = [], isOpen, onToggle }) {
     )
   );
 }
-

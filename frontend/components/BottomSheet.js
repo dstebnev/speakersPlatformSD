@@ -4,7 +4,8 @@ const e = React.createElement;
 export function BottomSheet({ talk, speakers = [] }) {
   if (!talk) return null;
 
-  const accent = ACCENTS[talk.direction] || '#03a9f4';
+  const primaryTag = (talk.tags || [])[0];
+  const accent = ACCENTS[primaryTag] || '#03a9f4';
   const [expanded, setExpanded] = React.useState(false);
   const startYRef = React.useRef(0);
 
@@ -46,10 +47,15 @@ export function BottomSheet({ talk, speakers = [] }) {
     document.removeEventListener('touchend', handleEnd);
   };
 
+  const rawStatus = (talk.status || '').toLowerCase();
+  const isPast = rawStatus ? rawStatus === 'past' : new Date(talk.date) < new Date();
   const link =
-    new Date(talk.date) < new Date()
-      ? e('a', { href: talk.recordingLink, target: '_blank' }, 'Запись')
-      : e('a', { href: talk.registrationLink, target: '_blank' }, 'Регистрация');
+    talk.link &&
+    e(
+      'a',
+      { href: talk.link, target: '_blank', rel: 'noopener' },
+      isPast ? 'Запись' : 'Регистрация'
+    );
 
   return e(
     'div',
@@ -68,7 +74,7 @@ export function BottomSheet({ talk, speakers = [] }) {
     e(
       'div',
       { className: 'sheet-content' },
-      e('h3', null, talk.title),
+      e('h3', null, talk.name),
       e(
         'div',
         { className: 'sheet-speaker' },
@@ -94,7 +100,9 @@ export function BottomSheet({ talk, speakers = [] }) {
             )
           )
         ),
-      e('div', { className: 'sheet-event' }, talk.eventName),
+      e('div', { className: 'sheet-event' }, talk.event),
+      primaryTag && e('div', { className: 'sheet-tag' }, `Тег: ${primaryTag}`),
+      talk.rate !== null && talk.rate !== undefined && e('div', { className: 'sheet-rate' }, `Рейтинг: ${talk.rate}`),
       link
     )
   );

@@ -34,13 +34,16 @@ function renderCharts(speakers, talks) {
   });
 
   talks.forEach(t => {
-    if (talkCount[t.direction] !== undefined) {
-      talkCount[t.direction]++;
-      (t.speakerIds || []).forEach(id => {
-        speakerSets[t.direction].add(id);
-        allSpeakers.add(id);
-      });
-    }
+    const tags = Array.isArray(t.tags) && t.tags.length ? t.tags : (t.direction ? [t.direction] : []);
+    tags.forEach(tag => {
+      if (talkCount[tag] !== undefined) {
+        talkCount[tag]++;
+        (t.speaker_ids || t.speakerIds || []).forEach(id => {
+          speakerSets[tag].add(id);
+          allSpeakers.add(id);
+        });
+      }
+    });
   });
 
   const activeSpeakers = allSpeakers.size;

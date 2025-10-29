@@ -11,7 +11,7 @@ const tg = window.Telegram?.WebApp;
 
 function App() {
   const [filters, setFilters] = useState({
-    direction: 'all',
+    tag: 'all',
     status: 'all',
     query: '',
     speaker: '',
@@ -32,7 +32,7 @@ function App() {
   }, []);
 
   const getSpeakers = talk =>
-    speakers.filter(s => (talk?.speakerIds || []).includes(s.id));
+    speakers.filter(s => (talk?.speaker_ids || []).includes(s.id));
 
   useEffect(() => {
     const onKey = e => {
@@ -48,7 +48,7 @@ function App() {
   if (filters.query) activeFilters.push(`Название: ${filters.query}`);
   if (filters.speaker) activeFilters.push(`Спикер: ${filters.speaker}`);
   if (filters.event) activeFilters.push(`Мероприятие: ${filters.event}`);
-  if (filters.direction !== 'all') activeFilters.push(`Направление: ${filters.direction}`);
+  if (filters.tag !== 'all') activeFilters.push(`Тег: ${filters.tag}`);
   if (filters.status !== 'all') activeFilters.push(`Статус: ${filters.status}`);
   if (filters.from) activeFilters.push(`С ${filters.from}`);
   if (filters.to) activeFilters.push(`По ${filters.to}`);

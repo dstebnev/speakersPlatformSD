@@ -4,7 +4,7 @@ const e = React.createElement;
 const { useState, useEffect } = React;
 
 export function FilterPanel({ filters, onChange, visible, speakers = [], events = [] }) {
-  const { direction, status, query, speaker, from, to, event: eventName } = filters;
+  const { tag, status, query, speaker, from, to, event: eventName } = filters;
 
   const [localQuery, setLocalQuery] = useState(query);
   const [localSpeaker, setLocalSpeaker] = useState(speaker);
@@ -26,7 +26,7 @@ export function FilterPanel({ filters, onChange, visible, speakers = [], events 
   }, [debouncedSpeaker, speaker]);
 
   const reset = () =>
-    onChange({ direction: 'all', status: 'all', query: '', speaker: '', event: '', from: '', to: '' });
+    onChange({ tag: 'all', status: 'all', query: '', speaker: '', event: '', from: '', to: '' });
 
   return e(
     'section',
@@ -67,11 +67,11 @@ export function FilterPanel({ filters, onChange, visible, speakers = [], events 
     e(
       'select',
       {
-        value: direction,
-        onChange: ev => set('direction', ev.target.value),
-        'aria-label': 'Направление',
+        value: tag,
+        onChange: ev => set('tag', ev.target.value),
+        'aria-label': 'Тег',
       },
-      e('option', { value: 'all' }, 'Все направления'),
+      e('option', { value: 'all' }, 'Все теги'),
       DIRECTIONS.map(d => e('option', { key: d, value: d }, d))
     ),
     e(
