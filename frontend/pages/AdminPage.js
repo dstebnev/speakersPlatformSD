@@ -275,6 +275,23 @@ export function AdminPage() {
   const [modal, setModal] = useState(null); // { type, item? }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const headerRef = React.useRef(null);
+
+  // Measure the sticky page-header height and expose it as a CSS variable
+  // so the admin-tabs can stick right below it (avoids hard-coded magic numbers).
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => {
+      document.documentElement.style.setProperty(
+        '--admin-header-height', el.offsetHeight + 'px'
+      );
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -376,7 +393,7 @@ export function AdminPage() {
   return e(
     'div',
     { className: 'page-scroll' },
-    e('div', { className: 'page-header' }, e('div', { className: 'page-header__title' }, 'Администрирование')),
+    e('div', { className: 'page-header', ref: headerRef }, e('div', { className: 'page-header__title' }, 'Администрирование')),
 
     // Tabs
     e(

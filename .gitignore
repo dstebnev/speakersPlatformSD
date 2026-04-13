@@ -4,5 +4,14 @@ out
 .env
 
 db.json
-data/
+
+# Exclude DB files and uploaded photos — but NOT the data/ directory itself.
+# The empty data/ folder is committed via data/.gitkeep so the app can write
+# to it on a fresh server without manual setup.
+data/*.db
+data/*.db-shm
+data/*.db-wal
+# Ignore uploaded photo files but keep the photos/ directory in git
+data/photos/*
+!data/photos/.gitkeep
 amvera.yml
