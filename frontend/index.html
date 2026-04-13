@@ -1,48 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Speakers Platform</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="styles/header.css" />
-  <!-- React and dependencies from CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Telegram WebApp JS to access Telegram features -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body class="page talks-body" style="--header-extra-top: 8px;">
+<body>
   <div id="root"></div>
+
   <script src="/config.js"></script>
   <script src="safe-area.js"></script>
   <script>
-    (function() {
+    (function () {
       const cfg = window.APP_CONFIG || { mode: 'prod', admins: [] };
       const tg = window.Telegram?.WebApp;
+
       tg?.ready();
+      tg?.expand();
+      tg?.disableVerticalSwipes?.();
+      if (typeof tg?.requestFullscreen === 'function') tg.requestFullscreen();
+      tg?.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
+
       const user = tg?.initDataUnsafe?.user;
-      if (user && user.username) {
+      if (user?.username) {
         document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
       }
-      const isAdmin = user && cfg.admins.includes(user.username);
-      window.__IS_ADMIN__ = cfg.mode === 'debug' || isAdmin;
-      const tryExpand = () => {
-        if (!tg) return;
-        tg.ready?.();
-        tg.expand?.();
-        tg.requestFullscreen?.();
-        tg.disableVerticalSwipes?.();
-        tg.postEvent?.('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
-      };
-      if (document.readyState === 'loading') {
-        window.addEventListener('DOMContentLoaded', tryExpand);
-      } else {
-        tryExpand();
-      }
+
+      window.__IS_ADMIN__ = cfg.mode === 'debug' || !!(user?.username && cfg.admins.includes(user.username));
+
+      // Apply Telegram theme CSS variables
+      const theme = tg?.themeParams || {};
+      Object.entries(theme).forEach(([k, v]) =>
+        document.documentElement.style.setProperty('--tg-' + k, v)
+      );
     })();
   </script>
-  <script src="errors.js"></script>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
