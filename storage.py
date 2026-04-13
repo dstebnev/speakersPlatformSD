@@ -118,6 +118,8 @@ def _ensure_speakers_table(conn):
         conn.execute("ALTER TABLE speakers ADD COLUMN telegram TEXT DEFAULT ''")
     if 'expertise' not in column_names:
         conn.execute("ALTER TABLE speakers ADD COLUMN expertise TEXT DEFAULT '[]'")
+    if 'photoUrl' not in column_names:
+        conn.execute("ALTER TABLE speakers ADD COLUMN photoUrl TEXT DEFAULT ''")
 
 
 def _create_speakers_table(conn):
@@ -128,7 +130,8 @@ def _create_speakers_table(conn):
             email     TEXT DEFAULT '',
             telegram  TEXT DEFAULT '',
             expertise TEXT DEFAULT '[]',
-            role      TEXT DEFAULT ''
+            role      TEXT DEFAULT '',
+            photoUrl  TEXT DEFAULT ''
         )
     """)
 
@@ -171,6 +174,7 @@ def _migrate_speakers_from_old(conn, column_names):
 
 
 def _row_to_speaker(row):
+    keys = row.keys()
     return {
         'id': row['id'],
         'name': row['name'],
@@ -178,6 +182,7 @@ def _row_to_speaker(row):
         'telegram': row['telegram'] or '',
         'expertise': _normalize_json_list(row['expertise']),
         'role': row['role'] or '',
+        'photoUrl': (row['photoUrl'] if 'photoUrl' in keys else '') or '',
     }
 
 
@@ -195,8 +200,8 @@ def get_speaker(spk_id):
 
 def _upsert_speaker(conn, spk):
     conn.execute(
-        """INSERT OR REPLACE INTO speakers (id, name, email, telegram, expertise, role)
-           VALUES (?, ?, ?, ?, ?, ?)""",
+        """INSERT OR REPLACE INTO speakers (id, name, email, telegram, expertise, role, photoUrl)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
         (
             spk['id'],
             spk['name'],
@@ -204,6 +209,7 @@ def _upsert_speaker(conn, spk):
             spk.get('telegram', ''),
             json.dumps(spk.get('expertise', []), ensure_ascii=False),
             spk.get('role', ''),
+            spk.get('photoUrl', ''),
         ),
     )
     for tag in spk.get('expertise', []):
@@ -218,6 +224,7 @@ def add_speaker(obj):
         'telegram': (obj.get('telegram') or '').strip(),
         'expertise': _normalize_json_list(obj.get('expertise', [])),
         'role': (obj.get('role') or '').strip(),
+        'photoUrl': (obj.get('photoUrl') or '').strip(),
     }
     with get_conn() as conn:
         _upsert_speaker(conn, spk)

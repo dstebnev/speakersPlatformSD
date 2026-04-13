@@ -19,6 +19,78 @@ async function api(method, url, body) {
   return res.json();
 }
 
+// ─── Photo Upload ──────────────────────────────────────────────────────────────
+function PhotoUpload({ value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = React.useRef(null);
+
+  const handleFile = async ev => {
+    const file = ev.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error('Ошибка загрузки');
+      const { url } = await res.json();
+      onChange(url);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUploading(false);
+      ev.target.value = '';
+    }
+  };
+
+  return e(
+    'div',
+    { className: 'photo-upload' },
+    // Preview / placeholder
+    e(
+      'div',
+      {
+        className: 'photo-upload__preview',
+        onClick: () => !uploading && inputRef.current?.click(),
+        style: { cursor: uploading ? 'default' : 'pointer' },
+      },
+      value
+        ? e('img', { src: value, alt: 'Фото', className: 'photo-upload__img' })
+        : e('div', { className: 'photo-upload__placeholder' },
+            e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 32, height: 32, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
+              e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' })
+            )
+          ),
+      uploading && e('div', { className: 'photo-upload__overlay' }, e('div', { className: 'spinner' }))
+    ),
+    e(
+      'div',
+      { className: 'photo-upload__actions' },
+      e('button', {
+        type: 'button',
+        className: 'btn btn-ghost',
+        style: { flex: 1 },
+        disabled: uploading,
+        onClick: () => inputRef.current?.click(),
+      }, uploading ? 'Загрузка...' : value ? 'Заменить фото' : 'Добавить фото'),
+      value && e('button', {
+        type: 'button',
+        className: 'btn btn-danger',
+        style: { width: 'auto', padding: '11px 14px' },
+        disabled: uploading,
+        onClick: () => onChange(''),
+      }, '×')
+    ),
+    e('input', {
+      ref: inputRef,
+      type: 'file',
+      accept: 'image/jpeg,image/png,image/webp',
+      style: { display: 'none' },
+      onChange: handleFile,
+    })
+  );
+}
+
 // ─── Speaker Form ──────────────────────────────────────────────────────────────
 function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) {
   const [form, setForm] = useState({
@@ -27,12 +99,21 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
     email: initial.email || '',
     telegram: initial.telegram || '',
     expertise: initial.expertise || [],
+    photoUrl: initial.photoUrl || '',
   });
   const set = key => ev => setForm(f => ({ ...f, [key]: ev.target.value }));
 
   return e(
     React.Fragment,
     null,
+    // Photo
+    e('div', { className: 'field' },
+      e('label', { className: 'field-label' }, 'Фото'),
+      e(PhotoUpload, {
+        value: form.photoUrl,
+        onChange: url => setForm(f => ({ ...f, photoUrl: url })),
+      })
+    ),
     e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Имя Фамилия *'),
       e('input', { className: 'field-input', value: form.name, onChange: set('name'), placeholder: 'Иван Иванов' })

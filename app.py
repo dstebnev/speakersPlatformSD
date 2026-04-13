@@ -4,6 +4,8 @@ import os
 import json
 from dotenv import load_dotenv
 from uuid import uuid4
+from io import BytesIO
+from PIL import Image
 import storage
 
 load_dotenv(override=True)
@@ -151,6 +153,40 @@ def activity_by_id(act_id):
     if updated is None:
         return abort(404)
     return jsonify(updated)
+
+
+# ─── Upload ───────────────────────────────────────────────────────────────────
+
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    if not is_admin_request(request):
+        return abort(403)
+
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        return abort(400)
+
+    allowed_ext   = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+    allowed_mimes = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext or file.mimetype not in allowed_mimes:
+        return abort(400)
+
+    img = Image.open(file.stream)
+    # Resize to max 400×400 preserving aspect ratio
+    img.thumbnail((400, 400), Image.LANCZOS)
+    if img.mode not in ('RGB', 'RGBA'):
+        img = img.convert('RGBA')
+
+    buf = BytesIO()
+    img.save(buf, format='PNG', optimize=True, compress_level=9)
+
+    filename = f"{uuid4().hex}.png"
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    with open(os.path.join(UPLOAD_FOLDER, filename), 'wb') as f:
+        f.write(buf.getvalue())
+
+    return jsonify({'url': f'/photos/{filename}'})
 
 
 # ─── Stats ────────────────────────────────────────────────────────────────────
