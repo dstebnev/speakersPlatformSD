@@ -19,6 +19,10 @@ export function TagsMultiSelect({ value = [], onChange, options = [], placeholde
   const filtered = options.filter(
     o => !selected.includes(o.name) && o.name.toLowerCase().includes(query.toLowerCase())
   );
+  const trimmedQuery = query.trim();
+  const canCreate = trimmedQuery &&
+    !options.some(o => o.name.toLowerCase() === trimmedQuery.toLowerCase()) &&
+    !selected.includes(trimmedQuery);
 
   useEffect(() => {
     const handler = ev => {
@@ -68,7 +72,7 @@ export function TagsMultiSelect({ value = [], onChange, options = [], placeholde
         onChange: ev => { setQuery(ev.target.value); setOpen(true); },
       })
     ),
-    open && filtered.length > 0 && e(
+    open && (filtered.length > 0 || canCreate) && e(
       'div',
       { className: 'tags-dropdown' },
       filtered.map(o =>
@@ -77,7 +81,13 @@ export function TagsMultiSelect({ value = [], onChange, options = [], placeholde
           className: 'tags-dropdown__item',
           onMouseDown: ev => { ev.preventDefault(); add(o.name); },
         }, o.name)
-      )
+      ),
+      canCreate && e('div', {
+        key: '__create__',
+        className: 'tags-dropdown__item tags-dropdown__item--create',
+        onMouseDown: ev => { ev.preventDefault(); add(trimmedQuery); },
+        style: { color: 'var(--tg-theme-link-color, #2481cc)', fontStyle: 'italic' },
+      }, `+ Создать тег "${trimmedQuery}"`)
     )
   );
 }

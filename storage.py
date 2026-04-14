@@ -120,18 +120,21 @@ def _ensure_speakers_table(conn):
         conn.execute("ALTER TABLE speakers ADD COLUMN expertise TEXT DEFAULT '[]'")
     if 'photoUrl' not in column_names:
         conn.execute("ALTER TABLE speakers ADD COLUMN photoUrl TEXT DEFAULT ''")
+    if 'mattermost' not in column_names:
+        conn.execute("ALTER TABLE speakers ADD COLUMN mattermost TEXT DEFAULT ''")
 
 
 def _create_speakers_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS speakers (
-            id        TEXT PRIMARY KEY,
-            name      TEXT NOT NULL,
-            email     TEXT DEFAULT '',
-            telegram  TEXT DEFAULT '',
-            expertise TEXT DEFAULT '[]',
-            role      TEXT DEFAULT '',
-            photoUrl  TEXT DEFAULT ''
+            id          TEXT PRIMARY KEY,
+            name        TEXT NOT NULL,
+            email       TEXT DEFAULT '',
+            telegram    TEXT DEFAULT '',
+            mattermost  TEXT DEFAULT '',
+            expertise   TEXT DEFAULT '[]',
+            role        TEXT DEFAULT '',
+            photoUrl    TEXT DEFAULT ''
         )
     """)
 
@@ -180,6 +183,7 @@ def _row_to_speaker(row):
         'name': row['name'],
         'email': row['email'] or '',
         'telegram': row['telegram'] or '',
+        'mattermost': (row['mattermost'] if 'mattermost' in keys else '') or '',
         'expertise': _normalize_json_list(row['expertise']),
         'role': row['role'] or '',
         'photoUrl': (row['photoUrl'] if 'photoUrl' in keys else '') or '',
@@ -200,13 +204,14 @@ def get_speaker(spk_id):
 
 def _upsert_speaker(conn, spk):
     conn.execute(
-        """INSERT OR REPLACE INTO speakers (id, name, email, telegram, expertise, role, photoUrl)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        """INSERT OR REPLACE INTO speakers (id, name, email, telegram, mattermost, expertise, role, photoUrl)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             spk['id'],
             spk['name'],
             spk.get('email', ''),
             spk.get('telegram', ''),
+            spk.get('mattermost', ''),
             json.dumps(spk.get('expertise', []), ensure_ascii=False),
             spk.get('role', ''),
             spk.get('photoUrl', ''),
@@ -222,6 +227,7 @@ def add_speaker(obj):
         'name': (obj.get('name') or '').strip(),
         'email': (obj.get('email') or '').strip(),
         'telegram': (obj.get('telegram') or '').strip(),
+        'mattermost': (obj.get('mattermost') or '').strip(),
         'expertise': _normalize_json_list(obj.get('expertise', [])),
         'role': (obj.get('role') or '').strip(),
         'photoUrl': (obj.get('photoUrl') or '').strip(),
@@ -270,6 +276,8 @@ def _ensure_activities_table(conn):
         conn.execute("ALTER TABLE activities ADD COLUMN expertise_tags TEXT DEFAULT '[]'")
     if 'format' not in column_names:
         conn.execute("ALTER TABLE activities ADD COLUMN format TEXT DEFAULT 'speech'")
+    if 'link' not in column_names:
+        conn.execute("ALTER TABLE activities ADD COLUMN link TEXT DEFAULT ''")
 
 
 def _create_activities_table(conn):
@@ -282,7 +290,8 @@ def _create_activities_table(conn):
             speaker_ids    TEXT DEFAULT '[]',
             date           TEXT DEFAULT '',
             event          TEXT DEFAULT '',
-            expertise_tags TEXT DEFAULT '[]'
+            expertise_tags TEXT DEFAULT '[]',
+            link           TEXT DEFAULT ''
         )
     """)
 
@@ -317,6 +326,7 @@ def _migrate_from_talks(conn):
 
 
 def _row_to_activity(row):
+    keys = row.keys()
     return {
         'id': row['id'],
         'name': row['name'],
@@ -326,6 +336,7 @@ def _row_to_activity(row):
         'date': row['date'] or '',
         'event': row['event'] or '',
         'expertise_tags': _normalize_json_list(row['expertise_tags']),
+        'link': (row['link'] if 'link' in keys else '') or '',
     }
 
 
@@ -346,8 +357,8 @@ def get_activity(act_id):
 def _upsert_activity(conn, act):
     conn.execute(
         """INSERT OR REPLACE INTO activities
-           (id, name, format, description, speaker_ids, date, event, expertise_tags)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (id, name, format, description, speaker_ids, date, event, expertise_tags, link)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             act['id'],
             act['name'],
@@ -357,6 +368,7 @@ def _upsert_activity(conn, act):
             act.get('date', ''),
             act.get('event', ''),
             json.dumps(act.get('expertise_tags', []), ensure_ascii=False),
+            act.get('link', ''),
         ),
     )
     for tag in act.get('expertise_tags', []):
@@ -376,6 +388,7 @@ def add_activity(obj):
         'date': obj.get('date', ''),
         'event': (obj.get('event') or '').strip(),
         'expertise_tags': _normalize_json_list(obj.get('expertise_tags', [])),
+        'link': (obj.get('link') or '').strip(),
     }
     with get_conn() as conn:
         _upsert_activity(conn, act)

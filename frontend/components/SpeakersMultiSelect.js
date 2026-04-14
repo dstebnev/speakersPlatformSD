@@ -4,13 +4,15 @@ const { useState, useRef, useEffect } = React;
 /**
  * Multi-select for speakers (by id).
  * Props:
- *   value: string[]          – selected speaker ids
+ *   value: string[]                        – selected speaker ids
  *   onChange: (ids) => void
  *   speakers: {id, name}[]
+ *   onCreateSpeaker: (name) => Promise<id> – optional, enables creating new speakers
  */
-export function SpeakersMultiSelect({ value = [], onChange, speakers = [] }) {
+export function SpeakersMultiSelect({ value = [], onChange, speakers = [], onCreateSpeaker }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [creating, setCreating] = useState(false);
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -19,6 +21,9 @@ export function SpeakersMultiSelect({ value = [], onChange, speakers = [] }) {
   const filtered = speakers.filter(
     s => !selected.includes(s.id) && s.name.toLowerCase().includes(query.toLowerCase())
   );
+  const trimmedQuery = query.trim();
+  const canCreate = onCreateSpeaker && trimmedQuery &&
+    !speakers.some(s => s.name.toLowerCase() === trimmedQuery.toLowerCase());
 
   useEffect(() => {
     const handler = ev => {
@@ -38,6 +43,17 @@ export function SpeakersMultiSelect({ value = [], onChange, speakers = [] }) {
   };
 
   const remove = id => onChange(selected.filter(s => s !== id));
+
+  const handleCreate = async () => {
+    if (!trimmedQuery || creating) return;
+    setCreating(true);
+    try {
+      const id = await onCreateSpeaker(trimmedQuery);
+      if (id) add(id);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return e(
     'div',
@@ -69,7 +85,7 @@ export function SpeakersMultiSelect({ value = [], onChange, speakers = [] }) {
         onChange: ev => { setQuery(ev.target.value); setOpen(true); },
       })
     ),
-    open && filtered.length > 0 && e(
+    open && (filtered.length > 0 || canCreate) && e(
       'div',
       { className: 'tags-dropdown' },
       filtered.map(s =>
@@ -78,7 +94,13 @@ export function SpeakersMultiSelect({ value = [], onChange, speakers = [] }) {
           className: 'tags-dropdown__item',
           onMouseDown: ev => { ev.preventDefault(); add(s.id); },
         }, s.name, s.role ? e('span', { style: { color: 'var(--tg-theme-hint-color)', marginLeft: 6, fontSize: '0.8125rem' } }, s.role) : null)
-      )
+      ),
+      canCreate && e('div', {
+        key: '__create__',
+        className: 'tags-dropdown__item tags-dropdown__item--create',
+        onMouseDown: ev => { ev.preventDefault(); handleCreate(); },
+        style: { color: 'var(--tg-theme-link-color, #2481cc)', fontStyle: 'italic' },
+      }, creating ? 'Создание...' : `+ Создать спикера "${trimmedQuery}"`)
     )
   );
 }

@@ -98,6 +98,7 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
     role: initial.role || '',
     email: initial.email || '',
     telegram: initial.telegram || '',
+    mattermost: initial.mattermost || '',
     expertise: initial.expertise || [],
     photoUrl: initial.photoUrl || '',
   });
@@ -131,6 +132,10 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
       e('input', { className: 'field-input', value: form.telegram, onChange: set('telegram'), placeholder: '@username' })
     ),
     e('div', { className: 'field' },
+      e('label', { className: 'field-label' }, 'Mattermost'),
+      e('input', { className: 'field-input', value: form.mattermost, onChange: set('mattermost'), placeholder: '@username' })
+    ),
+    e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Экспертность'),
       e(TagsMultiSelect, {
         value: form.expertise,
@@ -154,7 +159,7 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
 }
 
 // ─── Activity Form ─────────────────────────────────────────────────────────────
-function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete, saving }) {
+function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete, saving, onCreateSpeaker }) {
   const [form, setForm] = useState({
     name: initial.name || '',
     format: initial.format || 'speech',
@@ -163,6 +168,7 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
     date: initial.date || '',
     event: initial.event || '',
     expertise_tags: initial.expertise_tags || [],
+    link: initial.link || '',
   });
   const set = key => ev => setForm(f => ({ ...f, [key]: ev.target.value }));
 
@@ -185,6 +191,7 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
         value: form.speaker_ids,
         onChange: ids => setForm(f => ({ ...f, speaker_ids: ids })),
         speakers,
+        onCreateSpeaker,
       })
     ),
     e('div', { className: 'field' },
@@ -207,6 +214,10 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
         options: expertiseTags,
         placeholder: 'Выберите темы...',
       })
+    ),
+    e('div', { className: 'field' },
+      e('label', { className: 'field-label' }, 'Ссылка'),
+      e('input', { className: 'field-input', value: form.link, onChange: set('link'), placeholder: 'https://...' })
     ),
     e('button', {
       className: 'btn btn-primary',
@@ -339,6 +350,18 @@ export function AdminPage() {
       closeModal();
     } catch (err) { alert(err.message); }
     finally { setSaving(false); }
+  };
+
+  // ─── Create speaker on-the-fly (from ActivityForm) ──
+  const createSpeaker = async name => {
+    try {
+      const created = await api('POST', '/api/speakers', { name: name.trim() });
+      setSpeakers(prev => [...prev, created].sort((a, b) => a.name.localeCompare(b.name, 'ru')));
+      return created.id;
+    } catch (err) {
+      alert('Ошибка при создании спикера: ' + err.message);
+      return null;
+    }
   };
 
   // ─── Activities CRUD ──
@@ -503,6 +526,7 @@ export function AdminPage() {
         onSave: saveActivity,
         onDelete: deleteActivity,
         saving,
+        onCreateSpeaker: createSpeaker,
       })
     ),
 

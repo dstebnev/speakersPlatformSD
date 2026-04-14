@@ -113,6 +113,11 @@ export function ActivityCard({ activity, speakers = [], isOpen, onToggle }) {
           'div', { className: 'activity-card__detail-row' },
           e('span', null, 'Дата:'),
           e('span', null, formatDate(activity.date))
+        ),
+        activity.link && e(
+          'div', { className: 'activity-card__detail-row' },
+          e('span', null, 'Ссылка:'),
+          e('a', { href: activity.link, target: '_blank', rel: 'noopener noreferrer', style: { color: 'var(--tg-theme-link-color, #2481cc)', wordBreak: 'break-all' } }, activity.link)
         )
       )
     )

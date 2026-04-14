@@ -42,7 +42,7 @@ export function SpeakerCard({ speaker }) {
         e('span', { key: tag, className: 'tag' }, tag)
       )
     ),
-    (speaker.email || speaker.telegram) && e(
+    (speaker.email || speaker.telegram || speaker.mattermost) && e(
       'div',
       { className: 'speaker-card__contacts' },
       speaker.email && e(
@@ -57,9 +57,17 @@ export function SpeakerCard({ speaker }) {
         'a',
         { href: tgLink, className: 'speaker-card__contact-link', target: '_blank', rel: 'noopener' },
         e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 14, height: 14, viewBox: '0 0 24 24', fill: 'currentColor' },
-          e('path', { d: 'M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z' })
+          e('path', { d: 'M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.447c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z' })
         ),
         '@' + speaker.telegram.replace(/^@/, '')
+      ),
+      speaker.mattermost && e(
+        'span',
+        { className: 'speaker-card__contact-link', title: 'Mattermost' },
+        e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
+          e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' })
+        ),
+        speaker.mattermost.startsWith('@') ? speaker.mattermost : '@' + speaker.mattermost
       )
     )
   );
