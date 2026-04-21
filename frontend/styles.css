@@ -147,6 +147,27 @@ body {
   border-color: transparent;
 }
 
+.chip__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  margin-left: 5px;
+  border-radius: 9px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  background: rgba(0, 0, 0, 0.1);
+  color: inherit;
+  vertical-align: middle;
+}
+
+.chip.active .chip__count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* ─── Card ───────────────────────────────────────────────────────────────────── */
 .card {
   background: var(--card-bg);

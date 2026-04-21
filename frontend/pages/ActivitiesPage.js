@@ -10,6 +10,12 @@ const FORMAT_OPTIONS = [
   { value: 'digital', label: 'Digital' },
 ];
 
+const TIME_OPTIONS = [
+  { value: 'all',      label: 'Все' },
+  { value: 'upcoming', label: 'Будущие' },
+  { value: 'past',     label: 'Прошедшие' },
+];
+
 async function fetchJSON(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(res.statusText);
@@ -24,8 +30,10 @@ export function ActivitiesPage() {
   const [error, setError] = useState('');
   const [openId, setOpenId] = useState(null);
   const [query, setQuery] = useState('');
-  const [formatFilter, setFormatFilter] = useState('all');
-  const [tagFilter, setTagFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('upcoming');
+  // Multi-select: empty array = "all" selected
+  const [formatFilters, setFormatFilters] = useState([]);
+  const [tagFilters, setTagFilters] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -44,11 +52,68 @@ export function ActivitiesPage() {
 
   const speakerMap = useMemo(() => Object.fromEntries(speakers.map(s => [s.id, s])), [speakers]);
 
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const toggleFormat = (value) => {
+    if (value === 'all') {
+      setFormatFilters([]);
+    } else {
+      setFormatFilters(prev =>
+        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+      );
+    }
+    setOpenId(null);
+  };
+
+  const toggleTag = (value) => {
+    if (value === 'all') {
+      setTagFilters([]);
+    } else {
+      setTagFilters(prev =>
+        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+      );
+    }
+    setOpenId(null);
+  };
+
+  // Activities filtered by time only — base for format counts
+  const timeFiltered = useMemo(() => {
+    return activities.filter(a => {
+      if (timeFilter === 'upcoming') return !a.date || a.date >= today;
+      if (timeFilter === 'past') return a.date && a.date < today;
+      return true;
+    });
+  }, [activities, timeFilter, today]);
+
+  // Format counts depend on time filter only
+  const formatCounts = useMemo(() => {
+    const counts = {};
+    timeFiltered.forEach(a => {
+      counts[a.format] = (counts[a.format] || 0) + 1;
+    });
+    return counts;
+  }, [timeFiltered]);
+
+  // Tag counts depend on time filter + selected formats
+  const tagCounts = useMemo(() => {
+    const counts = {};
+    timeFiltered
+      .filter(a => formatFilters.length === 0 || formatFilters.includes(a.format))
+      .forEach(a => {
+        (a.expertise_tags || []).forEach(tag => {
+          counts[tag] = (counts[tag] || 0) + 1;
+        });
+      });
+    return counts;
+  }, [timeFiltered, formatFilters]);
+
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    return activities.filter(a => {
-      if (formatFilter !== 'all' && a.format !== formatFilter) return false;
-      if (tagFilter !== 'all' && !(a.expertise_tags || []).includes(tagFilter)) return false;
+    const result = activities.filter(a => {
+      if (timeFilter === 'upcoming' && a.date && a.date < today) return false;
+      if (timeFilter === 'past' && (!a.date || a.date >= today)) return false;
+      if (formatFilters.length > 0 && !formatFilters.includes(a.format)) return false;
+      if (tagFilters.length > 0 && !(a.expertise_tags || []).some(t => tagFilters.includes(t))) return false;
       if (q) {
         const inName = a.name.toLowerCase().includes(q);
         const inEvent = (a.event || '').toLowerCase().includes(q);
@@ -59,7 +124,18 @@ export function ActivitiesPage() {
       }
       return true;
     });
-  }, [activities, formatFilter, tagFilter, query, speakerMap]);
+
+    result.sort((a, b) => {
+      const da = a.date || '';
+      const db = b.date || '';
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return timeFilter === 'past' ? db.localeCompare(da) : da.localeCompare(db);
+    });
+
+    return result;
+  }, [activities, timeFilter, formatFilters, tagFilters, query, speakerMap, today]);
 
   const tagChips = useMemo(() => [
     { value: 'all', label: 'Все темы' },
@@ -92,29 +168,51 @@ export function ActivitiesPage() {
         })
       )
     ),
-    // Format filter chips
+    // Time filter chips
     e(
       'div',
       { className: 'filter-chips' },
-      FORMAT_OPTIONS.map(opt =>
+      TIME_OPTIONS.map(opt =>
         e('button', {
           key: opt.value,
-          className: `chip${formatFilter === opt.value ? ' active' : ''}`,
-          onClick: () => { setFormatFilter(opt.value); setOpenId(null); },
+          className: `chip${timeFilter === opt.value ? ' active' : ''}`,
+          onClick: () => { setTimeFilter(opt.value); setOpenId(null); },
         }, opt.label)
       )
     ),
-    // Expertise tag chips
+    // Format filter chips (multi-select)
+    e(
+      'div',
+      { className: 'filter-chips' },
+      FORMAT_OPTIONS.map(opt => {
+        const isActive = opt.value === 'all' ? formatFilters.length === 0 : formatFilters.includes(opt.value);
+        const count = opt.value !== 'all' ? (formatCounts[opt.value] || 0) : null;
+        return e('button', {
+          key: opt.value,
+          className: `chip${isActive ? ' active' : ''}`,
+          onClick: () => toggleFormat(opt.value),
+        },
+          opt.label,
+          count !== null && e('span', { className: 'chip__count' }, count)
+        );
+      })
+    ),
+    // Expertise tag chips (multi-select)
     tagChips.length > 1 && e(
       'div',
       { className: 'filter-chips' },
-      tagChips.map(opt =>
-        e('button', {
+      tagChips.map(opt => {
+        const isActive = opt.value === 'all' ? tagFilters.length === 0 : tagFilters.includes(opt.value);
+        const count = opt.value !== 'all' ? (tagCounts[opt.value] || 0) : null;
+        return e('button', {
           key: opt.value,
-          className: `chip${tagFilter === opt.value ? ' active' : ''}`,
-          onClick: () => { setTagFilter(opt.value); setOpenId(null); },
-        }, opt.label)
-      )
+          className: `chip${isActive ? ' active' : ''}`,
+          onClick: () => toggleTag(opt.value),
+        },
+          opt.label,
+          count !== null && e('span', { className: 'chip__count' }, count)
+        );
+      })
     ),
     // List
     filtered.length === 0
