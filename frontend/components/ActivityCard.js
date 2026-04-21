@@ -1,6 +1,31 @@
 const e = React.createElement;
 const { useRef, useEffect } = React;
 
+function parseInline(line, lineIdx) {
+  const segments = [];
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+  let last = 0, match, i = 0;
+  while ((match = regex.exec(line)) !== null) {
+    if (match.index > last) segments.push(line.slice(last, match.index));
+    if (match[1] !== undefined) segments.push(e('strong', { key: `${lineIdx}b${i++}` }, match[1]));
+    else                        segments.push(e('em',     { key: `${lineIdx}i${i++}` }, match[2]));
+    last = match.index + match[0].length;
+  }
+  if (last < line.length) segments.push(line.slice(last));
+  return segments;
+}
+
+function renderDescription(text) {
+  if (!text) return null;
+  const lines = text.split('\n');
+  const nodes = [];
+  lines.forEach((line, idx) => {
+    if (idx > 0) nodes.push(e('br', { key: `br${idx}` }));
+    parseInline(line, idx).forEach(n => nodes.push(n));
+  });
+  return nodes;
+}
+
 const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
 
 function formatDate(d) {
@@ -92,7 +117,7 @@ export function ActivityCard({ activity, speakers = [], isOpen, onToggle }) {
       e(
         'div',
         { className: 'activity-card__body-inner' },
-        activity.description && e('p', { className: 'activity-card__desc' }, activity.description),
+        activity.description && e('p', { className: 'activity-card__desc' }, ...renderDescription(activity.description)),
         speakers.length > 0 && e(
           'div',
           { className: 'speaker-mini-list' },
