@@ -78,6 +78,9 @@ body {
   z-index: 10;
   background: var(--tg-theme-bg-color);
   border-bottom: 1px solid rgba(0,0,0,.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   /*
    * padding-top absorbs the Telegram overlay (Close / menu buttons).
    * --tg-content-safe-area-inset-top is set by safe-area.js from
@@ -91,6 +94,26 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--tg-theme-text-color);
+}
+
+.cache-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: var(--tg-theme-secondary-bg-color, #f1f1f1);
+  color: var(--tg-theme-text-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cache-clear-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* ─── Search bar ─────────────────────────────────────────────────────────────── */

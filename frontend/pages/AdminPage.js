@@ -286,6 +286,7 @@ export function AdminPage() {
   const [modal, setModal] = useState(null); // { type, item? }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [cacheClearing, setCacheClearing] = useState(false);
   const headerRef = React.useRef(null);
 
   // Measure the sticky page-header height and expose it as a CSS variable
@@ -409,6 +410,18 @@ export function AdminPage() {
     } catch (err) { alert(err.message); }
   };
 
+  const clearCache = async () => {
+    if (!window.confirm('Сбросить весь кэш браузера? Страница перезагрузится.')) return;
+    setCacheClearing(true);
+    try {
+      await api('POST', '/api/cache/clear');
+      window.location.reload();
+    } catch (err) {
+      alert('Ошибка при сбросе кэша: ' + err.message);
+      setCacheClearing(false);
+    }
+  };
+
   // ─── Render ──
   const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
   const speakerMap = Object.fromEntries(speakers.map(s => [s.id, s]));
@@ -416,7 +429,20 @@ export function AdminPage() {
   return e(
     'div',
     { className: 'page-scroll' },
-    e('div', { className: 'page-header', ref: headerRef }, e('div', { className: 'page-header__title' }, 'Администрирование')),
+    e('div', { className: 'page-header', ref: headerRef },
+      e('div', { className: 'page-header__title' }, 'Администрирование'),
+      e('button', {
+        className: 'cache-clear-btn',
+        onClick: clearCache,
+        disabled: cacheClearing,
+        title: 'Сбросить кэш',
+      },
+        e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
+          e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' })
+        ),
+        cacheClearing ? 'Сброс...' : 'Сбросить кэш'
+      )
+    ),
 
     // Tabs
     e(

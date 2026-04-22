@@ -7,12 +7,14 @@ import { AdminPage } from './pages/AdminPage.js';
 const e = React.createElement;
 const { useState } = React;
 
-const PAGES = [
+const BASE_PAGES = [
   { id: 'activities', label: 'Активности' },
   { id: 'speakers',   label: 'Спикеры' },
   { id: 'stats',      label: 'Статистика' },
-  { id: 'admin',      label: 'Админка' },
 ];
+const ADMIN_PAGE = { id: 'admin', label: 'Админка' };
+
+const PAGES = window.__IS_ADMIN__ ? [...BASE_PAGES, ADMIN_PAGE] : BASE_PAGES;
 
 function App() {
   const [page, setPage] = useState('activities');
@@ -22,7 +24,7 @@ function App() {
       case 'activities': return e(ActivitiesPage);
       case 'speakers':   return e(SpeakersPage);
       case 'stats':      return e(StatsPage);
-      case 'admin':      return e(AdminPage);
+      case 'admin':      return window.__IS_ADMIN__ ? e(AdminPage) : null;
       default:           return null;
     }
   };

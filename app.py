@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, abort, send_from_directory, Response
 from flask_compress import Compress
 import os
 import json
+import time
 from dotenv import load_dotenv
 from uuid import uuid4
 from io import BytesIO
@@ -19,6 +20,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 MODE = os.getenv('MODE', 'prod').lower()
 ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '').split(',') if u.strip()]
 CACHE_TIMEOUT = int(os.getenv('CACHE_TIMEOUT', '3600'))
+
+# Timestamp of last cache clear; static files served with no-cache for 60s after clear
+_cache_cleared_at: float = 0.0
+_CACHE_CLEAR_WINDOW = 60  # seconds
+
+
+def _static_max_age() -> int:
+    """Return 0 (no-cache) for 60s after a cache clear, otherwise use CACHE_TIMEOUT."""
+    if time.time() - _cache_cleared_at < _CACHE_CLEAR_WINDOW:
+        return 0
+    return CACHE_TIMEOUT
 
 storage.init_db()
 
@@ -48,7 +60,7 @@ def config_js():
     effective_mode = 'debug' if _effective_debug() else MODE
     js = (
         'window.APP_CONFIG = '
-        + json.dumps({'mode': effective_mode, 'admins': ADMIN_USERNAMES}, ensure_ascii=False)
+        + json.dumps({'mode': effective_mode, 'admins': ADMIN_USERNAMES, 'cacheVersion': int(_cache_cleared_at)}, ensure_ascii=False)
     )
     return Response(js, mimetype='application/javascript')
 
@@ -196,11 +208,22 @@ def stats():
     return jsonify(storage.get_stats())
 
 
+# ─── Cache ────────────────────────────────────────────────────────────────────
+
+@app.route('/api/cache/clear', methods=['POST'])
+def clear_cache():
+    if not is_admin_request(request):
+        return abort(403)
+    global _cache_cleared_at
+    _cache_cleared_at = time.time()
+    return jsonify({'ok': True, 'cacheVersion': int(_cache_cleared_at)})
+
+
 # ─── Static files ─────────────────────────────────────────────────────────────
 
 @app.route('/photos/<path:filename>')
 def serve_photo(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename, max_age=CACHE_TIMEOUT)
+    return send_from_directory(UPLOAD_FOLDER, filename, max_age=_static_max_age())
 
 
 @app.route('/', defaults={'path': ''})
@@ -208,7 +231,7 @@ def serve_photo(filename):
 def static_proxy(path):
     # All routes serve index.html for SPA routing
     if path and '.' in path.split('/')[-1]:
-        return send_from_directory('frontend', path, max_age=CACHE_TIMEOUT)
+        return send_from_directory('frontend', path, max_age=_static_max_age())
     return send_from_directory('frontend', 'index.html', max_age=0)
 
 
