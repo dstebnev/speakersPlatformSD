@@ -45,8 +45,15 @@ def _effective_debug() -> bool:
     return MODE == 'debug' or app.debug
 
 
+_LOCALHOST_HOSTS = {'localhost', '127.0.0.1', '::1'}
+
+def _is_localhost(req) -> bool:
+    """True when the request is served from localhost (any port)."""
+    return req.host.split(':')[0] in _LOCALHOST_HOSTS
+
+
 def is_admin_request(req) -> bool:
-    if _effective_debug():
+    if _effective_debug() or _is_localhost(req):
         return True
     username = (
         req.cookies.get('username')
@@ -60,9 +67,7 @@ def is_admin_request(req) -> bool:
 
 @app.route('/config.js')
 def config_js():
-    # When Flask debug flag is on, report mode as 'debug' so the frontend
-    # also grants admin access without a Telegram username check.
-    effective_mode = 'debug' if _effective_debug() else MODE
+    effective_mode = 'debug' if (_effective_debug() or _is_localhost(request)) else MODE
     js = (
         'window.APP_CONFIG = '
         + json.dumps({'mode': effective_mode, 'admins': ADMIN_USERNAMES, 'cacheVersion': int(_cache_cleared_at)}, ensure_ascii=False)

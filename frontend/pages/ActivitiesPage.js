@@ -4,16 +4,15 @@ const e = React.createElement;
 const { useState, useEffect, useMemo } = React;
 
 const FORMAT_OPTIONS = [
-  { value: 'all',     label: 'Все форматы' },
   { value: 'speech',  label: 'Выступление' },
   { value: 'article', label: 'Статья' },
   { value: 'digital', label: 'Digital' },
 ];
 
 const TIME_OPTIONS = [
-  { value: 'all',      label: 'Все' },
   { value: 'upcoming', label: 'Будущие' },
   { value: 'past',     label: 'Прошедшие' },
+  { value: 'all',      label: 'Все' },
 ];
 
 async function fetchJSON(url) {
@@ -22,7 +21,23 @@ async function fetchJSON(url) {
   return res.json();
 }
 
-export function ActivitiesPage() {
+// Search icon
+const SearchIcon = e('svg', {
+  viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2,
+  width: 16, height: 16,
+},
+  e('circle', { cx: 11, cy: 11, r: 7 }),
+  e('path', { d: 'm20 20-3.5-3.5', strokeLinecap: 'round' }));
+
+// Mic icon
+const MicIcon = e('svg', {
+  viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7,
+  width: 22, height: 22,
+},
+  e('rect', { x: 9, y: 3, width: 6, height: 12, rx: 3 }),
+  e('path', { d: 'M5 11a7 7 0 0 0 14 0M12 18v3', strokeLinecap: 'round' }));
+
+export function ActivitiesPage({ onOpenRequest }) {
   const [activities, setActivities] = useState([]);
   const [speakers, setSpeakers] = useState([]);
   const [expertiseTags, setExpertiseTags] = useState([]);
@@ -31,7 +46,6 @@ export function ActivitiesPage() {
   const [openId, setOpenId] = useState(null);
   const [query, setQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('upcoming');
-  // Multi-select: empty array = "all" selected
   const [formatFilters, setFormatFilters] = useState([]);
   const [tagFilters, setTagFilters] = useState([]);
 
@@ -50,51 +64,34 @@ export function ActivitiesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const speakerMap = useMemo(() => Object.fromEntries(speakers.map(s => [s.id, s])), [speakers]);
+  const speakerMap = useMemo(() =>
+    Object.fromEntries(speakers.map(s => [s.id, s])), [speakers]);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-  const toggleFormat = (value) => {
-    if (value === 'all') {
-      setFormatFilters([]);
-    } else {
-      setFormatFilters(prev =>
-        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-      );
-    }
+  const toggleFormat = value => {
+    setFormatFilters(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
     setOpenId(null);
   };
 
-  const toggleTag = (value) => {
-    if (value === 'all') {
-      setTagFilters([]);
-    } else {
-      setTagFilters(prev =>
-        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-      );
-    }
+  const toggleTag = value => {
+    setTagFilters(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
     setOpenId(null);
   };
 
-  // Activities filtered by time only — base for format counts
-  const timeFiltered = useMemo(() => {
-    return activities.filter(a => {
-      if (timeFilter === 'upcoming') return !a.date || a.date >= today;
-      if (timeFilter === 'past') return a.date && a.date < today;
-      return true;
-    });
-  }, [activities, timeFilter, today]);
+  // Time-filtered subset (base for counts)
+  const timeFiltered = useMemo(() => activities.filter(a => {
+    if (timeFilter === 'upcoming') return !a.date || a.date >= today;
+    if (timeFilter === 'past') return a.date && a.date < today;
+    return true;
+  }), [activities, timeFilter, today]);
 
-  // Format counts depend on time filter only
   const formatCounts = useMemo(() => {
     const counts = {};
-    timeFiltered.forEach(a => {
-      counts[a.format] = (counts[a.format] || 0) + 1;
-    });
+    timeFiltered.forEach(a => { counts[a.format] = (counts[a.format] || 0) + 1; });
     return counts;
   }, [timeFiltered]);
 
-  // Tag counts depend on time filter + selected formats
   const tagCounts = useMemo(() => {
     const counts = {};
     timeFiltered
@@ -117,121 +114,113 @@ export function ActivitiesPage() {
       if (q) {
         const inName = a.name.toLowerCase().includes(q);
         const inEvent = (a.event || '').toLowerCase().includes(q);
-        const inSpeakers = (a.speaker_ids || []).some(id =>
-          speakerMap[id]?.name.toLowerCase().includes(q)
-        );
-        if (!inName && !inEvent && !inSpeakers) return false;
+        const inSpks = (a.speaker_ids || []).some(id => speakerMap[id]?.name.toLowerCase().includes(q));
+        if (!inName && !inEvent && !inSpks) return false;
       }
       return true;
     });
 
     result.sort((a, b) => {
-      const da = a.date || '';
-      const db = b.date || '';
+      const da = a.date || '', db = b.date || '';
       if (!da && !db) return 0;
       if (!da) return 1;
       if (!db) return -1;
       return timeFilter === 'past' ? db.localeCompare(da) : da.localeCompare(db);
     });
-
     return result;
   }, [activities, timeFilter, formatFilters, tagFilters, query, speakerMap, today]);
 
-  const tagChips = useMemo(() => [
-    { value: 'all', label: 'Все темы' },
-    ...expertiseTags.map(t => ({ value: t.name, label: t.name })),
-  ], [expertiseTags]);
+  if (loading) return e('div', { className: 'page-scroll' },
+    e('div', { className: 'loader' }, e('div', { className: 'spinner' })));
+  if (error) return e('div', { className: 'page-scroll' },
+    e('div', { className: 'empty-state' },
+      e('div', { className: 'empty-state__icon' }, '⚠️'),
+      e('div', { className: 'empty-state__text' }, error)));
 
-  if (loading) return e('div', { className: 'page-scroll' }, e('div', { className: 'loader' }, e('div', { className: 'spinner' })));
-  if (error)   return e('div', { className: 'page-scroll' }, e('div', { className: 'empty-state' }, e('div', { className: 'empty-state__icon' }, '⚠️'), e('div', { className: 'empty-state__text' }, error)));
+  const allTagChips = expertiseTags.map(t => t.name);
 
-  return e(
-    'div',
-    { className: 'page-scroll' },
-    // Sticky header
-    e(
-      'div',
-      { className: 'page-header' },
-      e('div', { className: 'page-header__title' }, 'Активности'),
-      e(
-        'div',
-        { className: 'search-bar' },
-        e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
-          e('circle', { cx: 11, cy: 11, r: 8 }),
-          e('path', { strokeLinecap: 'round', d: 'm21 21-4.35-4.35' })
-        ),
-        e('input', {
-          type: 'search',
-          placeholder: 'Поиск по названию, спикеру, площадке...',
-          value: query,
-          onChange: ev => { setQuery(ev.target.value); setOpenId(null); },
-        })
-      )
-    ),
-    // Time filter chips
-    e(
-      'div',
-      { className: 'filter-chips' },
-      TIME_OPTIONS.map(opt =>
-        e('button', {
-          key: opt.value,
-          className: `chip${timeFilter === opt.value ? ' active' : ''}`,
-          onClick: () => { setTimeFilter(opt.value); setOpenId(null); },
-        }, opt.label)
-      )
-    ),
-    // Format filter chips (multi-select)
-    e(
-      'div',
-      { className: 'filter-chips' },
+  return e('div', { className: 'page' },
+
+    // Header
+    e('div', { className: 'page__head' },
+      e('div', null,
+        e('h1', { className: 'page__title' }, 'Активности'),
+        e('div', { className: 'page__sub' },
+          'Выступления, статьи и цифровой контент')),
+      e('div', { className: 'page__count' },
+        `${filtered.length} из ${timeFiltered.length}`)),
+
+    // Search
+    e('div', { className: 'search' },
+      SearchIcon,
+      e('input', {
+        placeholder: 'Поиск по названию, спикеру или площадке…',
+        value: query,
+        onChange: ev => { setQuery(ev.target.value); setOpenId(null); },
+      })),
+
+    // Time filter
+    e('div', { className: 'chiprow' },
+      e('span', { className: 'chiprow__label' }, 'Период'),
+      TIME_OPTIONS.map(opt => e('button', {
+        key: opt.value,
+        className: 'chip' + (timeFilter === opt.value ? ' is-active' : ''),
+        onClick: () => { setTimeFilter(opt.value); setOpenId(null); },
+      }, opt.label))),
+
+    // Format filter
+    e('div', { className: 'chiprow' },
+      e('span', { className: 'chiprow__label' }, 'Формат'),
+      e('button', {
+        className: 'chip' + (formatFilters.length === 0 ? ' is-active' : ''),
+        onClick: () => { setFormatFilters([]); setOpenId(null); },
+      }, 'Все'),
       FORMAT_OPTIONS.map(opt => {
-        const isActive = opt.value === 'all' ? formatFilters.length === 0 : formatFilters.includes(opt.value);
-        const count = opt.value !== 'all' ? (formatCounts[opt.value] || 0) : null;
+        const count = formatCounts[opt.value] || 0;
         return e('button', {
           key: opt.value,
-          className: `chip${isActive ? ' active' : ''}`,
+          className: 'chip' + (formatFilters.includes(opt.value) ? ' is-active' : ''),
           onClick: () => toggleFormat(opt.value),
         },
+          e('span', { className: `fmt-dot fmt-dot--${opt.value}` }),
           opt.label,
-          count !== null && e('span', { className: 'chip__count' }, count)
-        );
-      })
-    ),
-    // Expertise tag chips (multi-select)
-    tagChips.length > 1 && e(
-      'div',
-      { className: 'filter-chips' },
-      tagChips.map(opt => {
-        const isActive = opt.value === 'all' ? tagFilters.length === 0 : tagFilters.includes(opt.value);
-        const count = opt.value !== 'all' ? (tagCounts[opt.value] || 0) : null;
-        return e('button', {
-          key: opt.value,
-          className: `chip${isActive ? ' active' : ''}`,
-          onClick: () => toggleTag(opt.value),
-        },
-          opt.label,
-          count !== null && e('span', { className: 'chip__count' }, count)
-        );
-      })
-    ),
+          e('span', { className: 'chip__count' }, count));
+      })),
+
+    // Tag filter
+    allTagChips.length > 0 && e('div', { className: 'chiprow' },
+      e('span', { className: 'chiprow__label' }, 'Темы'),
+      e('button', {
+        className: 'chip' + (tagFilters.length === 0 ? ' is-active' : ''),
+        onClick: () => { setTagFilters([]); setOpenId(null); },
+      }, 'Все'),
+      allTagChips.map(t => e('button', {
+        key: t,
+        className: 'chip' + (tagFilters.includes(t) ? ' is-active' : ''),
+        onClick: () => toggleTag(t),
+      },
+        t,
+        tagCounts[t] != null && e('span', { className: 'chip__count' }, tagCounts[t] || 0)))),
+
     // List
     filtered.length === 0
-      ? e('div', { className: 'empty-state' },
-          e('div', { className: 'empty-state__icon' }, '📋'),
-          e('div', { className: 'empty-state__text' }, 'Нет активностей по выбранным фильтрам')
-        )
-      : e(
-          'div',
-          { className: 'list-container' },
-          filtered.map(a =>
-            e(ActivityCard, {
-              key: a.id,
-              activity: a,
-              speakers: (a.speaker_ids || []).map(id => speakerMap[id]).filter(Boolean),
-              isOpen: openId === a.id,
-              onToggle: id => setOpenId(prev => prev === id ? null : id),
-            })
-          )
-        )
-  );
+      ? e('div', { className: 'empty', style: { marginTop: 18 } },
+          e('div', { className: 'empty__glyph' }, '«ничего»'),
+          'нет активностей по выбранным фильтрам')
+      : e('div', { className: 'act-list' },
+          filtered.map(a => e(ActivityCard, {
+            key: a.id,
+            activity: a,
+            speakers: (a.speaker_ids || []).map(id => speakerMap[id]).filter(Boolean),
+            isOpen: openId === a.id,
+            onToggle: id => setOpenId(prev => prev === id ? null : id),
+          }))),
+
+    // CTA
+    e('div', { className: 'cta' },
+      e('div', { className: 'cta__ic' }, MicIcon),
+      e('div', { className: 'cta__txt' },
+        e('div', { className: 'cta__title' }, 'Есть идея для доклада или статьи?'),
+        e('div', { className: 'cta__sub' }, 'DevRel-команда поможет с подготовкой, площадкой и продвижением.')),
+      e('button', { className: 'cta__btn', onClick: onOpenRequest }, 'Отправить заявку')));
 }

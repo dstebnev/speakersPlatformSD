@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Speakers Platform</title>
+  <title>Spotlight · Speakers Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -30,7 +33,8 @@
         document.cookie = 'username=' + encodeURIComponent(user.username) + ';path=/';
       }
 
-      window.__IS_ADMIN__ = cfg.mode === 'debug' || !!(user?.username && cfg.admins.includes(user.username));
+      const _isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      window.__IS_ADMIN__ = cfg.mode === 'debug' || _isLocalhost || !!(user?.username && cfg.admins.includes(user.username));
 
       // Apply Telegram theme CSS variables
       const theme = tg?.themeParams || {};

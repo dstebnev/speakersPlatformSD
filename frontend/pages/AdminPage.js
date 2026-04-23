@@ -287,23 +287,6 @@ export function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [cacheClearing, setCacheClearing] = useState(false);
-  const headerRef = React.useRef(null);
-
-  // Measure the sticky page-header height and expose it as a CSS variable
-  // so the admin-tabs can stick right below it (avoids hard-coded magic numbers).
-  useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-    const update = () => {
-      document.documentElement.style.setProperty(
-        '--admin-header-height', el.offsetHeight + 'px'
-      );
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -426,32 +409,30 @@ export function AdminPage() {
   const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
   const speakerMap = Object.fromEntries(speakers.map(s => [s.id, s]));
 
+  const RefreshIcon = e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
+    e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' }));
+
   return e(
     'div',
-    { className: 'page-scroll' },
-    e('div', { className: 'page-header', ref: headerRef },
-      e('div', { className: 'page-header__title' }, 'Администрирование'),
+    { className: 'page' },
+
+    // Header
+    e('div', { className: 'page__head' },
+      e('div', null,
+        e('h1', { className: 'page__title' }, 'Администрирование'),
+        e('div', { className: 'page__sub' }, 'Управление спикерами, активностями и тегами')),
       e('button', {
-        className: 'cache-clear-btn',
+        className: 'btn btn-ghost',
+        style: { alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
         onClick: clearCache,
         disabled: cacheClearing,
-        title: 'Сбросить кэш',
-      },
-        e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
-          e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' })
-        ),
-        cacheClearing ? 'Сброс...' : 'Сбросить кэш'
-      )
-    ),
+      }, RefreshIcon, cacheClearing ? 'Сброс...' : 'Сбросить кэш')),
 
     // Tabs
-    e(
-      'div',
-      { className: 'admin-tabs' },
-      e('button', { className: `admin-tab${tab === 'activities' ? ' active' : ''}`, onClick: () => setTab('activities') }, 'Активности'),
-      e('button', { className: `admin-tab${tab === 'speakers' ? ' active' : ''}`, onClick: () => setTab('speakers') }, 'Спикеры'),
-      e('button', { className: `admin-tab${tab === 'tags' ? ' active' : ''}`, onClick: () => setTab('tags') }, 'Теги')
-    ),
+    e('div', { className: 'chiprow', style: { marginBottom: 4 } },
+      e('button', { className: 'chip' + (tab === 'activities' ? ' is-active' : ''), onClick: () => setTab('activities') }, 'Активности'),
+      e('button', { className: 'chip' + (tab === 'speakers' ? ' is-active' : ''), onClick: () => setTab('speakers') }, 'Спикеры'),
+      e('button', { className: 'chip' + (tab === 'tags' ? ' is-active' : ''), onClick: () => setTab('tags') }, 'Теги')),
 
     loading
       ? e('div', { className: 'loader' }, e('div', { className: 'spinner' }))
