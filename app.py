@@ -3,6 +3,7 @@ from flask_compress import Compress
 import os
 import json
 import time
+import urllib.request as _urllib_req
 from dotenv import load_dotenv
 from uuid import uuid4
 from io import BytesIO
@@ -20,6 +21,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 MODE = os.getenv('MODE', 'prod').lower()
 ADMIN_USERNAMES = [u.strip() for u in os.getenv('ADMIN_USERNAMES', '').split(',') if u.strip()]
 CACHE_TIMEOUT = int(os.getenv('CACHE_TIMEOUT', '3600'))
+
+BOT_TOKEN = os.getenv('BOT_TOKEN', '')
+# Comma-separated Telegram chat IDs (numbers) or @usernames of DevRel managers
+DEVREL_MANAGERS = [u.strip() for u in os.getenv('DEVREL', '').split(',') if u.strip()]
 
 # Timestamp of last cache clear; static files served with no-cache for 60s after clear
 _cache_cleared_at: float = 0.0
@@ -217,6 +222,46 @@ def clear_cache():
     global _cache_cleared_at
     _cache_cleared_at = time.time()
     return jsonify({'ok': True, 'cacheVersion': int(_cache_cleared_at)})
+
+
+# ─── Speaker requests ────────────────────────────────────────────────────────
+
+def _send_tg_message(chat_id: str, text: str) -> bool:
+    if not BOT_TOKEN:
+        return False
+    # Non-numeric values are treated as @usernames
+    target = chat_id if chat_id.lstrip('-').isdigit() else f'@{chat_id.lstrip("@")}'
+    payload = json.dumps({'chat_id': target, 'text': text, 'parse_mode': 'HTML'}).encode()
+    req = _urllib_req.Request(
+        f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
+        data=payload,
+        headers={'Content-Type': 'application/json'},
+    )
+    try:
+        with _urllib_req.urlopen(req, timeout=10) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
+
+
+@app.route('/api/speaker-request', methods=['POST'])
+def speaker_request():
+    body = request.get_json() or {}
+    contact = (body.get('contact') or '').strip()
+    message = (body.get('message') or '').strip()
+    if not contact or not message:
+        return abort(400)
+
+    tg_user = (body.get('tg_user') or '').strip()
+    text = (
+        '🎤 <b>Новая заявка: хочу стать спикером</b>\n\n'
+        + (f'👤 От: {tg_user}\n' if tg_user else '')
+        + f'📱 Контакт: {contact}\n\n'
+        + f'💬 Сообщение:\n{message}'
+    )
+
+    sent = sum(_send_tg_message(m, text) for m in DEVREL_MANAGERS)
+    return jsonify({'ok': True, 'sent': sent})
 
 
 # ─── Static files ─────────────────────────────────────────────────────────────
