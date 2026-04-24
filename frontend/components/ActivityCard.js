@@ -76,8 +76,10 @@ export function ActivityCard({ activity, speakers = [], isOpen, onToggle }) {
         e('div', { className: 'act__speakers-av' },
           speakers.slice(0, 3).map(s => e('div', {
             key: s.id, className: 'av-sm',
-            style: { background: 'var(--accent-soft)', color: 'var(--accent-ink)' },
-          }, speakerInitials(s.name)))),
+            style: s.photoUrl ? {} : { background: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+          }, s.photoUrl
+            ? e('img', { src: s.photoUrl, alt: s.name })
+            : speakerInitials(s.name)))),
         speakerNames),
 
       (activity.expertise_tags || []).length > 0 && e('div', { className: 'act__tags' },

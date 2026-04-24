@@ -166,7 +166,7 @@ function RequestSheet({ onClose }) {
                 Ic.check({ width: 24, height: 24 })),
               e('h2', { className: 'sheet__title', style: { textAlign: 'center' } }, 'Готово!'),
               e('p', { className: 'success-state__txt' },
-                'Заявка отправлена DevRel-команде. Мы свяжемся с вами в течение 2 рабочих дней.')),
+                'Заявка отправлена деврелу. Приду за подробностями в телеграм.')),
             e('button', { className: 'btn-sheet-primary', onClick: onClose }, 'Закрыть'))
         : e('div', null,
             e('h2', { className: 'sheet__title' },

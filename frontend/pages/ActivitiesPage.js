@@ -221,6 +221,6 @@ export function ActivitiesPage({ onOpenRequest }) {
       e('div', { className: 'cta__ic' }, MicIcon),
       e('div', { className: 'cta__txt' },
         e('div', { className: 'cta__title' }, 'Есть идея для доклада или статьи?'),
-        e('div', { className: 'cta__sub' }, 'DevRel-команда поможет с подготовкой, площадкой и продвижением.')),
+        e('div', { className: 'cta__sub' }, 'DevRel поможет с подготовкой, площадкой и продвижением.')),
       e('button', { className: 'cta__btn', onClick: onOpenRequest }, 'Отправить заявку')));
 }
