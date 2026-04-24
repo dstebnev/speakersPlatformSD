@@ -1,5 +1,6 @@
 import { Avatar } from './components/Avatar.js';
 import { ActivitiesPage } from './pages/ActivitiesPage.js';
+import { ArchivePage } from './pages/ArchivePage.js';
 import { StatsPage } from './pages/StatsPage.js';
 import { SpeakersPage } from './pages/SpeakersPage.js';
 import { AdminPage } from './pages/AdminPage.js';
@@ -36,6 +37,10 @@ const Ic = {
     e('path', { d: 'M6 6l12 12M18 6 6 18', strokeLinecap: 'round' })),
   check: (p = {}) => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, ...p },
     e('path', { d: 'm5 13 4 4L19 7', strokeLinecap: 'round', strokeLinejoin: 'round' })),
+  archive: (p = {}) => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, ...p },
+    e('rect', { x: 2, y: 4, width: 20, height: 5, rx: 1.5 }),
+    e('path', { d: 'M4 9v10a1 1 0 001 1h14a1 1 0 001-1V9', strokeLinecap: 'round' }),
+    e('path', { d: 'M10 13h4', strokeLinecap: 'round' })),
   admin: (p = {}) => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, ...p },
     e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }),
     e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })),
@@ -53,7 +58,7 @@ function TopBar({ onToggleTweaks }) {
 
 // ─── BotNav ────────────────────────────────────────────────────────────────────
 function BotNav({ pages, current, onChange }) {
-  const iconMap = { activities: Ic.calendar, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
+  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
   return e('nav', { className: 'botnav', style: { '--botnav-cols': pages.length } },
     pages.map(p => e('button', {
       key: p.id,
@@ -64,7 +69,7 @@ function BotNav({ pages, current, onChange }) {
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────────
 function Sidebar({ pages, current, onChange, onOpenRequest, onToggleTweaks }) {
-  const iconMap = { activities: Ic.calendar, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
+  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
   return e('aside', { className: 'sidebar' },
     e('div', { className: 'sidebar__brand' },
       e('div', { className: 'brand-dot' })),
@@ -272,6 +277,7 @@ function SpeakerSheet({ speaker, onClose }) {
 // ─── App ───────────────────────────────────────────────────────────────────────
 const BASE_PAGES = [
   { id: 'activities', label: 'Активности' },
+  { id: 'archive',    label: 'Архив' },
   { id: 'speakers',   label: 'Спикеры' },
   { id: 'stats',      label: 'Статистика' },
 ];
@@ -332,6 +338,7 @@ function App() {
       e(TopBar, { onToggleTweaks: toggleTweaks }),
       e('div', { className: 'app__scroll' },
         page === 'activities' && e(ActivitiesPage, { onOpenRequest: openRequest }),
+        page === 'archive'    && e(ArchivePage),
         page === 'speakers'   && e(SpeakersPage, { onOpenRequest: openRequest, onOpenSpeaker: setActiveSpeaker }),
         page === 'stats'      && e(StatsPage),
         page === 'admin' && isAdmin && e(AdminPage)),
