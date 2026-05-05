@@ -215,7 +215,9 @@ def upload():
 
 @app.route('/api/stats')
 def stats():
-    return jsonify(storage.get_stats())
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    return jsonify(storage.get_stats(date_from=date_from, date_to=date_to))
 
 
 # ─── Cache ────────────────────────────────────────────────────────────────────

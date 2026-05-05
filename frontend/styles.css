@@ -476,6 +476,32 @@ a { color: inherit; }
   border-bottom: 1px solid var(--line-2);
   display: flex; justify-content: space-between; color: var(--ink);
 }
+/* ─── Stats date filter ──────────────────────────────────────────────────────── */
+.stats-filter { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+
+.year-nav {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  flex-shrink: 0;
+}
+.year-nav__btn {
+  background: none; border: none; padding: 0 4px;
+  cursor: pointer; color: var(--ink-3);
+  font-size: 15px; line-height: 1;
+  border-radius: 4px;
+  display: flex; align-items: center;
+  transition: color .15s;
+}
+.year-nav__btn:hover:not(:disabled) { color: var(--ink); }
+.year-nav__btn:disabled { opacity: 0.3; cursor: default; }
+.year-nav__val {
+  font-size: 13px; font-weight: 500; color: var(--ink);
+  min-width: 36px; text-align: center;
+}
+
 .stats-grid-2 { margin-top: 16px; }
 
 .bar {

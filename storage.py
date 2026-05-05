@@ -423,10 +423,22 @@ def delete_activity(act_id):
 
 # ─── Stats ────────────────────────────────────────────────────────────────────
 
-def get_stats():
+def get_stats(date_from=None, date_to=None):
     with get_conn() as conn:
         activities = [_row_to_activity(r) for r in conn.execute("SELECT * FROM activities").fetchall()]
         speakers = [_row_to_speaker(r) for r in conn.execute("SELECT * FROM speakers").fetchall()]
+
+    if date_from or date_to:
+        def in_range(a):
+            d = a.get('date', '')
+            if not d:
+                return False
+            if date_from and d < date_from:
+                return False
+            if date_to and d > date_to:
+                return False
+            return True
+        activities = [a for a in activities if in_range(a)]
 
     speaker_map = {s['id']: s for s in speakers}
 
