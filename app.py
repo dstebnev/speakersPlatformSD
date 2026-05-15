@@ -254,16 +254,14 @@ def _send_tg_message(chat_id: str, text: str) -> bool:
 @app.route('/api/speaker-request', methods=['POST'])
 def speaker_request():
     body = request.get_json() or {}
-    contact = (body.get('contact') or '').strip()
     message = (body.get('message') or '').strip()
-    if not contact or not message:
+    if not message:
         return abort(400)
 
     tg_user = (body.get('tg_user') or '').strip()
     text = (
         '🎤 <b>Новая заявка: хочу стать спикером</b>\n\n'
-        + (f'👤 От: {tg_user}\n' if tg_user else '')
-        + f'📱 Контакт: {contact}\n\n'
+        + (f'👤 От: {tg_user}\n\n' if tg_user else '')
         + f'💬 Сообщение:\n{message}'
     )
 

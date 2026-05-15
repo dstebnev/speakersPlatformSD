@@ -138,18 +138,17 @@ function getTgUser() {
 const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
 
 function RequestSheet({ onClose }) {
-  const [contact, setContact] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
 
   const submit = async () => {
-    if (!contact.trim() || !message.trim()) return;
+    if (!message.trim()) return;
     setStatus('sending');
     try {
       const res = await fetch('/api/speaker-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contact: contact.trim(), message: message.trim(), tg_user: getTgUser() }),
+        body: JSON.stringify({ message: message.trim(), tg_user: getTgUser() }),
       });
       if (!res.ok) throw new Error();
       setStatus('success');
@@ -177,17 +176,7 @@ function RequestSheet({ onClose }) {
             e('h2', { className: 'sheet__title' },
               'Хочу ', e('em', { style: { fontStyle: 'italic', color: 'var(--accent)' } }, 'заявить о себе.')),
             e('p', { style: { color: 'var(--ink-3)', margin: '0 0 18px', fontSize: 14 } },
-              'Коротко — кто, о чём хочешь рассказать, и где с тобой связаться.'),
-            e('div', { className: 'field', style: { marginBottom: 12 } },
-              e('label', { className: 'field-lbl' }, 'Контакт'),
-              e('input', {
-                className: 'input',
-                placeholder: 'Telegram, email или mattermost',
-                value: contact,
-                onChange: ev => setContact(ev.target.value),
-                disabled: status === 'sending',
-                autoFocus: true,
-              })),
+              'Коротко — кто ты и о чём хочешь рассказать. Деврел ответит в телеграм.'),
             e('div', { className: 'field' },
               e('label', { className: 'field-lbl' }, 'О себе и теме, если есть'),
               e('textarea', {
@@ -197,12 +186,13 @@ function RequestSheet({ onClose }) {
                 onChange: ev => setMessage(ev.target.value),
                 disabled: status === 'sending',
                 rows: 5,
+                autoFocus: true,
               })),
             status === 'error' && e('p', { className: 'error-msg' }, 'Ошибка отправки. Попробуйте ещё раз.'),
             e('button', {
               className: 'btn-sheet-primary',
               onClick: submit,
-              disabled: !contact.trim() || !message.trim() || status === 'sending',
+              disabled: !message.trim() || status === 'sending',
             }, status === 'sending' ? 'Отправляем…' : 'Отправить заявку'))));
 }
 
