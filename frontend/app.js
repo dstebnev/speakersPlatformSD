@@ -4,6 +4,7 @@ import { ArchivePage } from './pages/ArchivePage.js';
 import { StatsPage } from './pages/StatsPage.js';
 import { SpeakersPage } from './pages/SpeakersPage.js';
 import { AdminPage } from './pages/AdminPage.js';
+import { CalendarPage } from './pages/CalendarPage.js';
 
 const e = React.createElement;
 const { useState, useEffect } = React;
@@ -44,6 +45,10 @@ const Ic = {
   admin: (p = {}) => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, ...p },
     e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }),
     e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })),
+  calview: (p = {}) => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, ...p },
+    e('rect', { x: 3, y: 5, width: 18, height: 16, rx: 2 }),
+    e('path', { d: 'M3 10h18M8 3v4M16 3v4', strokeLinecap: 'round' }),
+    e('path', { d: 'M7.5 14.5h.01M12 14.5h.01M16.5 14.5h.01M7.5 18h.01M12 18h.01', strokeLinecap: 'round', strokeWidth: 2.5 })),
 };
 
 // ─── TopBar ────────────────────────────────────────────────────────────────────
@@ -58,7 +63,7 @@ function TopBar({ onToggleTweaks }) {
 
 // ─── BotNav ────────────────────────────────────────────────────────────────────
 function BotNav({ pages, current, onChange }) {
-  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
+  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin, calendar: Ic.calview };
   return e('nav', { className: 'botnav', style: { '--botnav-cols': pages.length } },
     pages.map(p => e('button', {
       key: p.id,
@@ -69,7 +74,7 @@ function BotNav({ pages, current, onChange }) {
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────────
 function Sidebar({ pages, current, onChange, onOpenRequest, onToggleTweaks }) {
-  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin };
+  const iconMap = { activities: Ic.calendar, archive: Ic.archive, speakers: Ic.users, stats: Ic.chart, admin: Ic.admin, calendar: Ic.calview };
   return e('aside', { className: 'sidebar' },
     e('div', { className: 'sidebar__brand' },
       e('div', { className: 'brand-dot' })),
@@ -135,7 +140,7 @@ function getTgUser() {
   }
 }
 
-const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
+const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
 
 function RequestSheet({ onClose }) {
   const [message, setMessage] = useState('');
@@ -271,7 +276,10 @@ const BASE_PAGES = [
   { id: 'speakers',   label: 'Спикеры' },
   { id: 'stats',      label: 'Статистика' },
 ];
-const ADMIN_PAGE = { id: 'admin', label: 'Админка' };
+const ADMIN_PAGES = [
+  { id: 'calendar', label: 'Календарь' },
+  { id: 'admin',    label: 'Админка' },
+];
 
 function isAdminUser() {
   // localhost / debug — always admin
@@ -283,7 +291,7 @@ function isAdminUser() {
 
 function App() {
   const isAdmin = isAdminUser();
-  const PAGES = isAdmin ? [...BASE_PAGES, ADMIN_PAGE] : BASE_PAGES;
+  const PAGES = isAdmin ? [...BASE_PAGES, ...ADMIN_PAGES] : BASE_PAGES;
 
   const [page, setPage] = useState(() => localStorage.getItem('sp.page') || 'activities');
   const [tweaksOpen, setTweaksOpen] = useState(false);
@@ -331,7 +339,8 @@ function App() {
         page === 'archive'    && e(ArchivePage),
         page === 'speakers'   && e(SpeakersPage, { onOpenRequest: openRequest, onOpenSpeaker: setActiveSpeaker }),
         page === 'stats'      && e(StatsPage),
-        page === 'admin' && isAdmin && e(AdminPage)),
+        page === 'calendar' && isAdmin && e(CalendarPage),
+        page === 'admin'    && isAdmin && e(AdminPage)),
       e(BotNav, { pages: PAGES, current: page, onChange: setPage })),
 
     requestOpen  && e(RequestSheet, { onClose: closeRequest }),

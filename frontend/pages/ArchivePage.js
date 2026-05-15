@@ -95,7 +95,7 @@ export function ArchivePage() {
       fetchJSON('/api/tags'),
     ])
       .then(([acts, spks, tags]) => {
-        setActivities(acts);
+        setActivities(acts.filter(a => a.format !== 'devrel'));
         setSpeakers(spks);
         setExpertiseTags(tags);
       })

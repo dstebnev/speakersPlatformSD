@@ -7,6 +7,7 @@ const FORMAT_OPTIONS = [
   { value: 'speech',  label: 'Выступление' },
   { value: 'article', label: 'Статья' },
   { value: 'digital', label: 'Digital' },
+  { value: 'devrel',  label: 'Деврел' },
 ];
 
 async function fetchJSON(url) {
@@ -47,7 +48,7 @@ export function ActivitiesPage({ onOpenRequest }) {
       fetchJSON('/api/tags'),
     ])
       .then(([acts, spks, tags]) => {
-        setActivities(acts);
+        setActivities(acts.filter(a => a.format !== 'devrel'));
         setSpeakers(spks);
         setExpertiseTags(tags);
       })

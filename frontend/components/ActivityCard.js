@@ -26,7 +26,7 @@ function renderDescription(text) {
   return nodes;
 }
 
-const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
+const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
 const MONTHS_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 
 function fmtDay(iso) {

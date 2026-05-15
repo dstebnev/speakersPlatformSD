@@ -7,7 +7,7 @@ from uuid import uuid4
 DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), 'data', 'app.db'))
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
-VALID_FORMATS = ('speech', 'article', 'digital')
+VALID_FORMATS = ('speech', 'article', 'digital', 'devrel')
 
 
 def get_conn():
@@ -278,6 +278,8 @@ def _ensure_activities_table(conn):
         conn.execute("ALTER TABLE activities ADD COLUMN format TEXT DEFAULT 'speech'")
     if 'link' not in column_names:
         conn.execute("ALTER TABLE activities ADD COLUMN link TEXT DEFAULT ''")
+    if 'date_end' not in column_names:
+        conn.execute("ALTER TABLE activities ADD COLUMN date_end TEXT DEFAULT ''")
 
 
 def _create_activities_table(conn):
@@ -289,6 +291,7 @@ def _create_activities_table(conn):
             description    TEXT DEFAULT '',
             speaker_ids    TEXT DEFAULT '[]',
             date           TEXT DEFAULT '',
+            date_end       TEXT DEFAULT '',
             event          TEXT DEFAULT '',
             expertise_tags TEXT DEFAULT '[]',
             link           TEXT DEFAULT ''
@@ -334,6 +337,7 @@ def _row_to_activity(row):
         'description': row['description'] or '',
         'speaker_ids': _normalize_json_list(row['speaker_ids']),
         'date': row['date'] or '',
+        'date_end': (row['date_end'] if 'date_end' in keys else '') or '',
         'event': row['event'] or '',
         'expertise_tags': _normalize_json_list(row['expertise_tags']),
         'link': (row['link'] if 'link' in keys else '') or '',
@@ -357,8 +361,8 @@ def get_activity(act_id):
 def _upsert_activity(conn, act):
     conn.execute(
         """INSERT OR REPLACE INTO activities
-           (id, name, format, description, speaker_ids, date, event, expertise_tags, link)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           (id, name, format, description, speaker_ids, date, date_end, event, expertise_tags, link)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             act['id'],
             act['name'],
@@ -366,6 +370,7 @@ def _upsert_activity(conn, act):
             act.get('description', ''),
             json.dumps(act.get('speaker_ids', []), ensure_ascii=False),
             act.get('date', ''),
+            act.get('date_end', ''),
             act.get('event', ''),
             json.dumps(act.get('expertise_tags', []), ensure_ascii=False),
             act.get('link', ''),
@@ -386,6 +391,7 @@ def add_activity(obj):
         'description': obj.get('description', ''),
         'speaker_ids': _normalize_json_list(obj.get('speaker_ids', [])),
         'date': obj.get('date', ''),
+        'date_end': (obj.get('date_end') or '').strip(),
         'event': (obj.get('event') or '').strip(),
         'expertise_tags': _normalize_json_list(obj.get('expertise_tags', [])),
         'link': (obj.get('link') or '').strip(),
@@ -427,6 +433,9 @@ def get_stats(date_from=None, date_to=None):
     with get_conn() as conn:
         activities = [_row_to_activity(r) for r in conn.execute("SELECT * FROM activities").fetchall()]
         speakers = [_row_to_speaker(r) for r in conn.execute("SELECT * FROM speakers").fetchall()]
+
+    # devrel activities are calendar-only and never counted in stats
+    activities = [a for a in activities if a.get('format') != 'devrel']
 
     if date_from or date_to:
         def in_range(a):

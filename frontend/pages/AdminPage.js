@@ -9,6 +9,7 @@ const FORMAT_OPTIONS = [
   { value: 'speech',  label: 'Выступление' },
   { value: 'article', label: 'Статья' },
   { value: 'digital', label: 'Digital' },
+  { value: 'devrel',  label: 'Деврел' },
 ];
 
 async function api(method, url, body) {
@@ -159,18 +160,20 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
 }
 
 // ─── Activity Form ─────────────────────────────────────────────────────────────
-function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete, saving, onCreateSpeaker }) {
+export function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete, saving, onCreateSpeaker }) {
   const [form, setForm] = useState({
     name: initial.name || '',
     format: initial.format || 'speech',
     description: initial.description || '',
     speaker_ids: initial.speaker_ids || [],
     date: initial.date || '',
+    date_end: initial.date_end || '',
     event: initial.event || '',
     expertise_tags: initial.expertise_tags || [],
     link: initial.link || '',
   });
   const set = key => ev => setForm(f => ({ ...f, [key]: ev.target.value }));
+  const isDevrel = form.format === 'devrel';
 
   return e(
     React.Fragment,
@@ -185,7 +188,7 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
         FORMAT_OPTIONS.map(opt => e('option', { key: opt.value, value: opt.value }, opt.label))
       )
     ),
-    e('div', { className: 'field' },
+    !isDevrel && e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Спикеры / Авторы'),
       e(SpeakersMultiSelect, {
         value: form.speaker_ids,
@@ -199,14 +202,22 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
       e('textarea', { className: 'field-textarea', value: form.description, onChange: set('description'), placeholder: 'Краткое описание активности...' })
     ),
     e('div', { className: 'field' },
-      e('label', { className: 'field-label' }, 'Мероприятие / Площадка'),
-      e('input', { className: 'field-input', value: form.event, onChange: set('event'), placeholder: 'HighLoad++, Habr...' })
+      e('label', { className: 'field-label' }, 'Мероприятие'),
+      e('input', { className: 'field-input', value: form.event, onChange: set('event'), placeholder: isDevrel ? 'В рамках какого мероприятия' : 'HighLoad++, Habr...' })
     ),
     e('div', { className: 'field' },
-      e('label', { className: 'field-label' }, 'Дата'),
+      e('label', { className: 'field-label' }, isDevrel ? 'Дата начала' : 'Дата'),
       e('input', { className: 'field-input', type: 'date', value: form.date, onChange: set('date') })
     ),
-    e('div', { className: 'field' },
+    isDevrel && e('div', { className: 'field' },
+      e('label', { className: 'field-label' }, 'Дата окончания'),
+      e('input', {
+        className: 'field-input', type: 'date', value: form.date_end,
+        onChange: set('date_end'),
+        min: form.date || undefined,
+      })
+    ),
+    !isDevrel && e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Тема экспертности'),
       e(TagsMultiSelect, {
         value: form.expertise_tags,
@@ -215,7 +226,7 @@ function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, onDelete,
         placeholder: 'Выберите темы...',
       })
     ),
-    e('div', { className: 'field' },
+    !isDevrel && e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Ссылка'),
       e('input', { className: 'field-input', value: form.link, onChange: set('link'), placeholder: 'https://...' })
     ),
@@ -406,7 +417,7 @@ export function AdminPage() {
   };
 
   // ─── Render ──
-  const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
+  const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
   const speakerMap = Object.fromEntries(speakers.map(s => [s.id, s]));
 
   const RefreshIcon = e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
