@@ -98,6 +98,35 @@ def delete_expertise_tag(tag_id):
         return cur.rowcount > 0
 
 
+def update_expertise_tag(tag_id, new_name):
+    new_name = (new_name or '').strip()
+    if not new_name:
+        return None
+    with get_conn() as conn:
+        row = conn.execute("SELECT name FROM expertise_tags WHERE id=?", (tag_id,)).fetchone()
+        if not row:
+            return None
+        old_name = row['name']
+        if old_name == new_name:
+            return {'id': tag_id, 'name': new_name}
+        try:
+            conn.execute("UPDATE expertise_tags SET name=? WHERE id=?", (new_name, tag_id))
+        except sqlite3.IntegrityError:
+            return None  # name already taken
+        for s in conn.execute("SELECT id, expertise FROM speakers").fetchall():
+            tags = _normalize_json_list(s['expertise'])
+            if old_name in tags:
+                conn.execute("UPDATE speakers SET expertise=? WHERE id=?",
+                             (json.dumps([new_name if t == old_name else t for t in tags], ensure_ascii=False), s['id']))
+        for a in conn.execute("SELECT id, expertise_tags FROM activities").fetchall():
+            tags = _normalize_json_list(a['expertise_tags'])
+            if old_name in tags:
+                conn.execute("UPDATE activities SET expertise_tags=? WHERE id=?",
+                             (json.dumps([new_name if t == old_name else t for t in tags], ensure_ascii=False), a['id']))
+        conn.commit()
+    return {'id': tag_id, 'name': new_name}
+
+
 # ─── Speakers ─────────────────────────────────────────────────────────────────
 
 def _ensure_speakers_table(conn):
@@ -438,6 +467,9 @@ def get_stats(date_from=None, date_to=None):
     # devrel activities are calendar-only and never counted in stats
     activities = [a for a in activities if a.get('format') != 'devrel']
 
+    today = datetime.date.today().isoformat()
+    upcoming_count = sum(1 for a in activities if a.get('date', '') >= today)
+
     if date_from or date_to:
         def in_range(a):
             d = a.get('date', '')
@@ -491,6 +523,7 @@ def get_stats(date_from=None, date_to=None):
     return {
         'total_activities': len(activities),
         'total_speakers': len(speakers),
+        'upcoming_count': upcoming_count,
         'format_counts': format_counts,
         'top_speakers': top_speakers,
         'tag_counts': tag_counts,

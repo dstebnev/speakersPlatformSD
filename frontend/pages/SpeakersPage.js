@@ -65,7 +65,7 @@ export function SpeakersPage({ onOpenRequest, onOpenSpeaker }) {
     // Header
     e('div', { className: 'page__head' },
       e('div', null,
-        e('h1', { className: 'page__title' }, 'Спикеры'),
+        e('h1', { className: 'page__title' }, 'Эксперты'),
         e('div', { className: 'page__sub' },
           'Эксперты, готовые делиться знаниями внешне и внутри компании')),
       e('div', { className: 'page__count' }, `${filtered.length} matches`)),
@@ -108,7 +108,7 @@ export function SpeakersPage({ onOpenRequest, onOpenSpeaker }) {
     e('div', { className: 'cta' },
       e('div', { className: 'cta__ic' }, MicIcon),
       e('div', { className: 'cta__txt' },
-        e('div', { className: 'cta__title' }, 'Хотите присоединиться к пулу спикеров?'),
+        e('div', { className: 'cta__title' }, 'Хотите присоединиться к пулу экспертов?'),
         e('div', { className: 'cta__sub' }, 'Расскажите о себе — и мы подберём вам подходящую площадку.')),
       e('button', { className: 'cta__btn', onClick: onOpenRequest }, 'Заявка')));
 }

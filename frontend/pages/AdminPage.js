@@ -155,7 +155,7 @@ function SpeakerForm({ initial = {}, expertiseTags, onSave, onDelete, saving }) 
       style: { marginTop: 8 },
       disabled: saving,
       onClick: () => onDelete(),
-    }, 'Удалить спикера')
+    }, 'Удалить эксперта')
   );
 }
 
@@ -189,7 +189,7 @@ export function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, on
       )
     ),
     !isDevrel && e('div', { className: 'field' },
-      e('label', { className: 'field-label' }, 'Спикеры / Авторы'),
+      e('label', { className: 'field-label' }, 'Эксперты / Авторы'),
       e(SpeakersMultiSelect, {
         value: form.speaker_ids,
         onChange: ids => setForm(f => ({ ...f, speaker_ids: ids })),
@@ -245,8 +245,9 @@ export function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, on
 }
 
 // ─── Tag Form ──────────────────────────────────────────────────────────────────
-function TagForm({ onSave, saving }) {
-  const [name, setName] = useState('');
+function TagForm({ initial = {}, onSave, saving }) {
+  const [name, setName] = useState(initial.name || '');
+  const isEdit = !!initial.id;
   return e(
     React.Fragment,
     null,
@@ -258,13 +259,14 @@ function TagForm({ onSave, saving }) {
         onChange: ev => setName(ev.target.value),
         placeholder: 'Frontend, Backend, DevOps...',
         onKeyDown: ev => { if (ev.key === 'Enter' && name.trim()) onSave(name.trim()); },
+        autoFocus: true,
       })
     ),
     e('button', {
       className: 'btn btn-primary',
       disabled: saving || !name.trim(),
       onClick: () => onSave(name.trim()),
-    }, saving ? 'Сохранение...' : 'Добавить тег')
+    }, saving ? 'Сохранение...' : isEdit ? 'Сохранить' : 'Добавить тег')
   );
 }
 
@@ -337,7 +339,7 @@ export function AdminPage() {
   };
 
   const deleteSpeaker = async () => {
-    if (!window.confirm('Удалить спикера?')) return;
+    if (!window.confirm('Удалить эксперта?')) return;
     setSaving(true);
     try {
       await api('DELETE', `/api/speakers/${modal.item.id}`);
@@ -354,7 +356,7 @@ export function AdminPage() {
       setSpeakers(prev => [...prev, created].sort((a, b) => a.name.localeCompare(b.name, 'ru')));
       return created.id;
     } catch (err) {
-      alert('Ошибка при создании спикера: ' + err.message);
+      alert('Ошибка при создании эксперта: ' + err.message);
       return null;
     }
   };
@@ -389,7 +391,11 @@ export function AdminPage() {
   const saveTag = async name => {
     setSaving(true);
     try {
-      await api('POST', '/api/tags', { name });
+      if (modal?.item?.id) {
+        await api('PUT', `/api/tags/${modal.item.id}`, { name });
+      } else {
+        await api('POST', '/api/tags', { name });
+      }
       await load();
       closeModal();
     } catch (err) { alert(err.message); }
@@ -431,7 +437,7 @@ export function AdminPage() {
     e('div', { className: 'page__head' },
       e('div', null,
         e('h1', { className: 'page__title' }, 'Администрирование'),
-        e('div', { className: 'page__sub' }, 'Управление спикерами, активностями и тегами')),
+        e('div', { className: 'page__sub' }, 'Управление экспертами, активностями и тегами')),
       e('button', {
         className: 'btn btn-ghost',
         style: { alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
@@ -442,7 +448,7 @@ export function AdminPage() {
     // Tabs
     e('div', { className: 'chiprow', style: { marginBottom: 4 } },
       e('button', { className: 'chip' + (tab === 'activities' ? ' is-active' : ''), onClick: () => setTab('activities') }, 'Активности'),
-      e('button', { className: 'chip' + (tab === 'speakers' ? ' is-active' : ''), onClick: () => setTab('speakers') }, 'Спикеры'),
+      e('button', { className: 'chip' + (tab === 'speakers' ? ' is-active' : ''), onClick: () => setTab('speakers') }, 'Эксперты'),
       e('button', { className: 'chip' + (tab === 'tags' ? ' is-active' : ''), onClick: () => setTab('tags') }, 'Теги')),
 
     loading
@@ -480,7 +486,7 @@ export function AdminPage() {
       'div',
       { className: 'admin-list' },
       speakers.length === 0
-        ? e('div', { className: 'empty-state' }, e('div', { className: 'empty-state__icon' }, '👤'), e('div', { className: 'empty-state__text' }, 'Нет спикеров'))
+        ? e('div', { className: 'empty-state' }, e('div', { className: 'empty-state__icon' }, '👤'), e('div', { className: 'empty-state__text' }, 'Нет экспертов'))
         : speakers.map(s =>
             e('div', { key: s.id, className: 'admin-item' },
               e('div', { className: 'admin-item__info' },
@@ -506,6 +512,7 @@ export function AdminPage() {
             e('div', { key: t.id, className: 'admin-item' },
               e('div', { className: 'admin-item__info' }, e('div', { className: 'admin-item__title' }, t.name)),
               e('div', { className: 'admin-item__actions' },
+                e('button', { className: 'icon-btn', onClick: () => setModal({ type: 'tag', item: t }) }, EditIcon),
                 e('button', { className: 'icon-btn icon-btn--danger', onClick: () => deleteTag(t.id) }, TrashIcon)
               )
             )
@@ -524,7 +531,7 @@ export function AdminPage() {
     // Modal
     modal && modal.type === 'speaker' && e(
       Modal,
-      { title: modal.item ? 'Редактировать спикера' : 'Новый спикер', onClose: closeModal },
+      { title: modal.item ? 'Редактировать эксперта' : 'Новый эксперт', onClose: closeModal },
       e(SpeakerForm, {
         initial: modal.item || {},
         expertiseTags,
@@ -550,8 +557,8 @@ export function AdminPage() {
 
     modal && modal.type === 'tag' && e(
       Modal,
-      { title: 'Новый тег экспертизы', onClose: closeModal },
-      e(TagForm, { onSave: saveTag, saving })
+      { title: modal.item ? 'Редактировать тег' : 'Новый тег', onClose: closeModal },
+      e(TagForm, { initial: modal.item || {}, onSave: saveTag, saving })
     )
   );
 }

@@ -97,14 +97,23 @@ def expertise_tags():
     return jsonify(tag), 201
 
 
-@app.route('/api/tags/<tag_id>', methods=['DELETE'])
-def delete_tag(tag_id):
+@app.route('/api/tags/<tag_id>', methods=['PUT', 'DELETE'])
+def tag_detail(tag_id):
     if not is_admin_request(request):
         return abort(403)
-    ok = storage.delete_expertise_tag(tag_id)
-    if not ok:
+    if request.method == 'DELETE':
+        ok = storage.delete_expertise_tag(tag_id)
+        if not ok:
+            return abort(404)
+        return jsonify({'ok': True})
+    body = request.get_json() or {}
+    name = (body.get('name') or '').strip()
+    if not name:
+        return abort(400)
+    tag = storage.update_expertise_tag(tag_id, name)
+    if tag is None:
         return abort(404)
-    return jsonify({'ok': True})
+    return jsonify(tag)
 
 
 # ─── Speakers ─────────────────────────────────────────────────────────────────

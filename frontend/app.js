@@ -94,7 +94,7 @@ function Sidebar({ pages, current, onChange, onOpenRequest, onToggleTweaks }) {
         className: 'sidebar__item',
         onClick: onOpenRequest,
         style: { color: 'var(--ink-2)' },
-      }, Ic.mic({}), 'Стать спикером'),
+      }, Ic.mic({}), 'Стать экспертом'),
       e('div', { className: 'sidebar__foot-divider' })));
 }
 
@@ -273,7 +273,7 @@ function SpeakerSheet({ speaker, onClose }) {
 const BASE_PAGES = [
   { id: 'activities', label: 'Активности' },
   { id: 'archive',    label: 'Архив' },
-  { id: 'speakers',   label: 'Спикеры' },
+  { id: 'speakers',   label: 'Эксперты' },
   { id: 'stats',      label: 'Статистика' },
 ];
 const ADMIN_PAGES = [

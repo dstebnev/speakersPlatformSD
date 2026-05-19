@@ -148,7 +148,7 @@ export function StatsPage() {
 
     e('div', { className: 'stats-hero' },
       e(StatBig, { value: stats.total_activities, label: 'Активностей', delta: 'всего' }),
-      e(StatBig, { value: stats.total_speakers,   label: 'Спикеров', delta: 'в пуле' }),
+      e(StatBig, { value: stats.total_speakers,   label: 'Экспертов', delta: 'в пуле' }),
       e(StatBig, { value: Object.keys(stats.tag_counts || {}).length, label: 'Тем', delta: 'покрытие' }),
       e(StatBig, { value: upcomingCount, label: 'Впереди', delta: 'запланировано', accent: true })),
 
