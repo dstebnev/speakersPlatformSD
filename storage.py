@@ -21,6 +21,7 @@ def init_db():
         _ensure_speakers_table(conn)
         _ensure_activities_table(conn)
         _ensure_expertise_tags_table(conn)
+        _ensure_digest_log_table(conn)
         conn.commit()
 
 
@@ -495,3 +496,46 @@ def get_stats(date_from=None, date_to=None):
         'tag_counts': tag_counts,
         'monthly': monthly,
     }
+
+
+# ─── Digest log ───────────────────────────────────────────────────────────────
+
+def _ensure_digest_log_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS digest_log (
+            week_start TEXT PRIMARY KEY
+        )
+    """)
+
+
+def try_acquire_digest_lock(week_start: str) -> bool:
+    """Insert week_start into digest_log. Returns True only for the first caller."""
+    try:
+        with get_conn() as conn:
+            conn.execute(
+                "INSERT INTO digest_log (week_start) VALUES (?)", (week_start,)
+            )
+            conn.commit()
+        return True
+    except Exception:
+        return False
+
+
+def activities_in_range(date_from: str, date_to: str) -> list:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM activities WHERE date >= ? AND date <= ? ORDER BY date, name",
+            (date_from, date_to),
+        ).fetchall()
+    return [_row_to_activity(r) for r in rows]
+
+
+def get_speakers_by_ids(ids: list) -> dict:
+    if not ids:
+        return {}
+    placeholders = ','.join('?' * len(ids))
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"SELECT * FROM speakers WHERE id IN ({placeholders})", ids
+        ).fetchall()
+    return {r['id']: _row_to_speaker(r) for r in rows}

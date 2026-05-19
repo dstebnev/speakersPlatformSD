@@ -3,11 +3,15 @@ from flask_compress import Compress
 import os
 import json
 import time
+import datetime
 import urllib.request as _urllib_req
 from dotenv import load_dotenv
 from uuid import uuid4
 from io import BytesIO
 from PIL import Image
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import pytz
 import storage
 
 load_dotenv(override=True)
@@ -283,6 +287,113 @@ def static_proxy(path):
     if path and '.' in path.split('/')[-1]:
         return send_from_directory('frontend', path, max_age=_static_max_age())
     return send_from_directory('frontend', 'index.html', max_age=0)
+
+
+# ─── Weekly digest ────────────────────────────────────────────────────────────
+
+_FORMAT_LABELS = {
+    'speech':  '🎤 Доклады',
+    'article': '📝 Статьи',
+    'digital': '💻 Диджитал',
+}
+
+_MSK = pytz.timezone('Europe/Moscow')
+
+
+def _build_digest_text(activities: list, speaker_map: dict, week_from: str, week_to: str) -> str:
+    def _fmt_date(d: str) -> str:
+        try:
+            return datetime.datetime.strptime(d, '%Y-%m-%d').strftime('%d.%m')
+        except Exception:
+            return d
+
+    week_label = (
+        f'{_fmt_date(week_from)} – {_fmt_date(week_to)}'
+        f'.{week_to[:4]}'
+    )
+    header = f'📊 <b>Дайджест активностей за прошлую неделю</b>\n({week_label})\n'
+
+    if not activities:
+        return header + '\nЗа эту неделю активностей не было.'
+
+    by_format = {}
+    for act in activities:
+        fmt = act.get('format', 'speech')
+        if fmt == 'devrel':
+            continue
+        by_format.setdefault(fmt, []).append(act)
+
+    if not by_format:
+        return header + '\nЗа эту неделю активностей не было.'
+
+    lines = [header, f'Всего активностей: <b>{len(activities)}</b>\n']
+    for fmt in ('speech', 'article', 'digital'):
+        items = by_format.get(fmt, [])
+        if not items:
+            continue
+        lines.append(f'<b>{_FORMAT_LABELS[fmt]} ({len(items)})</b>')
+        for act in items:
+            names = [speaker_map[sid]['name'] for sid in act.get('speaker_ids', []) if sid in speaker_map]
+            speakers_str = (', '.join(names)) if names else ''
+            date_str = _fmt_date(act.get('date', ''))
+            event_str = act.get('event', '')
+            link = act.get('link', '')
+
+            line = f'• {act["name"]}'
+            if date_str:
+                line += f' ({date_str})'
+            if event_str:
+                line += f' — {event_str}'
+            if speakers_str:
+                line += f'\n  👤 {speakers_str}'
+            if link:
+                line += f'\n  🔗 <a href="{link}">{link}</a>'
+            lines.append(line)
+        lines.append('')
+
+    return '\n'.join(lines).strip()
+
+
+def send_weekly_digest():
+    today = datetime.datetime.now(_MSK).date()
+    # Monday of the previous week
+    week_end = today - datetime.timedelta(days=today.weekday() + 1)   # last Sunday
+    week_start = week_end - datetime.timedelta(days=6)                 # last Monday
+
+    week_start_str = week_start.isoformat()
+    week_end_str = week_end.isoformat()
+
+    if not storage.try_acquire_digest_lock(week_start_str):
+        return  # another worker already sent this digest
+
+    activities = storage.activities_in_range(week_start_str, week_end_str)
+    # exclude devrel from count
+    activities = [a for a in activities if a.get('format') != 'devrel']
+
+    all_speaker_ids = list({sid for a in activities for sid in a.get('speaker_ids', [])})
+    speaker_map = storage.get_speakers_by_ids(all_speaker_ids)
+
+    text = _build_digest_text(activities, speaker_map, week_start_str, week_end_str)
+
+    for chat_id in DEVREL_MANAGERS:
+        _send_tg_message(chat_id, text)
+
+
+def _start_scheduler():
+    scheduler = BackgroundScheduler(timezone=_MSK)
+    # Every Monday at 10:00 Moscow time
+    scheduler.add_job(
+        send_weekly_digest,
+        CronTrigger(day_of_week='mon', hour=10, minute=0, timezone=_MSK),
+    )
+    scheduler.start()
+
+
+# In Flask dev mode the reloader spawns a child process; only start scheduler there.
+# In production (gunicorn --preload) the module loads once in the master process.
+_flask_dev_mode = (MODE == 'debug' or os.getenv('MODE') is None)
+if not _flask_dev_mode or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    _start_scheduler()
 
 
 if __name__ == '__main__':
