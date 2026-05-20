@@ -188,7 +188,7 @@ export function ActivityForm({ initial = {}, expertiseTags, speakers, onSave, on
         FORMAT_OPTIONS.map(opt => e('option', { key: opt.value, value: opt.value }, opt.label))
       )
     ),
-    !isDevrel && e('div', { className: 'field' },
+    e('div', { className: 'field' },
       e('label', { className: 'field-label' }, 'Эксперты / Авторы'),
       e(SpeakersMultiSelect, {
         value: form.speaker_ids,
