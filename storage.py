@@ -465,12 +465,7 @@ def get_stats(date_from=None, date_to=None):
         speakers = [_row_to_speaker(r) for r in conn.execute("SELECT * FROM speakers").fetchall()]
 
     today = datetime.date.today().isoformat()
-    # upcoming_count: only non-devrel future activities
-    upcoming_count = sum(1 for a in all_activities
-                         if a.get('format') != 'devrel' and a.get('date', '') >= today)
-
-    # content_activities: non-devrel, used for format/tag/monthly stats and total count
-    content_activities = [a for a in all_activities if a.get('format') != 'devrel']
+    upcoming_count = sum(1 for a in all_activities if a.get('date', '') >= today)
 
     if date_from or date_to:
         def in_range(a):
@@ -482,23 +477,21 @@ def get_stats(date_from=None, date_to=None):
             if date_to and d > date_to:
                 return False
             return True
-        content_activities = [a for a in content_activities if in_range(a)]
-        # devrel experts count within the same date range
-        speaker_activities = [a for a in all_activities if in_range(a)]
+        activities = [a for a in all_activities if in_range(a)]
     else:
-        speaker_activities = all_activities
+        activities = all_activities
 
     speaker_map = {s['id']: s for s in speakers}
 
-    # Format breakdown (content only)
+    # Format breakdown
     format_counts = {}
-    for a in content_activities:
+    for a in activities:
         fmt = a.get('format', 'speech')
         format_counts[fmt] = format_counts.get(fmt, 0) + 1
 
-    # Speaker activity counts — includes devrel so experts there are ranked too
+    # Speaker activity counts
     speaker_act_counts = {}
-    for a in speaker_activities:
+    for a in activities:
         for spk_id in a.get('speaker_ids', []):
             speaker_act_counts[spk_id] = speaker_act_counts.get(spk_id, 0) + 1
 
@@ -508,15 +501,15 @@ def get_stats(date_from=None, date_to=None):
         if spk:
             top_speakers.append({'speaker': spk, 'count': count})
 
-    # Expertise tag counts (content only)
+    # Expertise tag counts
     tag_counts = {}
-    for a in content_activities:
+    for a in activities:
         for tag in a.get('expertise_tags', []):
             tag_counts[tag] = tag_counts.get(tag, 0) + 1
 
-    # Monthly trend (content only)
+    # Monthly trend
     monthly = {}
-    for a in content_activities:
+    for a in activities:
         date_str = a.get('date', '')
         if date_str:
             try:
@@ -527,7 +520,7 @@ def get_stats(date_from=None, date_to=None):
                 pass
 
     return {
-        'total_activities': len(content_activities),
+        'total_activities': len(activities),
         'total_speakers': len(speakers),
         'upcoming_count': upcoming_count,
         'format_counts': format_counts,

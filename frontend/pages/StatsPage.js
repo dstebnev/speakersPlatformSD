@@ -1,7 +1,7 @@
 const e = React.createElement;
 const { useState, useEffect, useRef } = React;
 
-const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital' };
+const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
 const MONTHS_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
@@ -112,7 +112,7 @@ export function StatsPage() {
   if (!stats) return null;
 
   // Format breakdown
-  const formatItems = ['speech', 'article', 'digital'].map(k => ({
+  const formatItems = ['speech', 'article', 'digital', 'devrel'].map(k => ({
     key: k, label: FORMAT_LABELS[k], count: stats.format_counts?.[k] || 0,
   }));
   const maxFormat = Math.max(...formatItems.map(x => x.count), 1);
@@ -158,7 +158,7 @@ export function StatsPage() {
           'По формату',
           e('small', null, `${stats.total_activities} total`)),
         formatItems.map(item => {
-          const colors = { speech: 'oklch(0.68 0.16 55)', article: 'oklch(0.65 0.14 180)', digital: 'oklch(0.62 0.17 290)' };
+          const colors = { speech: 'oklch(0.68 0.16 55)', article: 'oklch(0.65 0.14 180)', digital: 'oklch(0.62 0.17 290)', devrel: 'oklch(0.62 0.14 330)' };
           return e('div', { key: item.key, className: 'bar' },
             e('span', { className: 'bar__lbl' },
               e('span', { className: `fmt-dot fmt-dot--${item.key}` }),
