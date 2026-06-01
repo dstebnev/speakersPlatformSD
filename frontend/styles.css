@@ -371,10 +371,15 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: center;
   padding: 0;
   transition: background .12s, color .12s, opacity .15s;
-  opacity: 0;
+  opacity: 0.45;
   flex-shrink: 0;
 }
-.act:hover .act__dl, .act.is-open .act__dl { opacity: 1; }
+/* Desktop: hide until hover or open */
+@media (hover: hover) {
+  .act__dl { opacity: 0; }
+  .act:hover .act__dl { opacity: 1; }
+}
+.act.is-open .act__dl { opacity: 1; }
 .act__dl:hover { background: var(--bg-sunk); color: var(--ink); }
 .act__dl:active { transform: scale(0.88); }
 .act__chev {

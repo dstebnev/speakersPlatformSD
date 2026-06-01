@@ -1,5 +1,3 @@
-import { exportActivityCard } from '../utils/exportCard.js';
-
 const e = React.createElement;
 const { useState, useEffect, useMemo } = React;
 
@@ -85,7 +83,7 @@ function ArchiveCard({ activity, speakers }) {
         title: 'Скачать карточку',
         onClick: ev => {
           ev.stopPropagation();
-          exportActivityCard(activity, speakers);
+          import('../utils/exportCard.js').then(m => m.exportActivityCard(activity, speakers));
         },
       },
         e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, width: 14, height: 14 },
