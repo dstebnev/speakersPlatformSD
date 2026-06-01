@@ -422,12 +422,72 @@ export function AdminPage() {
     }
   };
 
+  // ─── Export helpers ──
+  const downloadFile = (content, filename, mime) => {
+    const blob = new Blob([content], { type: mime });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: filename });
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const today = () => new Date().toISOString().slice(0, 10);
+
+  const exportJSON = () => {
+    const payload = {
+      exported_at: new Date().toISOString(),
+      speakers:    speakers,
+      activities:  activities,
+      tags:        expertiseTags,
+    };
+    downloadFile(JSON.stringify(payload, null, 2), `spotlight-dump-${today()}.json`, 'application/json');
+  };
+
+  const toCSVRow = cells =>
+    cells.map(c => {
+      const s = c == null ? '' : String(c);
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? '"' + s.replace(/"/g, '""') + '"'
+        : s;
+    }).join(',');
+
+  const exportCSV = () => {
+    if (tab === 'activities') {
+      const header = toCSVRow(['id','name','format','date','date_end','event','link','speaker_names','expertise_tags','description']);
+      const rows   = activities.map(a => toCSVRow([
+        a.id, a.name, a.format, a.date || '', a.date_end || '', a.event || '', a.link || '',
+        (a.speaker_ids || []).map(id => speakers.find(s => s.id === id)?.name || id).join('; '),
+        (a.expertise_tags || []).join('; '),
+        (a.description || '').replace(/\n/g, ' '),
+      ]));
+      downloadFile([header, ...rows].join('\n'), `activities-${today()}.csv`, 'text/csv;charset=utf-8');
+    } else if (tab === 'speakers') {
+      const header = toCSVRow(['id','name','role','email','telegram','mattermost','expertise','photoUrl']);
+      const rows   = speakers.map(s => toCSVRow([
+        s.id, s.name, s.role || '', s.email || '', s.telegram || '', s.mattermost || '',
+        (s.expertise || []).join('; '), s.photoUrl || '',
+      ]));
+      downloadFile([header, ...rows].join('\n'), `speakers-${today()}.csv`, 'text/csv;charset=utf-8');
+    } else {
+      const header = toCSVRow(['id','name']);
+      const rows   = expertiseTags.map(t => toCSVRow([t.id, t.name]));
+      downloadFile([header, ...rows].join('\n'), `tags-${today()}.csv`, 'text/csv;charset=utf-8');
+    }
+  };
+
   // ─── Render ──
   const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
   const speakerMap = Object.fromEntries(speakers.map(s => [s.id, s]));
 
   const RefreshIcon = e('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
     e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' }));
+  const DownloadIcon = e('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
+    e('path', { d: 'M12 3v12M7 11l5 5 5-5M4 20h16', strokeLinecap: 'round', strokeLinejoin: 'round' }));
+  const CSVIcon = e('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2 },
+    e('path', { d: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+    e('polyline', { points: '14 2 14 8 20 8', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+    e('line', { x1: 8, y1: 13, x2: 16, y2: 13, strokeLinecap: 'round' }),
+    e('line', { x1: 8, y1: 17, x2: 16, y2: 17, strokeLinecap: 'round' }));
 
   return e(
     'div',
@@ -438,12 +498,27 @@ export function AdminPage() {
       e('div', null,
         e('h1', { className: 'page__title' }, 'Администрирование'),
         e('div', { className: 'page__sub' }, 'Управление экспертами, активностями и тегами')),
-      e('button', {
-        className: 'btn btn-ghost',
-        style: { alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
-        onClick: clearCache,
-        disabled: cacheClearing,
-      }, RefreshIcon, cacheClearing ? 'Сброс...' : 'Сбросить кэш')),
+      e('div', { style: { display: 'flex', gap: 8, alignSelf: 'flex-end', flexWrap: 'wrap', justifyContent: 'flex-end' } },
+        e('button', {
+          className: 'btn btn-ghost',
+          style: { display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
+          title: 'Скачать дамп всех данных (JSON)',
+          onClick: exportJSON,
+          disabled: loading,
+        }, DownloadIcon, 'JSON дамп'),
+        e('button', {
+          className: 'btn btn-ghost',
+          style: { display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
+          title: 'Скачать текущую вкладку как CSV',
+          onClick: exportCSV,
+          disabled: loading,
+        }, CSVIcon, 'CSV'),
+        e('button', {
+          className: 'btn btn-ghost',
+          style: { display: 'flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px' },
+          onClick: clearCache,
+          disabled: cacheClearing,
+        }, RefreshIcon, cacheClearing ? 'Сброс...' : 'Сбросить кэш'))),
 
     // Tabs
     e('div', { className: 'chiprow', style: { marginBottom: 4 } },
