@@ -294,7 +294,11 @@ def serve_photo(filename):
 def static_proxy(path):
     # All routes serve index.html for SPA routing
     if path and '.' in path.split('/')[-1]:
-        return send_from_directory('frontend', path, max_age=_static_max_age())
+        ext = path.rsplit('.', 1)[-1].lower()
+        # JS and CSS must always revalidate so deploys take effect immediately.
+        # Flask sends ETag automatically, so unchanged files cost only a 304.
+        age = 0 if ext in ('js', 'css') else _static_max_age()
+        return send_from_directory('frontend', path, max_age=age)
     return send_from_directory('frontend', 'index.html', max_age=0)
 
 
