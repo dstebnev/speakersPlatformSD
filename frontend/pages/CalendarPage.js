@@ -4,7 +4,7 @@ import { ActivityForm } from './AdminPage.js';
 const e = React.createElement;
 const { useState, useEffect, useMemo, useCallback } = React;
 
-const FORMAT_LABELS = { speech: 'Выступление', article: 'Статья', digital: 'Digital', devrel: 'Деврел' };
+const FORMAT_LABELS = { speech: 'Выступление', article: 'Статьи', digital: 'Digital', devrel: 'Деврел' };
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
