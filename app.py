@@ -410,7 +410,7 @@ if not _flask_dev_mode or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
 
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '5000'))
+    port = int(os.getenv('PORT', '8080'))
     # debug=True when MODE=debug OR when running locally without explicit MODE
     local_debug = MODE == 'debug' or os.getenv('MODE') is None
     app.run(host='0.0.0.0', port=port, debug=local_debug)
