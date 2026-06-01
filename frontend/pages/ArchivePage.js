@@ -1,3 +1,5 @@
+import { exportActivityCard } from '../utils/exportCard.js';
+
 const e = React.createElement;
 const { useState, useEffect, useMemo } = React;
 
@@ -63,19 +65,32 @@ function ArchiveCard({ activity, speakers }) {
     (activity.expertise_tags || []).length > 0 && e('div', { className: 'arc-card__tags' },
       activity.expertise_tags.map(t => e('span', { key: t, className: 'tag' }, t))),
 
-    // Link — the main artifact
-    activity.link
-      ? e('a', {
-          href: activity.link,
-          target: '_blank',
-          rel: 'noopener noreferrer',
-          className: 'arc-card__link',
-          onClick: ev => ev.stopPropagation(),
+    // Footer: link + download button
+    e('div', { className: 'arc-card__footer' },
+      activity.link
+        ? e('a', {
+            href: activity.link,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            className: 'arc-card__link',
+            onClick: ev => ev.stopPropagation(),
+          },
+            e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 14, height: 14 },
+              e('path', { d: 'M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3', strokeLinecap: 'round', strokeLinejoin: 'round' })),
+            'Открыть материал')
+        : e('span', { className: 'arc-card__no-link' }, 'Материал не добавлен'),
+
+      e('button', {
+        className: 'arc-card__dl',
+        title: 'Скачать карточку',
+        onClick: ev => {
+          ev.stopPropagation();
+          exportActivityCard(activity, speakers);
         },
-          e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 14, height: 14 },
-            e('path', { d: 'M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3', strokeLinecap: 'round', strokeLinejoin: 'round' })),
-          'Открыть материал')
-      : e('span', { className: 'arc-card__no-link' }, 'Материал не добавлен'));
+      },
+        e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, width: 14, height: 14 },
+          e('path', { d: 'M12 3v12M7 11l5 5 5-5M4 20h16', strokeLinecap: 'round', strokeLinejoin: 'round' })),
+        'Карточка')));
 }
 
 export function ArchivePage() {

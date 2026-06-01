@@ -1,3 +1,5 @@
+import { exportActivityCard } from '../utils/exportCard.js';
+
 const e = React.createElement;
 
 // Markdown inline rendering (bold/italic)
@@ -102,8 +104,19 @@ export function ActivityCard({ activity, speakers = [], isOpen, onToggle }) {
               e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, width: 12, height: 12 },
                 e('path', { d: 'M5 12h14M13 6l6 6-6 6', strokeLinecap: 'round', strokeLinejoin: 'round' }))))))),
 
-    // Chevron
-    e('div', { className: 'act__chev' },
-      e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 18, height: 18 },
-        e('path', { d: 'm6 9 6 6 6-6', strokeLinecap: 'round', strokeLinejoin: 'round' }))));
+    // Actions column: download button + chevron
+    e('div', { className: 'act__actions' },
+      e('button', {
+        className: 'act__dl',
+        title: 'Скачать карточку',
+        onClick: ev => {
+          ev.stopPropagation();
+          exportActivityCard(activity, speakers);
+        },
+      },
+        e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, width: 15, height: 15 },
+          e('path', { d: 'M12 3v12M7 11l5 5 5-5M4 20h16', strokeLinecap: 'round', strokeLinejoin: 'round' }))),
+      e('div', { className: 'act__chev' },
+        e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 18, height: 18 },
+          e('path', { d: 'm6 9 6 6 6-6', strokeLinecap: 'round', strokeLinejoin: 'round' })))));
 }
