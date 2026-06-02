@@ -289,7 +289,6 @@ export async function exportActivityCard(activity, speakers) {
   ctx.fillStyle = '#c2b8ae';
   ctx.font      = '400 15px Inter, -apple-system, sans-serif';
   ctx.textAlign = 'right';
-  ctx.fillText('Spotlight · Experts Platform', W - PAD, H - 44);
   ctx.textAlign = 'left';
 
   // ── Download ─────────────────────────────────────────────────────────────────
