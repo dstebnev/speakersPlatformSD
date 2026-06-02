@@ -178,14 +178,11 @@ export async function exportActivityCard(activity, speakers) {
     photoR = 122; photoXs = [W / 2 - 258, W / 2, W / 2 + 258];
   }
 
-  // ── Measure title with adaptive font size ───────────────────────────────────
-  // Space budget: card height minus badge area (top) and branding area (bottom)
-  const BADGE_AREA  = 110;   // y=0..110 occupied by badge row
-  const BRAND_AREA  = 80;    // bottom 80px reserved for branding
-  const AVAILABLE   = H - BADGE_AREA - BRAND_AREA; // 1160px
+  // ── Fixed photo position — same Y on every card ──────────────────────────────
+  // photoCY is constant so cards align visually in a grid/presentation.
+  // Title and tags flow downward from the photo; whitespace collects at the bottom.
+  const PHOTO_CY = 400;
 
-  // Fixed heights of non-title elements
-  const PHOTO_H        = photoR * 2;
   const PH_NAME_GAP    = 44;
   const NAME_H         = speakers.length > 0 ? 30 : 0;
   const NAME_TITLE_GAP = 80;
@@ -193,20 +190,20 @@ export async function exportActivityCard(activity, speakers) {
   const TAGS_GAP       = tags.length > 0 ? 56 : 0;
   const TAGS_H         = tags.length > 0 ? 44 : 0;
 
-  const FIXED_H    = PHOTO_H + PH_NAME_GAP + NAME_H + NAME_TITLE_GAP + TAGS_GAP + TAGS_H;
-  const MAX_TITLE_H = AVAILABLE - FIXED_H;  // height budget for the title
+  // How much vertical space remains for the title (from nameEnd to branding)
+  const nameEndY    = PHOTO_CY + photoR + PH_NAME_GAP + NAME_H;
+  const titleStartY = nameEndY + NAME_TITLE_GAP;
+  const BRAND_Y     = H - 44;
+  const MAX_TITLE_H = BRAND_Y - TAGS_H - TAGS_GAP - titleStartY - 16;
 
   const TITLE_W = W - PAD * 2;
   const { lines: titleLines, fontSize: titleFS, lineH: titleLH } =
     fitTitle(ctx, activity.name, TITLE_W, MAX_TITLE_H, 68, 28);
 
-  // ── Compute vertical positions (centred block) ───────────────────────────────
-  const BLOCK_H   = FIXED_H + titleLines.length * titleLH;
-  const BLOCK_TOP = BADGE_AREA + Math.max(16, (AVAILABLE - BLOCK_H) / 2);
-
-  const photoCY = BLOCK_TOP + photoR;
-  const nameBaseY = BLOCK_TOP + PHOTO_H + PH_NAME_GAP + NAME_H * 0.78; // baseline
-  const titleY    = BLOCK_TOP + PHOTO_H + PH_NAME_GAP + NAME_H + NAME_TITLE_GAP;
+  // ── Derive remaining Y positions ─────────────────────────────────────────────
+  const photoCY   = PHOTO_CY; // alias used in draw calls below
+  const nameBaseY = PHOTO_CY + photoR + PH_NAME_GAP + NAME_H * 0.78;
+  const titleY    = titleStartY;
   const tagsY     = titleY + titleLines.length * titleLH + TAGS_GAP;
 
   // ── Format badge ────────────────────────────────────────────────────────────
