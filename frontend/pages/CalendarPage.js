@@ -54,6 +54,108 @@ const ChevRight = () => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: '
 const EditIcon = () => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 16, height: 16 },
   e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' }));
 
+const DigestIcon = () => e('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, width: 16, height: 16 },
+  e('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }));
+
+// ─── Digest modal ─────────────────────────────────────────────────────────────
+
+function buildDigestText(activities, speakerMap, dateFrom, dateTo) {
+  const fmtDate = d => {
+    if (!d) return '';
+    const [y, m, day] = d.slice(0, 10).split('-');
+    return `${day}.${m}.${y}`;
+  };
+
+  const filtered = activities
+    .filter(a => a.date && a.date.slice(0, 10) >= dateFrom && a.date.slice(0, 10) <= dateTo)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (!filtered.length) return 'Активностей за выбранный период не найдено.';
+
+  const fromLabel = fmtDate(dateFrom);
+  const toLabel = fmtDate(dateTo);
+  const lines = [
+    `Дайджест активностей: ${fromLabel === toLabel ? fromLabel : `${fromLabel} – ${toLabel}`}`,
+    '',
+  ];
+
+  for (const act of filtered) {
+    const speakerNames = (act.speaker_ids || [])
+      .map(id => speakerMap[id]?.name).filter(Boolean);
+
+    const metaParts = [];
+    if (act.format) metaParts.push(FORMAT_LABELS[act.format] || act.format);
+    if (act.date) {
+      const dateLabel = act.date_end
+        ? `${fmtDate(act.date.slice(0, 10))} – ${fmtDate(act.date_end.slice(0, 10))}`
+        : fmtDate(act.date.slice(0, 10));
+      metaParts.push(dateLabel);
+    }
+    if (act.event) metaParts.push(act.event);
+    if (metaParts.length) lines.push(metaParts.join(', '));
+
+    const expertLine = speakerNames.length
+      ? `${speakerNames.join(', ')} — ${act.name}`
+      : act.name;
+    lines.push(expertLine);
+
+    if (act.link) lines.push(act.link);
+
+    lines.push('');
+  }
+
+  return lines.join('\n').trimEnd();
+}
+
+function DigestModal({ activities, speakerMap, year, month, onClose }) {
+  const pad = n => String(n).padStart(2, '0');
+  const lastDayNum = new Date(year, month + 1, 0).getDate();
+  const defaultFrom = `${year}-${pad(month + 1)}-01`;
+  const defaultTo   = `${year}-${pad(month + 1)}-${pad(lastDayNum)}`;
+
+  const [dateFrom, setDateFrom] = useState(defaultFrom);
+  const [dateTo, setDateTo]     = useState(defaultTo);
+  const [copied, setCopied]     = useState(false);
+
+  const text = useMemo(
+    () => buildDigestText(activities, speakerMap, dateFrom, dateTo),
+    [activities, speakerMap, dateFrom, dateTo],
+  );
+
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return e(Modal, { title: 'Дайджест активностей', onClose },
+    e('div', { style: { display: 'flex', gap: 10, marginBottom: 14 } },
+      e('div', { style: { flex: 1 } },
+        e('label', { className: 'field-lbl' }, 'С'),
+        e('input', {
+          type: 'date', className: 'field', value: dateFrom,
+          onChange: ev => setDateFrom(ev.target.value),
+        })),
+      e('div', { style: { flex: 1 } },
+        e('label', { className: 'field-lbl' }, 'По'),
+        e('input', {
+          type: 'date', className: 'field', value: dateTo,
+          onChange: ev => setDateTo(ev.target.value),
+        }))),
+    e('textarea', {
+      className: 'field',
+      readOnly: true,
+      value: text,
+      style: { minHeight: 220, fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, resize: 'vertical' },
+    }),
+    e('button', {
+      className: 'btn',
+      style: { marginTop: 12 },
+      onClick: copy,
+    }, copied ? '✓ Скопировано' : 'Скопировать'));
+}
+
 // ─── Activity detail sheet ────────────────────────────────────────────────────
 
 function ActivityDetailSheet({ activity, speakers, onClose, onEdit }) {
@@ -249,7 +351,12 @@ export function CalendarPage() {
     e('div', { className: 'page__head' },
       e('div', null,
         e('h1', { className: 'page__title' }, 'Календарь'),
-        e('div', { className: 'page__sub' }, 'Активности деврела'))),
+        e('div', { className: 'page__sub' }, 'Активности деврела')),
+      e('button', {
+        className: 'btn btn-ghost',
+        style: { display: 'inline-flex', alignItems: 'center', gap: 6, width: 'auto', padding: '8px 14px', fontSize: 13 },
+        onClick: () => setModal({ type: 'digest' }),
+      }, e(DigestIcon), 'Дайджест')),
 
     // Month navigation
     e('div', { className: 'cal-nav' },
@@ -359,5 +466,14 @@ export function CalendarPage() {
         onDelete: deleteActivity,
         saving,
         onCreateSpeaker: createSpeaker,
-      })));
+      })),
+
+    // Digest modal
+    modal && modal.type === 'digest' && e(DigestModal, {
+      activities,
+      speakerMap,
+      year,
+      month,
+      onClose: closeModal,
+    }));
 }
