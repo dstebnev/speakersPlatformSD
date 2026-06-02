@@ -1,9 +1,8 @@
 // Portrait card: 1080×1350 (4:5), rendered at 2× for retina quality.
-// Suits Stories, vertical slides, and 2-up landscape presentations.
 const W     = 1080;
 const H     = 1350;
 const SCALE = 2;
-const PAD   = 76; // horizontal padding
+const PAD   = 76;
 
 const FORMAT_META = {
   speech:  { label: 'Выступление', color: '#c87941' },
@@ -42,34 +41,40 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// Returns the number of lines drawn
-function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
+// Split text into lines (no truncation) at the current ctx.font
+function splitLines(ctx, text, maxW) {
   const words = text.split(/\s+/);
   const lines = [];
   let cur = '';
-
   for (const word of words) {
     const trial = cur ? cur + ' ' + word : word;
     if (ctx.measureText(trial).width > maxW && cur) {
-      if (lines.length === maxLines - 1) {
-        let shortened = cur;
-        while (ctx.measureText(shortened + '…').width > maxW && shortened.includes(' ')) {
-          shortened = shortened.slice(0, shortened.lastIndexOf(' '));
-        }
-        lines.push(shortened + '…');
-        cur = '';
-        break;
-      }
       lines.push(cur);
       cur = word;
     } else {
       cur = trial;
     }
   }
-  if (cur && lines.length < maxLines) lines.push(cur);
+  if (cur) lines.push(cur);
+  return lines;
+}
 
-  lines.forEach((line, i) => ctx.fillText(line, x, y + i * lineH));
-  return lines.length;
+// Find the largest font size where the title fits within `maxTitleH` pixels.
+// Returns { lines, fontSize, lineH }.
+function fitTitle(ctx, text, maxW, maxTitleH, maxFS, minFS) {
+  for (let fs = maxFS; fs >= minFS; fs -= 4) {
+    ctx.font = `600 ${fs}px Inter, -apple-system, sans-serif`;
+    const lh    = Math.round(fs * 1.28);
+    const lines = splitLines(ctx, text, maxW);
+    if (lines.length * lh <= maxTitleH) {
+      return { lines, fontSize: fs, lineH: lh };
+    }
+  }
+  // At minFS, accept whatever fits
+  const fs    = minFS;
+  const lh    = Math.round(fs * 1.28);
+  ctx.font    = `600 ${fs}px Inter, -apple-system, sans-serif`;
+  return { lines: splitLines(ctx, text, maxW), fontSize: fs, lineH: lh };
 }
 
 function hashHue(str) {
@@ -78,9 +83,8 @@ function hashHue(str) {
   return h;
 }
 
-// Circle photo with cover-fit aspect ratio (no squishing)
+// Circle photo with cover-fit aspect ratio correction
 async function drawSpeakerCircle(ctx, speaker, cx, cy, r) {
-  // Drop shadow
   ctx.save();
   ctx.shadowColor   = 'rgba(0,0,0,0.15)';
   ctx.shadowBlur    = 24;
@@ -94,25 +98,19 @@ async function drawSpeakerCircle(ctx, speaker, cx, cy, r) {
   if (speaker?.photoUrl) {
     try {
       const img = await loadImage(speaker.photoUrl);
-
-      // Cover-fit: scale so the shorter dimension fills the diameter
-      const nw = img.naturalWidth  || img.width;
-      const nh = img.naturalHeight || img.height;
-      const sc = Math.max((r * 2) / nw, (r * 2) / nh);
-      const dw = nw * sc;
-      const dh = nh * sc;
-
+      const nw  = img.naturalWidth  || img.width;
+      const nh  = img.naturalHeight || img.height;
+      const sc  = Math.max((r * 2) / nw, (r * 2) / nh);
       ctx.save();
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.clip();
-      ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
+      ctx.drawImage(img, cx - nw * sc / 2, cy - nh * sc / 2, nw * sc, nh * sc);
       ctx.restore();
       return;
     } catch { /* fall through */ }
   }
 
-  // Initials fallback
   const hue = speaker ? hashHue(speaker.id || speaker.name || '') : 38;
   ctx.save();
   ctx.beginPath();
@@ -140,14 +138,13 @@ export async function exportActivityCard(activity, speakers) {
     document.fonts.load('400 17px Inter'),
     document.fonts.load('500 17px Inter'),
     document.fonts.load('600 68px Inter'),
+    document.fonts.load('600 40px Inter'),
   ]).catch(() => {});
 
   const canvas = document.createElement('canvas');
   canvas.width  = W * SCALE;
   canvas.height = H * SCALE;
   const ctx = canvas.getContext('2d');
-
-  // All drawing in logical W×H — SCALE is applied via transform only
   ctx.scale(SCALE, SCALE);
 
   // ── Background ──────────────────────────────────────────────────────────────
@@ -157,19 +154,60 @@ export async function exportActivityCard(activity, speakers) {
   ctx.fillStyle = bgGrd;
   ctx.fillRect(0, 0, W, H);
 
-  // Warm ambient glow centred on the photo area
-  const glow = ctx.createRadialGradient(W / 2, 380, 0, W / 2, 380, 480);
-  glow.addColorStop(0, 'rgba(200,121,65,0.07)');
+  const glow = ctx.createRadialGradient(W / 2, H * 0.4, 0, W / 2, H * 0.4, 520);
+  glow.addColorStop(0, 'rgba(200,121,65,0.06)');
   glow.addColorStop(1, 'rgba(200,121,65,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Top accent bar ──────────────────────────────────────────────────────────
+  // ── Accent bar ──────────────────────────────────────────────────────────────
   const barGrd = ctx.createLinearGradient(0, 0, W, 0);
   barGrd.addColorStop(0, '#c87941');
   barGrd.addColorStop(1, '#e8aa72');
   ctx.fillStyle = barGrd;
   ctx.fillRect(0, 0, W, 8);
+
+  // ── Photo config by speaker count ───────────────────────────────────────────
+  const n = Math.min(Math.max(speakers.length, 0), 3);
+  let photoR, photoXs;
+  if (n <= 1) {
+    photoR = 200; photoXs = [W / 2];
+  } else if (n === 2) {
+    photoR = 155; photoXs = [W / 2 - 178, W / 2 + 178];
+  } else {
+    photoR = 122; photoXs = [W / 2 - 258, W / 2, W / 2 + 258];
+  }
+
+  // ── Measure title with adaptive font size ───────────────────────────────────
+  // Space budget: card height minus badge area (top) and branding area (bottom)
+  const BADGE_AREA  = 110;   // y=0..110 occupied by badge row
+  const BRAND_AREA  = 80;    // bottom 80px reserved for branding
+  const AVAILABLE   = H - BADGE_AREA - BRAND_AREA; // 1160px
+
+  // Fixed heights of non-title elements
+  const PHOTO_H        = photoR * 2;
+  const PH_NAME_GAP    = 44;
+  const NAME_H         = speakers.length > 0 ? 30 : 0;
+  const NAME_TITLE_GAP = 80;
+  const tags           = (activity.expertise_tags || []).slice(0, 5);
+  const TAGS_GAP       = tags.length > 0 ? 56 : 0;
+  const TAGS_H         = tags.length > 0 ? 44 : 0;
+
+  const FIXED_H    = PHOTO_H + PH_NAME_GAP + NAME_H + NAME_TITLE_GAP + TAGS_GAP + TAGS_H;
+  const MAX_TITLE_H = AVAILABLE - FIXED_H;  // height budget for the title
+
+  const TITLE_W = W - PAD * 2;
+  const { lines: titleLines, fontSize: titleFS, lineH: titleLH } =
+    fitTitle(ctx, activity.name, TITLE_W, MAX_TITLE_H, 68, 28);
+
+  // ── Compute vertical positions (centred block) ───────────────────────────────
+  const BLOCK_H   = FIXED_H + titleLines.length * titleLH;
+  const BLOCK_TOP = BADGE_AREA + Math.max(16, (AVAILABLE - BLOCK_H) / 2);
+
+  const photoCY = BLOCK_TOP + photoR;
+  const nameBaseY = BLOCK_TOP + PHOTO_H + PH_NAME_GAP + NAME_H * 0.78; // baseline
+  const titleY    = BLOCK_TOP + PHOTO_H + PH_NAME_GAP + NAME_H + NAME_TITLE_GAP;
+  const tagsY     = titleY + titleLines.length * titleLH + TAGS_GAP;
 
   // ── Format badge ────────────────────────────────────────────────────────────
   const fmt     = activity.format || 'speech';
@@ -177,6 +215,7 @@ export async function exportActivityCard(activity, speakers) {
   const BADGE_Y = 76;
 
   ctx.textBaseline = 'middle';
+
   ctx.beginPath();
   ctx.arc(PAD + 8, BADGE_Y, 7, 0, Math.PI * 2);
   ctx.fillStyle = fmtMeta.color;
@@ -206,95 +245,57 @@ export async function exportActivityCard(activity, speakers) {
   ctx.textBaseline = 'alphabetic';
 
   // ── Speaker photos ──────────────────────────────────────────────────────────
-  // Layout adapts to 1, 2, or 3 speakers; extras shown in the name label.
-  const n = Math.min(Math.max(speakers.length, 0), 3);
-  const showCount = Math.max(n, 1); // always render at least one slot
-
-  let photoCY, photoR, photoXs;
-  if (n <= 1) {
-    photoCY = 400;  photoR = 200;
-    photoXs = [W / 2];
-  } else if (n === 2) {
-    photoCY = 390;  photoR = 155;
-    photoXs = [W / 2 - 178, W / 2 + 178];
-  } else {
-    photoCY = 380;  photoR = 122;
-    photoXs = [W / 2 - 258, W / 2, W / 2 + 258];
-  }
-
-  for (let i = 0; i < showCount; i++) {
+  for (let i = 0; i < Math.max(n, 1); i++) {
     await drawSpeakerCircle(ctx, speakers[i] ?? null, photoXs[i], photoCY, photoR);
   }
 
-  // ── Speaker name(s) ─────────────────────────────────────────────────────────
-  const nameY    = photoCY + photoR + 44;
-  const allNames = speakers.slice(0, 3).map(s => s.name).filter(Boolean);
-  if (allNames.length > 0) {
-    const extra = speakers.length > 3 ? ` +${speakers.length - 3}` : '';
-    ctx.fillStyle = '#352e28';
-    ctx.font      = '500 32px Inter, -apple-system, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(allNames.join(', ') + extra, W / 2, nameY);
-    ctx.textAlign = 'left';
+  // ── Speaker names ───────────────────────────────────────────────────────────
+  if (speakers.length > 0) {
+    const allNames = speakers.slice(0, 3).map(s => s.name).filter(Boolean);
+    const extra    = speakers.length > 3 ? ` +${speakers.length - 3}` : '';
+    ctx.fillStyle  = '#4a3f35';
+    ctx.font       = '500 22px Inter, -apple-system, sans-serif';
+    ctx.textAlign  = 'center';
+    ctx.fillText(allNames.join(', ') + extra, W / 2, nameBaseY);
+    ctx.textAlign  = 'left';
   }
 
-  // ── Title ───────────────────────────────────────────────────────────────────
-  const TITLE_Y  = nameY + 135;
-  const TITLE_LH = 88;
-  const TITLE_W  = W - PAD * 2;
-
+  // ── Title (full text, adaptive font) ────────────────────────────────────────
   ctx.fillStyle = '#1c1811';
-  ctx.font      = '600 68px Inter, -apple-system, sans-serif';
-  const nTitleLines = wrapText(ctx, activity.name, PAD, TITLE_Y, TITLE_W, TITLE_LH, 3);
+  ctx.font      = `600 ${titleFS}px Inter, -apple-system, sans-serif`;
+  titleLines.forEach((line, i) => {
+    ctx.fillText(line, PAD, titleY + i * titleLH);
+  });
 
-  // ── Tags ────────────────────────────────────────────────────────────────────
-  // Anchored relative to bottom; sit above the branding strip.
-  const BRAND_Y = H - 50;
-  const TAG_H   = 40;
-  const TAG_Y   = BRAND_Y - 56 - TAG_H;
-
-  const tags = (activity.expertise_tags || []).slice(0, 6);
+  // ── Tags ─────────────────────────────────────────────────────────────────────
   if (tags.length > 0) {
-    const TAG_PAD = 18;
+    const TAG_H   = 44;
+    const TAG_PAD = 20;
     ctx.font         = '400 16px Inter, -apple-system, sans-serif';
     ctx.textBaseline = 'middle';
     let tx = PAD;
-
     for (const tag of tags) {
       const tw = ctx.measureText(tag).width;
       const pw = tw + TAG_PAD * 2;
       if (tx + pw > W - PAD) break;
-
       ctx.fillStyle = '#e4ddd3';
-      roundRect(ctx, tx, TAG_Y, pw, TAG_H, 10);
+      roundRect(ctx, tx, tagsY, pw, TAG_H, 10);
       ctx.fill();
-
       ctx.fillStyle = '#6b5f52';
-      ctx.fillText(tag, tx + TAG_PAD, TAG_Y + TAG_H / 2);
+      ctx.fillText(tag, tx + TAG_PAD, tagsY + TAG_H / 2);
       tx += pw + 10;
     }
-
     ctx.textBaseline = 'alphabetic';
   }
 
-  // ── Thin separator between title block and tags ──────────────────────────────
-  const contentBottom = TITLE_Y + nTitleLines * TITLE_LH + 4;
-  const sepY = contentBottom + (TAG_Y - contentBottom) / 2;
-  if (TAG_Y - contentBottom > 60) {
-    ctx.strokeStyle = 'rgba(180,170,160,0.4)';
-    ctx.lineWidth   = 1;
-    ctx.beginPath();
-    ctx.moveTo(PAD, sepY);
-    ctx.lineTo(W - PAD, sepY);
-    ctx.stroke();
-  }
-
-  // ── Branding ────────────────────────────────────────────────────────────────
+  // ── Branding (always at the very bottom) ─────────────────────────────────────
   ctx.fillStyle = '#c2b8ae';
   ctx.font      = '400 15px Inter, -apple-system, sans-serif';
   ctx.textAlign = 'right';
+  ctx.fillText('Spotlight · Experts Platform', W - PAD, H - 44);
+  ctx.textAlign = 'left';
 
-  // ── Download ────────────────────────────────────────────────────────────────
+  // ── Download ─────────────────────────────────────────────────────────────────
   const a    = document.createElement('a');
   a.download = `activity-${activity.id.slice(0, 8)}.png`;
   a.href     = canvas.toDataURL('image/png');
